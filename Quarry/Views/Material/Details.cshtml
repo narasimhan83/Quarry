@@ -1,0 +1,254 @@
+@model QuarryManagementSystem.Models.Domain.Material
+@{
+    ViewData["Title"] = "Material Details";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Material Details</h1>
+                <p class="text-muted mb-0">
+                    @Model.Name • @Model.Type • Unit: @Model.Unit
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Material")">Materials</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Success!</h5>
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="row">
+            <!-- Left column -->
+            <div class="col-lg-8">
+                <!-- Material info -->
+                <div class="card card-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Material Information</h3>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a asp-action="PriceHistory" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-tags"></i> Price History
+                            </a>
+                            <a asp-action="StockAdjustment" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+                                <i class="fas fa-warehouse"></i> Stock Adjustment
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Material Name</dt>
+                            <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+
+                            <dt class="col-sm-4">Type</dt>
+                            <dd class="col-sm-8">@Model.Type</dd>
+
+                            <dt class="col-sm-4">Unit</dt>
+                            <dd class="col-sm-8">@Model.Unit</dd>
+
+                            <dt class="col-sm-4">Unit Price</dt>
+                            <dd class="col-sm-8">@Model.UnitPrice.ToString("C")</dd>
+
+                            <dt class="col-sm-4">VAT Rate</dt>
+                            <dd class="col-sm-8">@Model.VatRate.ToString("N2")%</dd>
+
+                            <dt class="col-sm-4">Price with VAT</dt>
+                            <dd class="col-sm-8"><strong>@Model.PriceWithVat.ToString("C")</strong></dd>
+
+                            <dt class="col-sm-4">Status</dt>
+                            <dd class="col-sm-8">
+                                @{
+                                    var badge = Model.Status == "Active" ? "badge-success" : "badge-secondary";
+                                }
+                                <span class="badge @badge">@Model.Status</span>
+                            </dd>
+
+                            <dt class="col-sm-4">Created</dt>
+                            <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <dt class="col-sm-4">Updated</dt>
+                                <dd class="col-sm-8">@Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Recent weighment transactions referencing this material -->
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Weighment Transactions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                            <table class="table table-bordered table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Transaction #</th>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>Vehicle</th>
+                                        <th class="text-right">Net (kg)</th>
+                                        <th class="text-right">Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.WeighmentTransactions != null && Model.WeighmentTransactions.Any())
+                                    {
+                                        foreach (var w in Model.WeighmentTransactions
+                                                       .OrderByDescending(x => x.TransactionDate)
+                                                       .Take(20))
+                                        {
+                                            var amountText = (w.TotalAmount ?? 0).ToString("C");
+                                            var statusClass = w.Status == "Completed" ? "badge-success"
+                                                : w.Status == "InProgress" ? "badge-warning"
+                                                : w.Status == "Cancelled" ? "badge-danger" : "badge-secondary";
+                                            <tr>
+                                                <td><strong>@w.TransactionNumber</strong></td>
+                                                <td>@w.TransactionDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td>@(w.Customer?.Name ?? "Walk-in")</td>
+                                                <td>@w.VehicleRegNumber</td>
+                                                <td class="text-right">@w.NetWeight.ToString("N0")</td>
+                                                <td class="text-right">@amountText</td>
+                                                <td><span class="badge @statusClass">@w.Status</span></td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">
+                                                <i class="fas fa-info-circle"></i> No transactions for this material yet.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted">Showing latest 20 transactions for this material.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div class="col-lg-4">
+                <!-- Stock by quarry -->
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Stock Snapshot</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Quarry</th>
+                                        <th class="text-right">Current</th>
+                                        <th class="text-right">Reserved</th>
+                                        <th class="text-right">Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockTableBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            <i class="fas fa-circle-notch fa-spin"></i> Loading stock levels...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted">Figures in @Model.Unit.</small>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a asp-action="PriceHistory" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-block mb-2">
+                                <i class="fas fa-tags"></i> View Price History
+                            </a>
+                            <a asp-action="StockAdjustment" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-warehouse"></i> Adjust Stock
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <a asp-action="Index" class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-left"></i> Back to Materials
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Load stock levels via AJAX
+            $.ajax({
+                url: '@Url.Action("GetStockLevels", "Material")',
+                type: 'GET',
+                data: { materialId: @Model.Id },
+                success: function (data) {
+                    if (data.success && data.data && data.data.length) {
+                        var rows = '';
+                        data.data.forEach(function (r) {
+                            rows += '<tr>';
+                            rows += '<td>' + r.quarryName + '</td>';
+                            rows += '<td class="text-right">' + Number(r.currentStock).toLocaleString() + '</td>';
+                            rows += '<td class="text-right">' + Number(r.reservedStock).toLocaleString() + '</td>';
+                            rows += '<td class="text-right">' + Number(r.availableStock).toLocaleString() + '</td>';
+                            rows += '</tr>';
+                        });
+                        $('#stockTableBody').html(rows);
+                    } else {
+                        $('#stockTableBody').html('<tr><td colspan="4" class="text-center text-muted">No stock records found.</td></tr>');
+                    }
+                },
+                error: function () {
+                    $('#stockTableBody').html('<tr><td colspan="4" class="text-center text-danger">Error loading stock levels.</td></tr>');
+                }
+            });
+
+            // Auto-hide alerts
+            setTimeout(function () { $('.alert').fadeOut('slow'); }, 5000);
+        });
+    </script>
+}

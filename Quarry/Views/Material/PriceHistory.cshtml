@@ -1,0 +1,249 @@
+@model QuarryManagementSystem.Models.Domain.Material
+@{
+    ViewData["Title"] = "Material Price History";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Price History</h1>
+                <p class="text-muted mb-0">@Model.Name (@Model.Type) • Unit: @Model.Unit</p>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Material")">Materials</a></li>
+                    <li class="breadcrumb-item active">Price History</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <div id="alertArea"></div>
+
+        <div class="row">
+            <!-- Current Pricing -->
+            <div class="col-lg-4">
+                <div class="card card-success">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Current Price</h3>
+                        <button class="btn btn-light btn-sm" id="openUpdatePrice">
+                            <i class="fas fa-pen-to-square"></i> Update Price
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-6">Unit Price</dt>
+                            <dd class="col-6 text-right" id="curUnitPrice">@Model.UnitPrice.ToString("C")</dd>
+
+                            <dt class="col-6">VAT Rate</dt>
+                            <dd class="col-6 text-right" id="curVatRate">@Model.VatRate.ToString("N2")%</dd>
+
+                            <dt class="col-6">Price with VAT</dt>
+                            <dd class="col-6 text-right" id="curPriceWithVat">@Model.PriceWithVat.ToString("C")</dd>
+
+                            <dt class="col-6">Last Updated</dt>
+                            <dd class="col-6 text-right">@((Model.UpdatedAt ?? Model.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Stock Snapshot -->
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Stock Snapshot</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Quarry</th>
+                                        <th class="text-right">Current</th>
+                                        <th class="text-right">Reserved</th>
+                                        <th class="text-right">Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockTableBody">
+                                    <tr>
+                                        <td colspan="4" class="text-muted text-center">
+                                            <i class="fas fa-circle-notch fa-spin"></i> Loading stock levels...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted">Figures shown in @Model.Unit.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Table -->
+            <div class="col-lg-8">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Price Change Records</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th class="text-right">Old Price</th>
+                                        <th class="text-right">New Price</th>
+                                        <th class="text-right">Change</th>
+                                        <th class="text-right">% Change</th>
+                                        <th>Changed By</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">
+                                            <i class="fas fa-info-circle"></i> No price history records found.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Note: Price history persistence is not enabled yet; current price updates are logged server-side.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Materials
+        </a>
+    </div>
+</section>
+
+<!-- Update Price Modal -->
+<div class="modal fade" id="updatePriceModal" tabindex="-1" role="dialog" aria-labelledby="updatePriceLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h5 class="modal-title" id="updatePriceLabel"><i class="fas fa-tags"></i> Update Price - @Model.Name</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+            <div class="form-group">
+                <label for="newPrice">New Unit Price (₦)</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="newPrice" placeholder="Enter new unit price">
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason for change</label>
+                <textarea class="form-control" id="reason" rows="3" placeholder="E.g., supplier change, market rate adjustment"></textarea>
+            </div>
+            <small class="text-muted">This will immediately update the current unit price for this material.</small>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="confirmUpdatePrice">
+            <i class="fas fa-check"></i> Update Price
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Load stock levels
+            $.ajax({
+                url: '@Url.Action("GetStockLevels", "Material")',
+                type: 'GET',
+                data: { materialId: @Model.Id },
+                success: function (data) {
+                    if (data.success && data.data && data.data.length) {
+                        var rows = '';
+                        data.data.forEach(function (r) {
+                            rows += '<tr>';
+                            rows += '<td>' + r.quarryName + '</td>';
+                            rows += '<td class="text-right">' + Number(r.currentStock).toLocaleString() + '</td>';
+                            rows += '<td class="text-right">' + Number(r.reservedStock).toLocaleString() + '</td>';
+                            rows += '<td class="text-right">' + Number(r.availableStock).toLocaleString() + '</td>';
+                            rows += '</tr>';
+                        });
+                        $('#stockTableBody').html(rows);
+                    } else {
+                        $('#stockTableBody').html('<tr><td colspan="4" class="text-center text-muted">No stock records found.</td></tr>');
+                    }
+                },
+                error: function () {
+                    $('#stockTableBody').html('<tr><td colspan="4" class="text-center text-danger">Error loading stock levels.</td></tr>');
+                }
+            });
+
+            // Open price update modal
+            $('#openUpdatePrice').on('click', function () {
+                $('#newPrice').val('');
+                $('#reason').val('');
+                $('#updatePriceModal').modal('show');
+            });
+
+            // Confirm price update
+            $('#confirmUpdatePrice').on('click', function () {
+                var price = parseFloat($('#newPrice').val());
+                var reason = $('#reason').val().trim();
+                if (isNaN(price) || price <= 0) {
+                    showAlert('Please enter a valid price greater than zero.', 'danger');
+                    return;
+                }
+                if (!reason) {
+                    showAlert('Please provide a reason for the price change.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("UpdatePrice", "Material")',
+                    type: 'POST',
+                    data: {
+                        materialId: @Model.Id,
+                        newPrice: price,
+                        reason: reason
+                    },
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            showAlert(resp.message || 'Price updated successfully.', 'success');
+                            // Update UI values
+                            $('#curUnitPrice').text(price.toLocaleString(undefined, { style: 'currency', currency: 'NGN' }));
+                            var vatRate = parseFloat('@Model.VatRate') || 0;
+                            var priceWithVat = price * (1 + (vatRate / 100));
+                            $('#curPriceWithVat').text(priceWithVat.toLocaleString(undefined, { style: 'currency', currency: 'NGN' }));
+                            $('#updatePriceModal').modal('hide');
+                        } else {
+                            showAlert((resp && resp.message) ? resp.message : 'Error updating price.', 'danger');
+                        }
+                    },
+                    error: function () {
+                        showAlert('Error updating price.', 'danger');
+                    }
+                });
+            });
+
+            function showAlert(message, type) {
+                var html = '<div class="alert alert-' + type + ' alert-dismissible">';
+                html += '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+                html += '<i class="icon fas ' + (type === 'success' ? 'fa-check' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-ban')) + '"></i> ';
+                html += message + '</div>';
+                $('#alertArea').html(html);
+                setTimeout(function () { $('.alert').fadeOut('slow'); }, 5000);
+            }
+        });
+    </script>
+}

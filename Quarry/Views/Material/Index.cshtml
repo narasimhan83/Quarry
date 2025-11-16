@@ -1,0 +1,235 @@
+@model QuarryManagementSystem.ViewModels.MaterialListViewModel
+@{
+    ViewData["Title"] = "Material Management";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Material Management</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item active">Materials</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Success!</h5>
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                @TempData["Error"]
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                @Model.ErrorMessage
+            </div>
+        }
+
+        <!-- Search and Filter Card -->
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">Search & Filter Materials</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get" asp-action="Index" class="form-horizontal">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="SearchTerm" class="control-label"></label>
+                                <input asp-for="SearchTerm" class="form-control" placeholder="Search by name or type" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="SelectedType" class="control-label"></label>
+                                <select asp-for="SelectedType" asp-items="Model.Types" class="form-control">
+                                    <option value="">-- All Types --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="SelectedStatus" class="control-label"></label>
+                                <select asp-for="SelectedStatus" asp-items="Model.Statuses" class="form-control">
+                                    <option value="">-- All Statuses --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">&nbsp;</label>
+                                <div class="input-group">
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Material List Card -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Materials</h3>
+                <div class="card-tools">
+                    <a asp-action="Create" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Add Material
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Unit</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">VAT %</th>
+                                <th class="text-right">Price w/ VAT</th>
+                                <th>Status</th>
+                                <th style="width: 180px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Materials.Any())
+                            {
+                                @foreach (var m in Model.Materials)
+                                {
+                                    var badge = m.Status == "Active" ? "badge-success" : "badge-secondary";
+                                    <tr>
+                                        <td><strong>@m.Name</strong></td>
+                                        <td>@m.Type</td>
+                                        <td>@m.Unit</td>
+                                        <td class="text-right">@m.UnitPrice.ToString("C")</td>
+                                        <td class="text-right">@m.VatRate.ToString("N2")%</td>
+                                        <td class="text-right">@m.PriceWithVat.ToString("C")</td>
+                                        <td><span class="badge @badge">@m.Status</span></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-info" title="Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@m.Id" class="btn btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="PriceHistory" asp-route-id="@m.Id" class="btn btn-secondary" title="Price History">
+                                                    <i class="fas fa-tags"></i>
+                                                </a>
+                                                <a asp-action="StockAdjustment" asp-route-id="@m.Id" class="btn btn-primary" title="Stock Adjustment">
+                                                    <i class="fas fa-warehouse"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">
+                                        <i class="fas fa-info-circle"></i> No materials found matching your criteria.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="dataTables_info">
+                            Showing @((Model.CurrentPage - 1) * 20 + 1) to @(Math.Min(Model.CurrentPage * 20, Model.TotalCount)) of @Model.TotalCount entries
+                        </div>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="dataTables_paginate paging_simple_numbers">
+                            <ul class="pagination">
+                                @if (Model.HasPreviousPage)
+                                {
+                                    <li class="paginate_button page-item">
+                                        <a asp-action="Index"
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-type="@Model.SelectedType"
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-page="@(Model.CurrentPage - 1)"
+                                           class="page-link">Previous</a>
+                                    </li>
+                                }
+
+                                @for (int i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <li class="paginate_button page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a asp-action="Index"
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-type="@Model.SelectedType"
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-page="@i"
+                                           class="page-link">@i</a>
+                                    </li>
+                                }
+
+                                @if (Model.HasNextPage)
+                                {
+                                    <li class="paginate_button page-item">
+                                        <a asp-action="Index"
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-type="@Model.SelectedType"
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-page="@(Model.CurrentPage + 1)"
+                                           class="page-link">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(function () {
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}
