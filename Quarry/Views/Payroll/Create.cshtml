@@ -1,0 +1,115 @@
+@model QuarryManagementSystem.ViewModels.PayrollCreateViewModel
+@{
+    ViewData["Title"] = "Create Payroll";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Create Payroll</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Payroll")">Payroll</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+        {
+            <div class="alert alert-danger">Please fix the validation errors below.</div>
+        }
+
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Payroll Parameters</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" asp-controller="Payroll" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PaymentMonth"></label>
+                                <input asp-for="PaymentMonth" type="date" class="form-control" />
+                                <span asp-validation-for="PaymentMonth" class="text-danger"></span>
+                                <small class="form-text text-muted">Select the month you are processing (use the 1st day of the month).</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PaymentDate"></label>
+                                <input asp-for="PaymentDate" type="date" class="form-control" />
+                                <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Status"></label>
+                                <select asp-for="Status" asp-items="Model.Statuses" class="form-control"></select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <textarea asp-for="Notes" rows="3" class="form-control" placeholder="Optional notes for this run..."></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="ExpectedEmployees"></label>
+                                <input asp-for="ExpectedEmployees" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="EstimatedGrossPay"></label>
+                                <input asp-for="EstimatedGrossPay" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="EstimatedNetPay"></label>
+                                <input asp-for="EstimatedNetPay" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-cogs"></i> Create Payroll
+                        </button>
+                        <a class="btn btn-secondary" href="@Url.Action("Index","Payroll")">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                Creating a payroll will generate salary lines for all active employees. After creation you will be redirected to the payroll details page to process or pay.
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

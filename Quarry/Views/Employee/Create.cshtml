@@ -1,0 +1,195 @@
+@model QuarryManagementSystem.ViewModels.EmployeeCreateViewModel
+@{
+    ViewData["Title"] = "Create Employee";
+    Layout = "_Layout";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Create Employee</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Employee")">Employees</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+        {
+            <div class="alert alert-danger">
+                Please fix the validation errors below.
+            </div>
+        }
+
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Employee Details</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" asp-controller="Employee" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="EmployeeCode"></label>
+                                <input asp-for="EmployeeCode" class="form-control" />
+                                <span asp-validation-for="EmployeeCode" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="FullName"></label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Phone"></label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Email"></label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="DateOfBirth"></label>
+                                <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Department"></label>
+                                <select asp-for="Department" asp-items="Model.Departments" class="form-control"></select>
+                                <span asp-validation-for="Department" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Designation"></label>
+                                <select asp-for="Designation" asp-items="Model.Designations" class="form-control"></select>
+                                <span asp-validation-for="Designation" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="DateOfJoining"></label>
+                                <input asp-for="DateOfJoining" class="form-control" type="date" />
+                                <span asp-validation-for="DateOfJoining" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="BasicSalary"></label>
+                                <input asp-for="BasicSalary" class="form-control" />
+                                <span asp-validation-for="BasicSalary" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="HousingAllowance"></label>
+                                <input asp-for="HousingAllowance" class="form-control" />
+                                <span asp-validation-for="HousingAllowance" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="TransportAllowance"></label>
+                                <input asp-for="TransportAllowance" class="form-control" />
+                                <span asp-validation-for="TransportAllowance" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="OtherAllowances"></label>
+                                <input asp-for="OtherAllowances" class="form-control" />
+                                <span asp-validation-for="OtherAllowances" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="PensionPIN"></label>
+                                <input asp-for="PensionPIN" class="form-control" />
+                                <span asp-validation-for="PensionPIN" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="BankName"></label>
+                                <select asp-for="BankName" asp-items="Model.Banks" class="form-control"></select>
+                                <span asp-validation-for="BankName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="BankAccountNumber"></label>
+                                <input asp-for="BankAccountNumber" class="form-control" />
+                                <span asp-validation-for="BankAccountNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="NHISNumber"></label>
+                                <input asp-for="NHISNumber" class="form-control" />
+                                <span asp-validation-for="NHISNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Status"></label>
+                                <select asp-for="Status" asp-items="Model.Statuses" class="form-control"></select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="QuarryId">Quarry</label>
+                                <select asp-for="QuarryId" asp-items="Model.Quarries" class="form-control"></select>
+                                <span asp-validation-for="QuarryId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card card-light">
+                                <div class="card-header">
+                                    <h3 class="card-title">Calculated</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label>Gross Salary</label>
+                                        <input class="form-control" value="@Model.GrossSalary.ToString("N2")" readonly />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Monthly Pension (8% of Basic + Housing)</label>
+                                        <input class="form-control" value="@Model.MonthlyPension.ToString("N2")" readonly />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Monthly NHIS (5% of Basic)</label>
+                                        <input class="form-control" value="@Model.MonthlyNHIS.ToString("N2")" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                        <a class="btn btn-secondary" href="@Url.Action("Index","Employee")">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                Fields marked with validation messages are required. Nigerian payroll defaults (VAT/PAYE context) are applied.
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

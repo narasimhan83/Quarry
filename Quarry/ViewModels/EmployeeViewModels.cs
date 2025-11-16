@@ -58,7 +58,7 @@ namespace QuarryManagementSystem.ViewModels
         public string FullName { get; set; } = string.Empty;
 
         [StringLength(20)]
-        [RegularExpression(@"^(\+234|0)[789][01]\d{9}$", ErrorMessage = "Invalid Nigerian phone number")]
+        [RegularExpression(@"^(?:\+234|0)[7-9]\d{9}$", ErrorMessage = "Invalid Nigerian phone number format. Use +234XXXXXXXXXX or 0XXXXXXXXXX")]
         [Display(Name = "Phone")]
         public string? Phone { get; set; }
 
