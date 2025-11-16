@@ -1,0 +1,270 @@
+@model QuarryManagementSystem.ViewModels.InvoicePrintViewModel
+@{
+    Layout = null; // Print-friendly standalone
+    var inv = Model.Invoice;
+    var company = Model.CompanyDetails;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Invoice @inv.InvoiceNumber - Print</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --primary: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #111827;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+            color: #111827;
+            margin: 0;
+            background: #fff;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: #fff;
+        }
+        .toolbar h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: 0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn.secondary {
+            background: #6b7280;
+        }
+        .page {
+            max-width: 900px;
+            margin: 24px auto;
+            padding: 24px;
+        }
+        .header {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+        .company h2 {
+            margin: 0 0 4px;
+            font-size: 22px;
+        }
+        .muted { color: var(--muted); }
+        .invoice-meta {
+            text-align: right;
+        }
+        .invoice-meta h3 {
+            margin: 0 0 6px;
+            font-size: 20px;
+        }
+        .meta-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 14px;
+        }
+        .section-title {
+            font-size: 16px;
+            margin: 18px 0 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+        th {
+            background: #f9fafb;
+            text-align: left;
+        }
+        .text-right { text-align: right; }
+        .totals {
+            margin-top: 16px;
+            width: 360px;
+            margin-left: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .totals .row {
+            display: grid;
+            grid-template-columns: 1fr 140px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .totals .row:last-child { border-bottom: 0; }
+        .totals .grand {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+        .notes {
+            margin-top: 18px;
+            padding: 12px;
+            border: 1px dashed var(--border);
+            background: #fcfcfd;
+        }
+        .footer {
+            margin-top: 26px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .sign {
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            text-align: center;
+        }
+        @@media print {
+            .toolbar { display: none; }
+            .page { margin: 0; padding: 0; max-width: none; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <h1>Invoice @inv.InvoiceNumber</h1>
+        <div>
+            <button class="btn" onclick="window.print()">Print</button>
+            <a href="@Url.Action("Details","Invoice", new { id = inv.Id })" class="btn secondary" style="text-decoration:none;">Back</a>
+        </div>
+    </div>
+
+    <div class="page">
+        <div class="header">
+            <div class="company">
+                <h2>@company.CompanyName</h2>
+                <div class="muted">
+                    @company.Address<br />
+                    @company.City, @company.State<br />
+                    Tel: @company.Phone | Email: @company.Email<br />
+                    Website: @company.Website<br />
+                    Tax No: @company.TaxNumber<br />
+                    Bank: @company.BankDetails
+                </div>
+            </div>
+            <div class="invoice-meta">
+                <h3>INVOICE</h3>
+                <div class="meta-line"><span>Invoice #</span><strong>@inv.InvoiceNumber</strong></div>
+                <div class="meta-line"><span>Invoice Date</span><span>@inv.InvoiceDate.ToString("dd/MM/yyyy")</span></div>
+                <div class="meta-line"><span>Due Date</span><span>@(inv.DueDate?.ToString("dd/MM/yyyy") ?? "-")</span></div>
+                <div class="meta-line"><span>Status</span><span>@inv.Status</span></div>
+            </div>
+        </div>
+
+        <h4 class="section-title">Bill To</h4>
+        <table>
+            <tr>
+                <td>
+                    <strong>@inv.Customer?.Name</strong><br />
+                    <span class="muted">Outstanding: ₦@inv.OutstandingBalance.ToString("N2")</span>
+                </td>
+                <td>
+                    <div><strong>LGA Receipt No:</strong> @(inv.LGAReceiptNumber ?? "-")</div>
+                    <div><strong>Payment Terms:</strong> @(inv.PaymentTerms ?? "-")</div>
+                </td>
+            </tr>
+        </table>
+
+        <h4 class="section-title">Items</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="text-right">Qty</th>
+                    <th>Unit</th>
+                    <th class="text-right">Unit Price (₦)</th>
+                    <th class="text-right">Amount (₦)</th>
+                    <th class="text-right">VAT (₦)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.InvoiceItems != null && Model.InvoiceItems.Any())
+                {
+                    foreach (var item in Model.InvoiceItems)
+                    {
+                        <tr>
+                            <td>@item.Description</td>
+                            <td class="text-right">@item.Quantity.ToString("N2")</td>
+                            <td>@item.Unit</td>
+                            <td class="text-right">@item.UnitPrice.ToString("N2")</td>
+                            <td class="text-right">@item.TotalAmount.ToString("N2")</td>
+                            <td class="text-right">@item.VatAmount.ToString("N2")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="muted">No items to display.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <div class="row">
+                <div>Subtotal</div>
+                <div class="text-right">₦@inv.SubTotal.ToString("N2")</div>
+            </div>
+            <div class="row">
+                <div>VAT</div>
+                <div class="text-right">₦@inv.VatAmount.ToString("N2")</div>
+            </div>
+            <div class="row grand">
+                <div>Total</div>
+                <div class="text-right">₦@inv.TotalAmount.ToString("N2")</div>
+            </div>
+            <div class="row">
+                <div>Paid</div>
+                <div class="text-right">₦@inv.PaidAmount.ToString("N2")</div>
+            </div>
+            <div class="row">
+                <div>Outstanding</div>
+                <div class="text-right">₦@inv.OutstandingBalance.ToString("N2")</div>
+            </div>
+        </div>
+
+        <div class="notes">
+            <strong>Amount in Words:</strong>
+            <div>@Model.AmountInWords</div>
+            @if (!string.IsNullOrWhiteSpace(inv.Notes))
+            {
+                <div style="margin-top:8px;"><strong>Notes:</strong> @inv.Notes</div>
+            }
+        </div>
+
+        <div class="footer">
+            <div class="sign">
+                Authorized Signature
+            </div>
+            <div class="muted" style="text-align:right;">
+                Generated on @Model.PrintDate.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+    </div>
+</body>
+</html>

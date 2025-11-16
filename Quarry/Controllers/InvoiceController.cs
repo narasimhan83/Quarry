@@ -286,7 +286,9 @@ namespace QuarryManagementSystem.Controllers
                 return NotFound();
             }
 
-            var invoice = await _context.Invoices.FindAsync(id);
+            var invoice = await _context.Invoices
+                .Include(i => i.Customer)
+                .FirstOrDefaultAsync(i => i.Id == id);
             if (invoice == null)
             {
                 return NotFound();
@@ -338,6 +340,7 @@ namespace QuarryManagementSystem.Controllers
                     if (model.PaymentAmount > invoice.OutstandingBalance)
                     {
                         ModelState.AddModelError("PaymentAmount", "Payment amount cannot exceed outstanding balance.");
+                        await PopulatePaymentViewModelAsync(model);
                         return View(model);
                     }
 
@@ -370,6 +373,7 @@ namespace QuarryManagementSystem.Controllers
                 ModelState.AddModelError("", "An error occurred while recording the payment. Please try again.");
             }
 
+            await PopulatePaymentViewModelAsync(model);
             return View(model);
         }
 
@@ -666,6 +670,33 @@ namespace QuarryManagementSystem.Controllers
                     VatAmount = weighment.VatAmount ?? 0
                 }
             };
+        }
+
+        private async Task PopulatePaymentViewModelAsync(InvoicePaymentViewModel model)
+        {
+            try
+            {
+                var invoice = await _context.Invoices
+                    .Include(i => i.Customer)
+                    .FirstOrDefaultAsync(i => i.Id == model.InvoiceId);
+
+                if (invoice != null)
+                {
+                    model.InvoiceNumber = invoice.InvoiceNumber;
+                    model.CustomerName = invoice.Customer?.Name ?? "Unknown";
+                    model.TotalAmount = invoice.TotalAmount;
+                    model.OutstandingAmount = invoice.OutstandingBalance;
+
+                    if (model.PaymentDate == default)
+                    {
+                        model.PaymentDate = DateTime.Now;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error populating payment view model for invoice {InvoiceId}", model.InvoiceId);
+            }
         }
     }
 }

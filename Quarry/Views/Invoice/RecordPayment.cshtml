@@ -1,0 +1,233 @@
+@model QuarryManagementSystem.ViewModels.InvoicePaymentViewModel
+@{
+    ViewData["Title"] = "Record Payment";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Record Payment</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Invoice")">Invoices</a></li>
+                    <li class="breadcrumb-item active">Record Payment</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <form asp-action="RecordPayment" method="post">
+            <input type="hidden" asp-for="InvoiceId" />
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Payment Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="InvoiceNumber" class="control-label"></label>
+                                        <input asp-for="InvoiceNumber" class="form-control" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentDate" class="control-label"></label>
+                                        <input asp-for="PaymentDate" type="date" class="form-control" />
+                                        <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerName" class="control-label"></label>
+                                        <input asp-for="CustomerName" class="form-control" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentMethod" class="control-label"></label>
+                                        <select asp-for="PaymentMethod" class="form-control">
+                                            <option value="">-- Select Method --</option>
+                                            <option>Cash</option>
+                                            <option>Bank Transfer</option>
+                                            <option>POS</option>
+                                            <option>Cheque</option>
+                                            <option>Other</option>
+                                        </select>
+                                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentAmount" class="control-label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">₦</span>
+                                            </div>
+                                            <input asp-for="PaymentAmount" type="number" class="form-control" inputmode="decimal" step="0.01" min="0.01" max="@Model.OutstandingAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                                        </div>
+                                        <small id="amountHelp" class="form-text text-muted">Cannot exceed Outstanding Amount (Max: ₦@Model.OutstandingAmount.ToString("N2")).</small>
+                                        <span asp-validation-for="PaymentAmount" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentNotes" class="control-label"></label>
+                                        <textarea asp-for="PaymentNotes" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+                                        <span asp-validation-for="PaymentNotes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Invoice Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Invoice Number</label>
+                                <input class="form-control" value="@Model.InvoiceNumber" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Total Amount</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input class="form-control" value="@Model.TotalAmount.ToString("N2")" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Outstanding Amount</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="OutstandingAmount" class="form-control" value="@Model.OutstandingAmount.ToString("N2")" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Outstanding After Payment</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="OutstandingAfter" class="form-control" value="@Model.OutstandingAmount.ToString("N2")" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Record Payment
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.InvoiceId" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Invoice
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            function parseNum(v) {
+                if (typeof v === 'number') return v;
+                if (!v) return 0;
+                // strip thousands separators and currency symbols
+                v = (v + '').replace(/[^0-9.\-]/g, '');
+                var n = parseFloat(v);
+                return isNaN(n) ? 0 : n;
+            }
+
+            var amountInput = document.getElementById('PaymentAmount');
+            var outstandingEl = document.getElementById('OutstandingAmount');
+            var outstandingAfterEl = document.getElementById('OutstandingAfter');
+            var submitBtn = document.querySelector('button[type="submit"]');
+            var form = document.querySelector('form[method="post"]');
+
+            var outstanding = parseNum(outstandingEl && outstandingEl.value);
+
+            function updateOutstandingAfterAndValidate() {
+                var amount = parseNum(amountInput && amountInput.value);
+                var after = Math.max(0, outstanding - amount);
+
+                if (outstandingAfterEl) {
+                    outstandingAfterEl.value = after.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+
+                // HTML5 validity message to align with server rules
+                if (!amountInput) return;
+
+                amountInput.setCustomValidity('');
+                if (amount < 0.01) {
+                    amountInput.setCustomValidity('Payment amount must be between 0.01 and 999,999,999.99');
+                } else if (amount > outstanding) {
+                    amountInput.setCustomValidity('Payment amount cannot exceed outstanding balance.');
+                }
+            }
+
+            if (amountInput) {
+                // Ensure correct numeric constraints on the control
+                amountInput.setAttribute('min', '0.01');
+                amountInput.setAttribute('step', '0.01');
+                if (outstanding > 0) {
+                    amountInput.setAttribute('max', String(outstanding));
+                } else {
+                    // If no outstanding, disable payment
+                    amountInput.value = '';
+                    amountInput.disabled = true;
+                    if (submitBtn) submitBtn.disabled = true;
+                }
+
+                amountInput.addEventListener('input', updateOutstandingAfterAndValidate);
+            }
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    updateOutstandingAfterAndValidate();
+                    if (amountInput && !amountInput.checkValidity()) {
+                        e.preventDefault();
+                        amountInput.reportValidity();
+                    }
+                });
+            }
+
+            // Initial compute
+            updateOutstandingAfterAndValidate();
+        })();
+    </script>
+}

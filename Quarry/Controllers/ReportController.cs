@@ -49,11 +49,11 @@ namespace QuarryManagementSystem.Controllers
 
                     OutstandingAmount = await _context.Invoices
                         .Where(i => i.Status == "Unpaid" || i.Status == "Partial")
-                        .SumAsync(i => i.OutstandingBalance),
+                        .SumAsync(i => i.TotalAmount - i.PaidAmount),
 
                     OverdueAmount = await _context.Invoices
                         .Where(i => i.Status == "Overdue")
-                        .SumAsync(i => i.OutstandingBalance),
+                        .SumAsync(i => i.TotalAmount - i.PaidAmount),
 
                     // Operational Summary
                     TotalWeighments = await _context.WeighmentTransactions.CountAsync(),
@@ -550,14 +550,14 @@ namespace QuarryManagementSystem.Controllers
         {
             var data = await _context.Invoices
                 .Include(i => i.Customer)
-                .Where(i => i.Status == "Overdue")
-                .OrderByDescending(i => i.OutstandingBalance)
+                .Where(i => i.Status == "Overdue" && i.DueDate.HasValue)
+                .OrderByDescending(i => i.TotalAmount - i.PaidAmount)
                 .Take(10)
                 .Select(i => new OverdueInvoiceData
                 {
                     InvoiceNumber = i.InvoiceNumber,
                     CustomerName = i.Customer.Name,
-                    OutstandingAmount = i.OutstandingBalance,
+                    OutstandingAmount = (i.TotalAmount - i.PaidAmount),
                     DaysOverdue = (DateTime.Now - i.DueDate!.Value).Days
                 })
                 .ToListAsync();
@@ -569,7 +569,7 @@ namespace QuarryManagementSystem.Controllers
         {
             var avg = await _context.WeighmentTransactions
                 .Where(w => w.Status == "Completed" && w.TotalAmount.HasValue)
-                .AverageAsync(w => w.TotalAmount.Value);
+                .AverageAsync(w => (decimal?)w.TotalAmount) ?? 0m;
 
             return avg;
         }
@@ -579,7 +579,7 @@ namespace QuarryManagementSystem.Controllers
             var totalInvoiced = await _context.Invoices.SumAsync(i => i.TotalAmount);
             var totalPaid = await _context.Invoices.SumAsync(i => i.PaidAmount);
 
-            return totalInvoiced > 0 ? (double)(totalPaid / totalInvoiced) * 100 : 0;
+            return totalInvoiced > 0 ? (double)(totalPaid / totalInvoiced) : 0;
         }
 
         private async Task<double> GetEmployeeRetentionRate()
@@ -587,7 +587,7 @@ namespace QuarryManagementSystem.Controllers
             var totalEmployees = await _context.Employees.CountAsync();
             var activeEmployees = await _context.Employees.CountAsync(e => e.Status == "Active");
 
-            return totalEmployees > 0 ? (double)(activeEmployees / totalEmployees) * 100 : 0;
+            return totalEmployees > 0 ? (double)activeEmployees / totalEmployees : 0;
         }
 
         // Financial Report Generation Methods

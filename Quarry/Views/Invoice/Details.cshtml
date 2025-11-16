@@ -1,0 +1,206 @@
+@model QuarryManagementSystem.ViewModels.InvoiceDetailsViewModel
+@{
+    ViewData["Title"] = "Invoice Details";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Invoice Details</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Invoice")">Invoices</a></li>
+                    <li class="breadcrumb-item active">@Model.Invoice.InvoiceNumber</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Invoice Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Invoice Number</label>
+                                    <input class="form-control" value="@Model.Invoice.InvoiceNumber" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <input class="form-control" value="@Model.Invoice.Status" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Invoice Date</label>
+                                    <input class="form-control" value="@Model.Invoice.InvoiceDate.ToString("yyyy-MM-dd")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Due Date</label>
+                                    <input class="form-control" value="@(Model.Invoice.DueDate?.ToString("yyyy-MM-dd") ?? "-")" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    <input class="form-control" value="@(Model.Invoice.Customer?.Name ?? "Unknown")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Payment Terms</label>
+                                    <input class="form-control" value="@Model.Invoice.PaymentTerms" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea class="form-control" rows="2" readonly>@Model.Invoice.Notes</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Weighment</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Invoice.WeighmentTransaction != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction #</th>
+                                            <th>Date</th>
+                                            <th>Vehicle</th>
+                                            <th>Material</th>
+                                            <th>Net Weight (kg)</th>
+                                            <th>Unit Price</th>
+                                            <th>Subtotal</th>
+                                            <th>VAT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>@Model.Invoice.WeighmentTransaction.TransactionNumber</td>
+                                            <td>@Model.Invoice.WeighmentTransaction.TransactionDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@Model.Invoice.WeighmentTransaction.VehicleRegNumber</td>
+                                            <td>@Model.Invoice.WeighmentTransaction.Material?.Name</td>
+                                            <td>@Model.Invoice.WeighmentTransaction.NetWeight.ToString("N0")</td>
+                                            <td>₦@((Model.Invoice.WeighmentTransaction.PricePerUnit ?? 0).ToString("N2"))</td>
+                                            <td>₦@((Model.Invoice.WeighmentTransaction.SubTotal ?? 0).ToString("N2"))</td>
+                                            <td>₦@((Model.Invoice.WeighmentTransaction.VatAmount ?? 0).ToString("N2"))</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">No weighment details available.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Totals</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Subtotal</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control" value="@Model.Invoice.SubTotal.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>VAT</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control" value="@Model.Invoice.VatAmount.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Total</strong></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control form-control-lg font-weight-bold" value="@Model.Invoice.TotalAmount.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Paid</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control" value="@Model.Invoice.PaidAmount.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Outstanding</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control" value="@Model.Invoice.OutstandingBalance.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount in Words</label>
+                            <textarea class="form-control" rows="2" readonly>@Model.AmountInWords</textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <a asp-action="Index" class="btn btn-secondary mr-2"><i class="fas fa-arrow-left"></i> Back</a>
+                        <a asp-action="Print" asp-route-id="@Model.Invoice.Id" class="btn btn-info mr-2"><i class="fas fa-print"></i> Print</a>
+                        @if (Model.CanEditPayment)
+                        {
+                            <a asp-action="RecordPayment" asp-route-id="@Model.Invoice.Id" class="btn btn-primary mr-2"><i class="fas fa-cash-register"></i> Record Payment</a>
+                        }
+                        @if (Model.CanCancel)
+                        {
+                            <form asp-action="Cancel" asp-route-id="@Model.Invoice.Id" method="post" class="d-inline" onsubmit="return confirm('Cancel this invoice? This cannot be undone.');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
