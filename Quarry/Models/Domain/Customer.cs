@@ -39,7 +39,7 @@ namespace QuarryManagementSystem.Models.Domain
         public string? ContactPerson { get; set; }
 
         [Required(ErrorMessage = "Phone number is required")]
-        [RegularExpression(@"^(\+234|0)[789][01]\d{9}$", ErrorMessage = "Invalid Nigerian phone number format. Use +234XXXXXXXXXX or 0XXXXXXXXXX")]
+        [RegularExpression(@"^(?:\+234|0)[7-9]\d{9}$", ErrorMessage = "Invalid Nigerian phone number format. Use +234XXXXXXXXXX or 0XXXXXXXXXX")]
         [StringLength(20)]
         public string Phone { get; set; } = string.Empty;
 

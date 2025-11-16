@@ -1,0 +1,206 @@
+@model QuarryManagementSystem.Models.Domain.Customer
+@{
+    ViewData["Title"] = "Edit Customer";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Edit Customer</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Customer")">Customers</a></li>
+                    <li class="breadcrumb-item active">Edit</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Customer Information</h3>
+                    </div>
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Name" class="control-label"></label>
+                                        <input asp-for="Name" class="form-control" />
+                                        <span asp-validation-for="Name" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="RCNumber" class="control-label"></label>
+                                        <input asp-for="RCNumber" class="form-control" />
+                                        <span asp-validation-for="RCNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ContactPerson" class="control-label"></label>
+                                        <input asp-for="ContactPerson" class="form-control" />
+                                        <span asp-validation-for="ContactPerson" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Phone" class="control-label"></label>
+                                        <input asp-for="Phone" class="form-control" />
+                                        <span asp-validation-for="Phone" class="text-danger"></span>
+                                        <small class="form-text text-muted">Format: +2348012345678 or 08012345678</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Email" class="control-label"></label>
+                                        <input asp-for="Email" class="form-control" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CreditLimit" class="control-label"></label>
+                                        <input asp-for="CreditLimit" class="form-control" />
+                                        <span asp-validation-for="CreditLimit" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="State" class="control-label"></label>
+                                        <select asp-for="State" asp-items="ViewBag.States" class="form-control">
+                                            <option value="">-- Select State --</option>
+                                        </select>
+                                        <span asp-validation-for="State" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="LGA" class="control-label"></label>
+                                        <select asp-for="LGA" asp-items="ViewBag.LGAs" class="form-control">
+                                            <option value="">-- Select LGA --</option>
+                                        </select>
+                                        <span asp-validation-for="LGA" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Location" class="control-label"></label>
+                                        <input asp-for="Location" class="form-control" />
+                                        <span asp-validation-for="Location" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="MiningLicenseNumber" class="control-label"></label>
+                                        <input asp-for="MiningLicenseNumber" class="form-control" />
+                                        <span asp-validation-for="MiningLicenseNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="TIN" class="control-label"></label>
+                                        <input asp-for="TIN" class="form-control" />
+                                        <span asp-validation-for="TIN" class="text-danger"></span>
+                                        <small class="form-text text-muted">Tax Identification Number</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="BVN" class="control-label"></label>
+                                        <input asp-for="BVN" class="form-control" />
+                                        <span asp-validation-for="BVN" class="text-danger"></span>
+                                        <small class="form-text text-muted">Bank Verification Number</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label asp-for="BillingAddress" class="control-label"></label>
+                                        <textarea asp-for="BillingAddress" class="form-control" rows="3"></textarea>
+                                        <span asp-validation-for="BillingAddress" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Status" class="control-label"></label>
+                                        <select asp-for="Status" asp-items="ViewBag.Statuses" class="form-control"></select>
+                                        <span asp-validation-for="Status" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(function () {
+            // Phone number formatting helper (simple, non-destructive)
+            $('#Phone').on('input', function () {
+                var raw = $(this).val().replace(/[^0-9+]/g, '');
+                $(this).val(raw);
+            });
+
+            // BVN validation (11 digits)
+            $('#BVN').on('input', function () {
+                var bvn = $(this).val().replace(/\D/g, '');
+                if (bvn.length > 11) bvn = bvn.substring(0, 11);
+                $(this).val(bvn);
+            });
+
+            // TIN validation (max 12 digits)
+            $('#TIN').on('input', function () {
+                var tin = $(this).val().replace(/\D/g, '');
+                if (tin.length > 12) tin = tin.substring(0, 12);
+                $(this).val(tin);
+            });
+        });
+    </script>
+}

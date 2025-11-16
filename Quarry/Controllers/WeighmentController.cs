@@ -556,5 +556,65 @@ namespace QuarryManagementSystem.Controllers
                 await _context.SaveChangesAsync();
             }
         }
+
+        // GET: Weighment/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var weighment = await _context.WeighmentTransactions
+                .Include(w => w.Customer)
+                .Include(w => w.Material)
+                .Include(w => w.Weighbridge)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (weighment == null)
+            {
+                return NotFound();
+            }
+
+            if (weighment.IsInvoiced || weighment.Status == "Completed")
+            {
+                TempData["Error"] = "Cannot delete a completed or invoiced weighment.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(weighment);
+        }
+
+        // POST: Weighment/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var weighment = await _context.WeighmentTransactions.FindAsync(id);
+            if (weighment == null)
+            {
+                return NotFound();
+            }
+
+            if (weighment.IsInvoiced || weighment.Status == "Completed")
+            {
+                TempData["Error"] = "Cannot delete a completed or invoiced weighment.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Revert customer outstanding balance if applicable
+            if (weighment.CustomerId.HasValue && weighment.TotalAmount.HasValue)
+            {
+                await UpdateCustomerOutstandingBalance(weighment.CustomerId.Value, -weighment.TotalAmount.Value);
+            }
+
+            _context.WeighmentTransactions.Remove(weighment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Weighment {weighment.TransactionNumber} deleted successfully.";
+            _logger.LogInformation("Weighment {TransactionNumber} deleted by user {UserName}", weighment.TransactionNumber, User.Identity?.Name);
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

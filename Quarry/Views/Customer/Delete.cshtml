@@ -1,0 +1,115 @@
+@model QuarryManagementSystem.Models.Domain.Customer
+@{
+    ViewData["Title"] = "Delete Customer";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-danger">Delete Customer</h1>
+                <p class="text-muted mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Customer")">Customers</a></li>
+                    <li class="breadcrumb-item active">Delete</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main confirmation card -->
+            <div class="col-md-8">
+                <div class="card card-outline card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">Confirm deletion of @Model.Name</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Company Name</dt>
+                            <dd class="col-sm-8">@Model.Name</dd>
+
+                            <dt class="col-sm-4">RC Number</dt>
+                            <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.RCNumber) ? Model.RCNumber : "-")</dd>
+
+                            <dt class="col-sm-4">Contact Person</dt>
+                            <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.ContactPerson) ? Model.ContactPerson : "-")</dd>
+
+                            <dt class="col-sm-4">Phone</dt>
+                            <dd class="col-sm-8">@Model.Phone</dd>
+
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.Email) ? Model.Email : "-")</dd>
+
+                            <dt class="col-sm-4">Location</dt>
+                            <dd class="col-sm-8">@Model.Location</dd>
+
+                            <dt class="col-sm-4">State / LGA</dt>
+                            <dd class="col-sm-8">@Model.State, @Model.LGA</dd>
+
+                            <dt class="col-sm-4">Credit Limit</dt>
+                            <dd class="col-sm-8">@Model.CreditLimit.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Outstanding</dt>
+                            <dd class="col-sm-8">@Model.OutstandingBalance.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Status</dt>
+                            <dd class="col-sm-8">@Model.Status</dd>
+                        </dl>
+                        <div class="alert alert-warning mt-3 mb-0">
+                            Deleting this customer will be blocked if there are existing weighment transactions linked to it.
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirm Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side info card -->
+            <div class="col-md-4">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Additional Info</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Created:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <p class="mb-1"><strong>Updated:</strong> @Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                        }
+                        <p class="mb-1"><strong>Address:</strong> @(!string.IsNullOrEmpty(Model.BillingAddress) ? Model.BillingAddress : "-")</p>
+                        @if (!string.IsNullOrEmpty(Model.MiningLicenseNumber))
+                        {
+                            <p class="mb-1"><strong>Mining License:</strong> @Model.MiningLicenseNumber</p>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.TIN))
+                        {
+                            <p class="mb-1"><strong>TIN:</strong> @Model.TIN</p>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.BVN))
+                        {
+                            <p class="mb-0"><strong>BVN:</strong> @Model.BVN</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

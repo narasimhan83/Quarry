@@ -1,0 +1,221 @@
+@model QuarryManagementSystem.Models.Domain.WeighmentTransaction
+@{
+    ViewData["Title"] = "Weighment Details";
+    var statusClass = Model.Status switch
+    {
+        "Completed" => "badge-success",
+        "InProgress" => "badge-warning",
+        "Cancelled" => "badge-danger",
+        _ => "badge-secondary"
+    };
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    Weighment Details
+                    <small class="ml-2 text-muted">(@Model.TransactionNumber)</small>
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Weighment")">Weighments</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Summary cards -->
+            <div class="col-md-3">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@Model.NetWeight.ToString("N0") <small style="font-size:16px">kg</small></h3>
+                        <p>Net Weight</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-weight"></i></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@(Model.TotalAmount?.ToString("C") ?? "-")</h3>
+                        <p>Total Amount</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-naira-sign"></i></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@(Model.EntryTime?.ToString("HH:mm") ?? "--")</h3>
+                        <p>Entry Time</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-sign-in-alt"></i></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>@(Model.ExitTime?.ToString("HH:mm") ?? "--")</h3>
+                        <p>Exit Time</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-sign-out-alt"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Transaction info -->
+            <div class="col-md-8">
+                <div class="card card-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Transaction</h3>
+                        <span class="badge @statusClass">@Model.Status</span>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Transaction #</dt>
+                            <dd class="col-sm-8">@Model.TransactionNumber</dd>
+
+                            <dt class="col-sm-4">Date</dt>
+                            <dd class="col-sm-8">@Model.TransactionDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                            <dt class="col-sm-4">Customer</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.Customer != null)
+                                {
+                                    @Model.Customer.Name
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Walk-in Customer</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">Weighbridge</dt>
+                            <dd class="col-sm-8">@Model.Weighbridge?.Name</dd>
+
+                            <dt class="col-sm-4">Challan Number</dt>
+                            <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.ChallanNumber) ? Model.ChallanNumber : "-")</dd>
+
+                            <dt class="col-sm-4">Created</dt>
+                            <dd class="col-sm-8">
+                                @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                                {
+                                    <span class="text-muted">by @Model.CreatedBy</span>
+                                }
+                            </dd>
+
+                            @if (Model.ModifiedAt.HasValue)
+                            {
+                                <dt class="col-sm-4">Modified</dt>
+                                <dd class="col-sm-8">
+                                    @Model.ModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                    @if (!string.IsNullOrEmpty(Model.ModifiedBy))
+                                    {
+                                        <span class="text-muted">by @Model.ModifiedBy</span>
+                                    }
+                                </dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">Vehicle & Weight</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Vehicle Reg.</dt>
+                            <dd class="col-sm-8">@Model.VehicleRegNumber</dd>
+
+                            <dt class="col-sm-4">Driver</dt>
+                            <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.DriverName) ? Model.DriverName : "-")</dd>
+
+                            <dt class="col-sm-4">Driver Phone</dt>
+                            <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.DriverPhone) ? Model.DriverPhone : "-")</dd>
+
+                            <dt class="col-sm-4">Gross (kg)</dt>
+                            <dd class="col-sm-8">@Model.GrossWeight.ToString("N0")</dd>
+
+                            <dt class="col-sm-4">Tare (kg)</dt>
+                            <dd class="col-sm-8">@((Model.TareWeight ?? 0).ToString("N0"))</dd>
+
+                            <dt class="col-sm-4">Net (kg)</dt>
+                            <dd class="col-sm-8"><strong>@Model.NetWeight.ToString("N0")</strong></dd>
+
+                            <dt class="col-sm-4">Unit</dt>
+                            <dd class="col-sm-8">@Model.WeightUnit</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Material & financials -->
+            <div class="col-md-4">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Material</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Name:</strong> @(Model.Material?.Name ?? "-")</p>
+                        <p class="mb-1"><strong>Type:</strong> @(Model.Material?.Type ?? "-")</p>
+                        <p class="mb-0"><strong>Price/Ton:</strong> @(Model.PricePerUnit?.ToString("C") ?? "-")</p>
+                    </div>
+                </div>
+
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Financial Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-6">Subtotal</dt>
+                            <dd class="col-sm-6 text-right">@((Model.SubTotal ?? 0).ToString("C"))</dd>
+                            <dt class="col-sm-6">VAT (@Model.VatRate.ToString("N2")%)</dt>
+                            <dd class="col-sm-6 text-right">@((Model.VatAmount ?? 0).ToString("C"))</dd>
+                            <dt class="col-sm-6">Total</dt>
+                            <dd class="col-sm-6 text-right"><strong>@((Model.TotalAmount ?? 0).ToString("C"))</strong></dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+
+                        <div>
+                            @if (!(Model.IsInvoiced || Model.Status == "Completed"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger ml-2">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="badge badge-info">Locked (Completed/Invoiced)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>

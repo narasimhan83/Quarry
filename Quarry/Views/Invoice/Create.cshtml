@@ -61,9 +61,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label asp-for="PaymentTerms" class="control-label"></label>
-                                        <select asp-for="PaymentTerms" asp-items="Model.PaymentTerms" class="form-control"></select>
-                                        <span asp-validation-for="PaymentTerms" class="text-danger"></span>
+                                        <label asp-for="SelectedPaymentTerms" class="control-label"></label>
+                                        <select asp-for="SelectedPaymentTerms" asp-items="Model.PaymentTermsList" class="form-control"></select>
+                                        <span asp-validation-for="SelectedPaymentTerms" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -361,7 +361,7 @@
             }
 
             // Auto-set due date based on payment terms
-            $('#PaymentTerms').change(function() {
+            $('#SelectedPaymentTerms').change(function() {
                 var terms = $(this).val();
                 var invoiceDate = new Date($('#InvoiceDate').val());
                 var days = parseInt(terms) || 30;
