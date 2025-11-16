@@ -1,0 +1,172 @@
+@model QuarryManagementSystem.ViewModels.FinancialReportViewModel
+@{
+    ViewData["Title"] = "Financial Reports";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Financial Reports</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Report")">Reports</a></li>
+                    <li class="breadcrumb-item active">Financial</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Filters</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Financial" asp-controller="Report" method="get" class="form-inline">
+                    <div class="form-group mr-2">
+                        <label class="mr-2">From</label>
+                        <input type="date" name="dateFrom" value="@(Model.DateFrom == default ? "" : Model.DateFrom.ToString("yyyy-MM-dd"))" class="form-control" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">To</label>
+                        <input type="date" name="dateTo" value="@(Model.DateTo == default ? "" : Model.DateTo.ToString("yyyy-MM-dd"))" class="form-control" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Type</label>
+                        <select asp-for="ReportType" name="reportType" class="form-control">
+                            <option value="summary">Summary</option>
+                            <option value="trialbalance">Trial Balance</option>
+                            <option value="profitloss">Profit & Loss</option>
+                            <option value="balancesheet">Balance Sheet</option>
+                            <option value="cashflow">Cash Flow</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Run</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@Model.ReportTitle</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.ReportType?.ToLower() == "summary" && Model.FinancialSummary != null)
+                {
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Total Revenue</span>
+                                    <span class="info-box-number">@Model.FinancialSummary.TotalRevenue.ToString("C")</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-danger"><i class="fas fa-money-bill-wave"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Total Expenses</span>
+                                    <span class="info-box-number">@Model.FinancialSummary.TotalExpenses.ToString("C")</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info"><i class="fas fa-equals"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Net Profit</span>
+                                    <span class="info-box-number">@Model.FinancialSummary.NetProfit.ToString("C")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model.ReportType?.ToLower() == "trialbalance" && Model.TrialBalance != null)
+                {
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr><th>Code</th><th>Account</th><th class="text-right">Debit</th><th class="text-right">Credit</th></tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var a in Model.TrialBalance.Accounts)
+                        {
+                            <tr>
+                                <td>@a.AccountCode</td>
+                                <td>@a.AccountName</td>
+                                <td class="text-right">@a.DebitBalance.ToString("N2")</td>
+                                <td class="text-right">@a.CreditBalance.ToString("N2")</td>
+                            </tr>
+                        }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2">Totals</th>
+                                <th class="text-right">@Model.TrialBalance.TotalDebit.ToString("N2")</th>
+                                <th class="text-right">@Model.TrialBalance.TotalCredit.ToString("N2")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "profitloss" && Model.ProfitLoss != null)
+                {
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <strong>Revenue:</strong> @Model.ProfitLoss.Revenue.ToString("C")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <strong>Expenses:</strong> @Model.ProfitLoss.Expenses.ToString("C")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <strong>Net Profit:</strong> @Model.ProfitLoss.NetProfit.ToString("C")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model.ReportType?.ToLower() == "balancesheet" && Model.BalanceSheet != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>Total Assets</th><td>@Model.BalanceSheet.TotalAssets.ToString("C")</td></tr>
+                        <tr><th>Total Liabilities</th><td>@Model.BalanceSheet.TotalLiabilities.ToString("C")</td></tr>
+                        <tr><th>Total Equity</th><td>@Model.BalanceSheet.TotalEquity.ToString("C")</td></tr>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "cashflow" && Model.CashFlow != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>Operating</th><td>@Model.CashFlow.OperatingActivities.ToString("C")</td></tr>
+                        <tr><th>Investing</th><td>@Model.CashFlow.InvestingActivities.ToString("C")</td></tr>
+                        <tr><th>Financing</th><td>@Model.CashFlow.FinancingActivities.ToString("C")</td></tr>
+                        <tr><th>Net Cash Flow</th><td>@Model.CashFlow.NetCashFlow.ToString("C")</td></tr>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No data available for the selected report.</p>
+                }
+            </div>
+        </div>
+    </div>
+</section>

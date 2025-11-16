@@ -224,7 +224,7 @@ namespace QuarryManagementSystem.ViewModels
         public decimal OutstandingAmount { get; set; }
 
         [Required(ErrorMessage = "Payment amount is required")]
-        [Range(0.01, 999999999.99, ErrorMessage = "Payment amount must be between 0.01 and 999,999,999.99")]
+        [Range(typeof(decimal), "0.01", "999999999.99", ErrorMessage = "Payment amount must be between 0.01 and 999,999,999.99")]
         [Display(Name = "Payment Amount")]
         [DataType(DataType.Currency)]
         public decimal PaymentAmount { get; set; }

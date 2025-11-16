@@ -1,0 +1,131 @@
+@model QuarryManagementSystem.ViewModels.PayrollReportViewModel
+@{
+    ViewData["Title"] = "Payroll Reports";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Payroll Reports</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Report")">Reports</a></li>
+                    <li class="breadcrumb-item active">Payroll</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <div class="card card-outline card-secondary">
+            <div class="card-header">
+                <h3 class="card-title">Filters</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Payroll" asp-controller="Report" method="get" class="form-inline">
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Year</label>
+                        <input type="number" name="year" class="form-control" value="@Model.Year" min="2000" max="2100" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Month</label>
+                        <input type="number" name="month" class="form-control" value="@Model.Month" min="1" max="12" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Type</label>
+                        <select asp-for="ReportType" class="form-control">
+                            <option value="summary">Summary</option>
+                            <option value="details">Details</option>
+                            <option value="compliance">Compliance</option>
+                            <option value="bank">Bank Payment</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Run</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@Model.ReportTitle</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.ReportType?.ToLower() == "summary" && Model.PayrollSummary != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>Period</th><td>@Model.PayrollSummary.Period</td></tr>
+                        <tr><th>Total Employees</th><td>@Model.PayrollSummary.TotalEmployees</td></tr>
+                        <tr><th>Gross Pay</th><td>@Model.PayrollSummary.GrossPay.ToString("C")</td></tr>
+                        <tr><th>Net Pay</th><td>@Model.PayrollSummary.NetPay.ToString("C")</td></tr>
+                        <tr><th>Total PAYE</th><td>@Model.PayrollSummary.TotalPAYE.ToString("C")</td></tr>
+                        <tr><th>Total Pension</th><td>@Model.PayrollSummary.TotalPension.ToString("C")</td></tr>
+                        <tr><th>Total NHIS</th><td>@Model.PayrollSummary.TotalNHIS.ToString("C")</td></tr>
+                        <tr><th>Employer Contributions</th><td>@Model.PayrollSummary.EmployerContributions.ToString("C")</td></tr>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "details" && Model.PayrollDetails != null)
+                {
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th class="text-right">Basic</th>
+                                <th class="text-right">Gross</th>
+                                <th class="text-right">PAYE</th>
+                                <th class="text-right">Pension</th>
+                                <th class="text-right">NHIS</th>
+                                <th class="text-right">Net</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var e in Model.PayrollDetails.EmployeeSalaries)
+                        {
+                            <tr>
+                                <td>@e.EmployeeCode</td>
+                                <td>@e.EmployeeName</td>
+                                <td>@e.Department</td>
+                                <td class="text-right">@e.BasicSalary.ToString("N2")</td>
+                                <td class="text-right">@e.GrossPay.ToString("N2")</td>
+                                <td class="text-right">@e.PAYE.ToString("N2")</td>
+                                <td class="text-right">@e.Pension.ToString("N2")</td>
+                                <td class="text-right">@e.NHIS.ToString("N2")</td>
+                                <td class="text-right">@e.NetPay.ToString("N2")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "compliance" && Model.ComplianceReport != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>PAYE Remittance</th><td>@Model.ComplianceReport.PAYERemittance.ToString("C")</td></tr>
+                        <tr><th>Pension Remittance</th><td>@Model.ComplianceReport.PensionRemittance.ToString("C")</td></tr>
+                        <tr><th>NHIS Remittance</th><td>@Model.ComplianceReport.NHISRemittance.ToString("C")</td></tr>
+                        <tr><th>Total Remittance</th><td>@Model.ComplianceReport.TotalRemittance.ToString("C")</td></tr>
+                        <tr><th>Compliance Status</th><td>@Model.ComplianceReport.ComplianceStatus</td></tr>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "bank" && Model.BankReport != null)
+                {
+                    <p class="text-muted">Bank payment report placeholder.</p>
+                }
+                else
+                {
+                    <p class="text-muted">No payroll data available for the selected options.</p>
+                }
+            </div>
+        </div>
+    </div>
+</section>

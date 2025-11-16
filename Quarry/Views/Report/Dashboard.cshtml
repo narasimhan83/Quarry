@@ -492,7 +492,7 @@
             // Customer Outstanding Chart
             var customerCtx = document.getElementById('customerOutstandingChart').getContext('2d');
             var customerChart = new Chart(customerCtx, {
-                type: 'horizontalBar',
+                type: 'bar',
                 data: {
                     labels: @Html.Raw(Json.Serialize(Model.CustomerOutstandingChart.Select(c => c.CustomerName))),
                     datasets: [{

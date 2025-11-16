@@ -16207,3 +16207,1351 @@ WHERE [i].[Id] = @__id_0
 2025-11-16 16:56:32.245 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
 2025-11-16 16:56:32.271 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
 2025-11-16 16:56:32.320 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 329.6958ms
+2025-11-16 20:50:53.252 +03:00 [INF] User profile is available. Using 'C:\Users\DELL\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-16 20:50:58.985 +03:00 [INF] Executed DbCommand (146ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-16 20:50:59.832 +03:00 [INF] Executed DbCommand (802ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-16 20:50:59.901 +03:00 [INF] Executed DbCommand (45ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-16 20:50:59.961 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-16 20:51:00.103 +03:00 [INF] Executed DbCommand (47ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-11-16 20:51:00.228 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-16 20:51:00.519 +03:00 [INF] Executed DbCommand (260ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-16 20:51:00.584 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-16 20:51:00.634 +03:00 [INF] Executed DbCommand (39ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-16 20:51:00.675 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-16 20:51:00.741 +03:00 [INF] Executed DbCommand (46ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-11-16 20:51:00.778 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-16 20:51:01.498 +03:00 [INF] Executed DbCommand (78ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-16 20:51:02.332 +03:00 [INF] Executed DbCommand (733ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-16 20:51:03.559 +03:00 [INF] Executed DbCommand (1,220ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-16 20:51:03.631 +03:00 [INF] Executed DbCommand (42ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-16 20:51:03.690 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-16 20:51:03.820 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[CreatedAt], [a].[Department], [a].[Designation], [a].[Email], [a].[EmailConfirmed], [a].[FullName], [a].[IsActive], [a].[LastLogin], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UpdatedAt], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedEmail] = @__normalizedEmail_0
+2025-11-16 20:51:04.046 +03:00 [INF] Executed DbCommand (46ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Quarries] AS [q]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-11-16 20:51:04.126 +03:00 [INF] Executed DbCommand (63ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Weighbridges] AS [w]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-11-16 20:51:04.238 +03:00 [INF] Executed DbCommand (59ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Materials] AS [m]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-11-16 20:51:05.083 +03:00 [INF] Now listening on: https://localhost:53551
+2025-11-16 20:51:05.085 +03:00 [INF] Now listening on: http://localhost:53552
+2025-11-16 20:51:05.091 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-16 20:51:05.094 +03:00 [INF] Hosting environment: Development
+2025-11-16 20:51:05.096 +03:00 [INF] Content root path: C:\WorkingCopy\Quarry\Quarry\Quarry
+2025-11-16 20:51:08.310 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/ - null null
+2025-11-16 20:51:08.618 +03:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2025-11-16 20:51:08.643 +03:00 [INF] AuthenticationScheme: Identity.Application was challenged.
+2025-11-16 20:51:08.655 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/ - 302 0 null 357.267ms
+2025-11-16 20:51:08.679 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Account/Login?ReturnUrl=%2F - null null
+2025-11-16 20:51:08.722 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-16 20:51:08.765 +03:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller QuarryManagementSystem.Controllers.AccountController (QuarryManagementSystem).
+2025-11-16 20:51:22.038 +03:00 [INF] Executing ViewResult, running view Login.
+2025-11-16 20:51:22.332 +03:00 [INF] Executed ViewResult - view Login executed in 13487.0658ms.
+2025-11-16 20:51:22.348 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem) in 13575.6225ms
+2025-11-16 20:51:22.354 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-16 20:51:22.390 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:51:22.393 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Account/Login?ReturnUrl=%2F - 200 null text/html; charset=utf-8 13713.4204ms
+2025-11-16 20:51:22.415 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 24.3288ms
+2025-11-16 20:51:22.539 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:51:22.629 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 91.0051ms
+2025-11-16 20:51:22.935 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/favicon.ico - null null
+2025-11-16 20:51:22.962 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/favicon.ico - 404 0 null 27.1478ms
+2025-11-16 20:51:22.977 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/favicon.ico, Response status code: 404
+2025-11-16 20:51:24.988 +03:00 [INF] Request starting HTTP/2 POST https://localhost:53551/Account/Login - application/x-www-form-urlencoded 236
+2025-11-16 20:51:25.001 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-16 20:51:25.029 +03:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(QuarryManagementSystem.ViewModels.LoginViewModel, System.String) on controller QuarryManagementSystem.Controllers.AccountController (QuarryManagementSystem).
+2025-11-16 20:51:25.137 +03:00 [INF] === RAW FORM DATA DEBUG ===
+2025-11-16 20:51:25.138 +03:00 [INF] Raw Username from Form: 'admin'
+2025-11-16 20:51:25.141 +03:00 [INF] Raw Password from Form: '*****'
+2025-11-16 20:51:25.142 +03:00 [INF] === MODEL DATA DEBUG ===
+2025-11-16 20:51:25.144 +03:00 [INF] Username from model: 'admin'
+2025-11-16 20:51:25.146 +03:00 [INF] Password from model: '*****'
+2025-11-16 20:51:25.147 +03:00 [INF] RememberMe: False
+2025-11-16 20:51:25.148 +03:00 [INF] === END DEBUG ===
+2025-11-16 20:51:25.150 +03:00 [INF] Attempting login for user: admin
+2025-11-16 20:51:25.413 +03:00 [INF] Executed DbCommand (197ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[CreatedAt], [a].[Department], [a].[Designation], [a].[Email], [a].[EmailConfirmed], [a].[FullName], [a].[IsActive], [a].[LastLogin], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UpdatedAt], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-11-16 20:51:25.836 +03:00 [INF] Executed DbCommand (52ms) [Parameters=[@__user_Id_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-11-16 20:51:25.961 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+2025-11-16 20:51:26.005 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-16 20:51:26.060 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__role_Id_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[ClaimType], [a].[ClaimValue]
+FROM [AspNetRoleClaims] AS [a]
+WHERE [a].[RoleId] = @__role_Id_0
+2025-11-16 20:51:26.088 +03:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-11-16 20:51:26.095 +03:00 [INF] User logged in successfully.
+2025-11-16 20:51:26.110 +03:00 [INF] Executing RedirectResult, redirecting to /.
+2025-11-16 20:51:26.113 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem) in 1078.8529ms
+2025-11-16 20:51:26.116 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-16 20:51:26.127 +03:00 [INF] Request finished HTTP/2 POST https://localhost:53551/Account/Login - 302 0 null 1139.0322ms
+2025-11-16 20:51:26.147 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/ - null null
+2025-11-16 20:51:26.289 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.DashboardController.Index (QuarryManagementSystem)'
+2025-11-16 20:51:26.302 +03:00 [INF] Route matched with {action = "Index", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller QuarryManagementSystem.Controllers.DashboardController (QuarryManagementSystem).
+2025-11-16 20:51:26.499 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__User_Identity_Name_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[CreatedAt], [a].[Department], [a].[Designation], [a].[Email], [a].[EmailConfirmed], [a].[FullName], [a].[IsActive], [a].[LastLogin], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UpdatedAt], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[UserName] = @__User_Identity_Name_0
+2025-11-16 20:51:26.669 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__today_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__today_0
+2025-11-16 20:51:26.771 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__today_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__today_0 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:26.839 +03:00 [INF] Executed DbCommand (43ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__thisMonth_0
+2025-11-16 20:51:26.889 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__thisMonth_0 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:26.953 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Customers] AS [c]
+WHERE [c].[Status] = N'Active'
+2025-11-16 20:51:27.131 +03:00 [INF] Executed DbCommand (126ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Customers] AS [c]
+WHERE [c].[Status] = N'Active' AND EXISTS (
+    SELECT 1
+    FROM [WeighmentTransactions] AS [w]
+    WHERE [c].[Id] = [w].[CustomerId] AND [w].[TransactionDate] >= @__thisMonth_0)
+2025-11-16 20:51:27.209 +03:00 [INF] Executed DbCommand (60ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Materials] AS [m]
+WHERE [m].[Status] = N'Active'
+2025-11-16 20:51:27.395 +03:00 [INF] Executed DbCommand (174ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Invoices] AS [i]
+2025-11-16 20:51:27.610 +03:00 [INF] Executed DbCommand (162ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] IN (N'Unpaid', N'Overdue')
+2025-11-16 20:51:27.762 +03:00 [INF] Executed DbCommand (135ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] = N'Overdue'
+2025-11-16 20:51:27.823 +03:00 [INF] Executed DbCommand (40ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount] - [i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] IN (N'Unpaid', N'Overdue')
+2025-11-16 20:51:28.037 +03:00 [INF] Executed DbCommand (53ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[TransactionNumber], [t].[TransactionDate], CASE
+    WHEN [c].[Id] IS NOT NULL THEN [c].[Name]
+    ELSE N'Walk-in Customer'
+END AS [CustomerName], CASE
+    WHEN [m].[Id] IS NOT NULL THEN [m].[Name]
+    ELSE N'Unknown'
+END AS [MaterialName], [t].[VehicleRegNumber], [t].[NetWeight], COALESCE([t].[TotalAmount], 0.0) AS [TotalAmount], [t].[Status]
+FROM (
+    SELECT TOP(@__p_0) [w].[Id], [w].[CustomerId], [w].[MaterialId], [w].[NetWeight], [w].[Status], [w].[TotalAmount], [w].[TransactionDate], [w].[TransactionNumber], [w].[VehicleRegNumber]
+    FROM [WeighmentTransactions] AS [w]
+    WHERE [w].[Status] = N'Completed'
+    ORDER BY [w].[TransactionDate] DESC
+) AS [t]
+LEFT JOIN [Customers] AS [c] ON [t].[CustomerId] = [c].[Id]
+LEFT JOIN [Materials] AS [m] ON [t].[MaterialId] = [m].[Id]
+ORDER BY [t].[TransactionDate] DESC
+2025-11-16 20:51:28.121 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [m].[Id], [m].[Name], [m].[Type], [m].[UnitPrice], (
+    SELECT COALESCE(SUM([s0].[CurrentStock]), 0.0)
+    FROM [StockYards] AS [s0]
+    WHERE [m].[Id] = [s0].[MaterialId]) AS [CurrentStock], 50.0 AS [MinimumStock]
+FROM [Materials] AS [m]
+WHERE [m].[Status] = N'Active' AND (
+    SELECT COALESCE(SUM([s].[CurrentStock]), 0.0)
+    FROM [StockYards] AS [s]
+    WHERE [m].[Id] = [s].[MaterialId]) < 50.0
+2025-11-16 20:51:28.175 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:28.231 +03:00 [INF] Executed DbCommand (40ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:28.312 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:28.359 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:28.397 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:28.439 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:28.486 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:28.579 +03:00 [INF] Executed DbCommand (79ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:28.749 +03:00 [INF] Executed DbCommand (164ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:28.853 +03:00 [INF] Executed DbCommand (99ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:29.161 +03:00 [INF] Executed DbCommand (297ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:29.231 +03:00 [INF] Executed DbCommand (60ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:29.271 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:29.321 +03:00 [INF] Executed DbCommand (42ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:29.374 +03:00 [INF] Executed DbCommand (45ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:29.428 +03:00 [INF] Executed DbCommand (46ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:29.470 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:29.512 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:29.556 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:29.626 +03:00 [INF] Executed DbCommand (52ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:29.684 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:29.746 +03:00 [INF] Executed DbCommand (52ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:29.839 +03:00 [INF] Executed DbCommand (85ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:29.913 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:29.957 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:30.004 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:30.045 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:30.092 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:30.138 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:30.182 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:30.219 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:30.276 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:30.312 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:30.375 +03:00 [INF] Executed DbCommand (55ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-16 20:51:30.411 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-16 20:51:30.469 +03:00 [INF] Executed DbCommand (50ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-16 20:51:30.484 +03:00 [INF] User admin accessed dashboard at "2025-11-16T20:51:30.4837807+03:00"
+2025-11-16 20:51:32.358 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:51:33.988 +03:00 [INF] Executed ViewResult - view Index executed in 3499.5077ms.
+2025-11-16 20:51:34.045 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.DashboardController.Index (QuarryManagementSystem) in 7736.9664ms
+2025-11-16 20:51:34.047 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.DashboardController.Index (QuarryManagementSystem)'
+2025-11-16 20:51:34.049 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/ - 200 null text/html; charset=utf-8 7902.4691ms
+2025-11-16 20:51:34.053 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/css/site.css - null null
+2025-11-16 20:51:34.053 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:51:34.058 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:51:34.087 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 29.5282ms
+2025-11-16 20:51:34.101 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:51:34.101 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:51:34.102 +03:00 [INF] The file /css/site.css was not modified
+2025-11-16 20:51:34.119 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/css/site.css - 304 null text/css 65.9237ms
+2025-11-16 20:51:34.121 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 68.4813ms
+2025-11-16 20:51:34.121 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 20.2376ms
+2025-11-16 20:51:34.134 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:51:34.154 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:51:34.167 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:51:34.167 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:51:34.168 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:51:34.168 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:51:34.169 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:51:34.195 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 28.5027ms
+2025-11-16 20:51:34.202 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 33.0162ms
+2025-11-16 20:51:34.207 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 38.4235ms
+2025-11-16 20:51:34.224 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 57.0058ms
+2025-11-16 20:51:34.229 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:51:34.241 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:51:34.252 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:51:34.268 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 100.3507ms
+2025-11-16 20:52:15.043 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:52:15.183 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:52:15.189 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:52:15.770 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:52:15.795 +03:00 [INF] Executed ViewResult - view Index executed in 599.6062ms.
+2025-11-16 20:52:15.837 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:52:15.838 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:15.840 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 645.7296ms
+2025-11-16 20:52:15.852 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 14.1484ms
+2025-11-16 20:52:15.881 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 43.4764ms
+2025-11-16 20:52:15.885 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:52:15.926 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 882.6389ms
+2025-11-16 20:52:15.931 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:52:15.938 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:15.990 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:52:15.991 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:52:16.063 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:52:16.102 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 171.3212ms
+2025-11-16 20:52:16.147 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:52:16.173 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 182.5858ms
+2025-11-16 20:52:16.190 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:52:16.202 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 140.7954ms
+2025-11-16 20:52:16.212 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:52:16.219 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 227.5498ms
+2025-11-16 20:52:17.456 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Dashboard - null null
+2025-11-16 20:52:17.463 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Dashboard (QuarryManagementSystem)'
+2025-11-16 20:52:17.470 +03:00 [INF] Route matched with {action = "Dashboard", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Dashboard() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:52:17.529 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] = N'Paid'
+2025-11-16 20:52:17.573 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__thisMonth_0 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:17.622 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount] - [i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] IN (N'Unpaid', N'Partial')
+2025-11-16 20:52:17.671 +03:00 [INF] Executed DbCommand (43ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount] - [i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] = N'Overdue'
+2025-11-16 20:52:17.719 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+2025-11-16 20:52:17.759 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__thisMonth_0
+2025-11-16 20:52:17.835 +03:00 [INF] Executed DbCommand (42ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Customers] AS [c]
+WHERE [c].[Status] = N'Active'
+2025-11-16 20:52:17.866 +03:00 [INF] Executed DbCommand (26ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Materials] AS [m]
+WHERE [m].[Status] = N'Active'
+2025-11-16 20:52:17.911 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Employees] AS [e]
+2025-11-16 20:52:17.968 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Employees] AS [e]
+WHERE [e].[Status] = N'Active'
+2025-11-16 20:52:18.025 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([p].[NetPay]), 0.0)
+FROM [PayrollRuns] AS [p]
+WHERE [p].[PaymentMonth] >= @__thisMonth_0 AND [p].[Status] = N'Processed'
+2025-11-16 20:52:18.104 +03:00 [INF] Executed DbCommand (55ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.192 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.254 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.302 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.351 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.393 +03:00 [INF] Executed DbCommand (28ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.433 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.479 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.550 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.593 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.629 +03:00 [INF] Executed DbCommand (28ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.687 +03:00 [INF] Executed DbCommand (50ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1 AND [i].[Status] = N'Paid'
+2025-11-16 20:52:18.753 +03:00 [INF] Executed DbCommand (42ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:18.807 +03:00 [INF] Executed DbCommand (43ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:18.848 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:18.909 +03:00 [INF] Executed DbCommand (54ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:18.970 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.011 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.046 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.113 +03:00 [INF] Executed DbCommand (47ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.152 +03:00 [INF] Executed DbCommand (27ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.203 +03:00 [INF] Executed DbCommand (40ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.256 +03:00 [INF] Executed DbCommand (45ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.315 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.363 +03:00 [INF] Executed DbCommand (39ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.420 +03:00 [INF] Executed DbCommand (46ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.474 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.519 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.566 +03:00 [INF] Executed DbCommand (40ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.629 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.678 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.725 +03:00 [INF] Executed DbCommand (39ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.771 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.826 +03:00 [INF] Executed DbCommand (45ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.856 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.906 +03:00 [INF] Executed DbCommand (42ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:19.946 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.015 +03:00 [INF] Executed DbCommand (61ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.083 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.111 +03:00 [INF] Executed DbCommand (21ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.150 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.197 +03:00 [INF] Executed DbCommand (39ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.255 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.293 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.338 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.391 +03:00 [INF] Executed DbCommand (42ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.434 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.483 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.525 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.568 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.607 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.652 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.698 +03:00 [INF] Executed DbCommand (35ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.733 +03:00 [INF] Executed DbCommand (27ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.779 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.817 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.864 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.904 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:20.951 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.011 +03:00 [INF] Executed DbCommand (52ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.046 +03:00 [INF] Executed DbCommand (28ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.087 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.130 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.187 +03:00 [INF] Executed DbCommand (45ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.224 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.281 +03:00 [INF] Executed DbCommand (49ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.334 +03:00 [INF] Executed DbCommand (45ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.374 +03:00 [INF] Executed DbCommand (33ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.418 +03:00 [INF] Executed DbCommand (37ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.454 +03:00 [INF] Executed DbCommand (28ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.502 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.548 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__date_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[NetWeight]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__date_0
+2025-11-16 20:52:21.683 +03:00 [INF] Executed DbCommand (64ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(@__p_0) [m].[Name] AS [MaterialName], COALESCE(SUM([w].[NetWeight]), 0.0) AS [TotalQuantity], COALESCE(SUM(COALESCE([w].[TotalAmount], 0.0)), 0.0) AS [TotalRevenue]
+FROM [WeighmentTransactions] AS [w]
+LEFT JOIN [Materials] AS [m] ON [w].[MaterialId] = [m].[Id]
+WHERE [w].[Status] = N'Completed' AND [m].[Id] IS NOT NULL
+GROUP BY [m].[Name]
+ORDER BY COALESCE(SUM(COALESCE([w].[TotalAmount], 0.0)), 0.0) DESC
+2025-11-16 20:52:21.740 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(@__p_0) [c].[Name] AS [CustomerName], [c].[OutstandingBalance], [c].[CreditLimit]
+FROM [Customers] AS [c]
+WHERE [c].[Status] = N'Active' AND [c].[OutstandingBalance] > 0.0
+ORDER BY [c].[OutstandingBalance] DESC
+2025-11-16 20:52:22.320 +03:00 [ERR] Error loading report dashboard
+System.InvalidOperationException: The LINQ expression 'DbSet<StockYard>()
+    .Where(s => EF.Property<int?>(StructuralTypeShaperExpression: 
+        QuarryManagementSystem.Models.Domain.Material
+        ValueBufferExpression: 
+            ProjectionBindingExpression: EmptyProjectionMember
+        IsNullable: False
+    , "Id") != null && object.Equals(
+        objA: (object)EF.Property<int?>(StructuralTypeShaperExpression: 
+            QuarryManagementSystem.Models.Domain.Material
+            ValueBufferExpression: 
+                ProjectionBindingExpression: EmptyProjectionMember
+            IsNullable: False
+        , "Id"), 
+        objB: (object)EF.Property<int?>(s, "MaterialId")))
+    .Sum(s => s.AvailableStock)' could not be translated. Additional information: Translation of member 'AvailableStock' on entity type 'StockYard' failed. This commonly occurs when the specified member is unmapped. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information.
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.TranslateSubquery(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerSqlTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitor.VisitBinary(BinaryExpression binaryExpression)
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerSqlTranslatingExpressionVisitor.VisitBinary(BinaryExpression binaryExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitor.TranslateInternal(Expression expression, Boolean applyDefaultTypeMapping)
+   at Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitor.Translate(Expression expression, Boolean applyDefaultTypeMapping)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.TranslateExpression(Expression expression, Boolean applyDefaultTypeMapping)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.TranslateLambdaExpression(ShapedQueryExpression shapedQueryExpression, LambdaExpression lambdaExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.TranslateWhere(ShapedQueryExpression source, LambdaExpression predicate)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at QuarryManagementSystem.Controllers.ReportController.GetLowStockMaterials() in C:\WorkingCopy\Quarry\Quarry\Quarry\Controllers\ReportController.cs:line 527
+   at QuarryManagementSystem.Controllers.ReportController.Dashboard() in C:\WorkingCopy\Quarry\Quarry\Quarry\Controllers\ReportController.cs:line 39
+2025-11-16 20:52:23.166 +03:00 [INF] Executing ViewResult, running view Dashboard.
+2025-11-16 20:52:23.346 +03:00 [INF] Executed ViewResult - view Dashboard executed in 926.992ms.
+2025-11-16 20:52:23.350 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:23.350 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:52:23.350 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:52:23.368 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Dashboard (QuarryManagementSystem) in 5895.3538ms
+2025-11-16 20:52:23.374 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 24.3084ms
+2025-11-16 20:52:23.377 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 27.7775ms
+2025-11-16 20:52:23.383 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 32.9677ms
+2025-11-16 20:52:23.385 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Dashboard (QuarryManagementSystem)'
+2025-11-16 20:52:23.387 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Dashboard - 200 null text/html; charset=utf-8 5931.1805ms
+2025-11-16 20:52:23.391 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:52:23.400 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:23.433 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:52:23.447 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:52:23.447 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:52:23.447 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:52:23.462 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 15.2989ms
+2025-11-16 20:52:23.467 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:52:23.472 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 24.8568ms
+2025-11-16 20:52:23.548 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 101.0763ms
+2025-11-16 20:52:26.451 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Financial - null null
+2025-11-16 20:52:26.464 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:26.478 +03:00 [INF] Route matched with {action = "Financial", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Financial(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:52:27.006 +03:00 [INF] Executing ViewResult, running view Financial.
+2025-11-16 20:52:27.068 +03:00 [INF] Executed ViewResult - view Financial executed in 570.2903ms.
+2025-11-16 20:52:27.074 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem) in 589.8256ms
+2025-11-16 20:52:27.077 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:27.080 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Financial - 200 null text/html; charset=utf-8 629.16ms
+2025-11-16 20:52:27.131 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:27.131 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:52:27.133 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:52:27.133 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:52:27.133 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:52:27.133 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:52:27.139 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 8.7698ms
+2025-11-16 20:52:27.146 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 15.7104ms
+2025-11-16 20:52:27.157 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 23.5328ms
+2025-11-16 20:52:27.164 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 31.5569ms
+2025-11-16 20:52:27.190 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:52:27.200 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 67.035ms
+2025-11-16 20:52:27.206 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:52:27.210 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:27.276 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:52:27.330 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 196.3764ms
+2025-11-16 20:52:31.619 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=summary - null null
+2025-11-16 20:52:31.630 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:31.639 +03:00 [INF] Route matched with {action = "Financial", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Financial(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:52:31.653 +03:00 [INF] Executing ViewResult, running view Financial.
+2025-11-16 20:52:31.666 +03:00 [INF] Executed ViewResult - view Financial executed in 13.0013ms.
+2025-11-16 20:52:31.668 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem) in 22.8662ms
+2025-11-16 20:52:31.670 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:31.673 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=summary - 200 null text/html; charset=utf-8 54.0787ms
+2025-11-16 20:52:31.737 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:52:31.738 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:31.740 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:52:31.741 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:52:31.741 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:52:31.741 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:52:31.836 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 98.5682ms
+2025-11-16 20:52:31.841 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 100.3504ms
+2025-11-16 20:52:31.849 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 108.8646ms
+2025-11-16 20:52:31.853 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:31.858 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 117.2714ms
+2025-11-16 20:52:31.884 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 146.7045ms
+2025-11-16 20:52:31.901 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:52:31.903 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 162.1436ms
+2025-11-16 20:52:31.908 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:52:31.917 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:52:37.067 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=trialbalance - null null
+2025-11-16 20:52:37.083 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:37.086 +03:00 [INF] Route matched with {action = "Financial", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Financial(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:52:37.874 +03:00 [INF] Executed DbCommand (751ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[AccountCode], [c].[AccountName], [c].[AccountType], [c].[CreatedAt], [c].[CurrentBalance], [c].[IsActive], [c].[OpeningBalance], [c].[SubType]
+FROM [ChartOfAccounts] AS [c]
+WHERE [c].[IsActive] = CAST(1 AS bit)
+ORDER BY [c].[AccountCode]
+2025-11-16 20:52:37.976 +03:00 [INF] Executing ViewResult, running view Financial.
+2025-11-16 20:52:37.987 +03:00 [INF] Executed ViewResult - view Financial executed in 11.0833ms.
+2025-11-16 20:52:37.993 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem) in 898.3878ms
+2025-11-16 20:52:37.997 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:38.002 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=trialbalance - 200 null text/html; charset=utf-8 934.6444ms
+2025-11-16 20:52:38.083 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:52:38.084 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:52:38.085 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:38.085 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:52:38.085 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:52:38.087 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:52:38.188 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 103.3462ms
+2025-11-16 20:52:38.194 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 109.3673ms
+2025-11-16 20:52:38.196 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 112.7382ms
+2025-11-16 20:52:38.198 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 113.1411ms
+2025-11-16 20:52:38.203 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 118.5971ms
+2025-11-16 20:52:38.233 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:38.240 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:52:38.251 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 166.081ms
+2025-11-16 20:52:38.253 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:52:38.270 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:52:54.992 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=profitloss - null null
+2025-11-16 20:52:55.006 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:55.010 +03:00 [INF] Route matched with {action = "Financial", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Financial(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:52:55.070 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[AccountCode], [c].[AccountName], [c].[AccountType], [c].[CreatedAt], [c].[CurrentBalance], [c].[IsActive], [c].[OpeningBalance], [c].[SubType]
+FROM [ChartOfAccounts] AS [c]
+WHERE [c].[AccountType] = N'Revenue' AND [c].[IsActive] = CAST(1 AS bit)
+2025-11-16 20:52:55.114 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[AccountCode], [c].[AccountName], [c].[AccountType], [c].[CreatedAt], [c].[CurrentBalance], [c].[IsActive], [c].[OpeningBalance], [c].[SubType]
+FROM [ChartOfAccounts] AS [c]
+WHERE [c].[AccountType] = N'Expense' AND [c].[IsActive] = CAST(1 AS bit)
+2025-11-16 20:52:55.129 +03:00 [INF] Executing ViewResult, running view Financial.
+2025-11-16 20:52:55.203 +03:00 [INF] Executed ViewResult - view Financial executed in 73.487ms.
+2025-11-16 20:52:55.203 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:52:55.204 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:55.209 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem) in 194.019ms
+2025-11-16 20:52:55.218 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 15.7051ms
+2025-11-16 20:52:55.223 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 18.4137ms
+2025-11-16 20:52:55.225 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:52:55.286 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:52:55.299 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:52:55.299 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:52:55.299 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:52:55.300 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:52:55.323 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:52:55.326 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=profitloss - 200 null text/html; charset=utf-8 333.288ms
+2025-11-16 20:52:55.333 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 46.2269ms
+2025-11-16 20:52:55.338 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:55.344 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 44.5511ms
+2025-11-16 20:52:55.348 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 48.9214ms
+2025-11-16 20:52:55.351 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 51.8267ms
+2025-11-16 20:52:55.388 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:52:55.396 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:52:55.404 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 104.5409ms
+2025-11-16 20:52:55.423 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:00.430 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=trialbalance - null null
+2025-11-16 20:53:00.458 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:53:00.464 +03:00 [INF] Route matched with {action = "Financial", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Financial(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:00.511 +03:00 [INF] Executed DbCommand (39ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[AccountCode], [c].[AccountName], [c].[AccountType], [c].[CreatedAt], [c].[CurrentBalance], [c].[IsActive], [c].[OpeningBalance], [c].[SubType]
+FROM [ChartOfAccounts] AS [c]
+WHERE [c].[IsActive] = CAST(1 AS bit)
+ORDER BY [c].[AccountCode]
+2025-11-16 20:53:00.520 +03:00 [INF] Executing ViewResult, running view Financial.
+2025-11-16 20:53:00.531 +03:00 [INF] Executed ViewResult - view Financial executed in 11.3169ms.
+2025-11-16 20:53:00.538 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem) in 67.9653ms
+2025-11-16 20:53:00.613 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:00.615 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Financial (QuarryManagementSystem)'
+2025-11-16 20:53:00.626 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 13.4791ms
+2025-11-16 20:53:00.668 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Financial?dateFrom=2024-11-16&dateTo=2025-11-16&reportType=trialbalance - 200 null text/html; charset=utf-8 237.2774ms
+2025-11-16 20:53:04.827 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:53:04.836 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:04.839 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:04.845 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:04.855 +03:00 [INF] Executed ViewResult - view Index executed in 10.7753ms.
+2025-11-16 20:53:04.861 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 16.5537ms
+2025-11-16 20:53:04.864 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:04.866 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 38.4755ms
+2025-11-16 20:53:04.921 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:04.921 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:04.923 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:04.925 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:04.926 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:04.926 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:05.030 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 105.0581ms
+2025-11-16 20:53:05.036 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 114.9248ms
+2025-11-16 20:53:05.048 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 125.7426ms
+2025-11-16 20:53:05.056 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 130.3772ms
+2025-11-16 20:53:05.060 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:05.071 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:05.081 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 160.6084ms
+2025-11-16 20:53:05.095 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:05.116 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:05.140 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 213.8361ms
+2025-11-16 20:53:07.494 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Operational - null null
+2025-11-16 20:53:07.509 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Operational (QuarryManagementSystem)'
+2025-11-16 20:53:07.525 +03:00 [INF] Route matched with {action = "Operational", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Operational(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:07.658 +03:00 [INF] Executed DbCommand (103ms) [Parameters=[@__fromDate_0='?' (DbType = DateTime2), @__toDate_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT [w].[Id], [w].[ChallanNumber], [w].[CreatedAt], [w].[CreatedBy], [w].[CustomerId], [w].[DriverName], [w].[DriverPhone], [w].[EntryTime], [w].[ExitTime], [w].[GrossWeight], [w].[InvoiceId], [w].[IsInvoiced], [w].[MaterialId], [w].[ModifiedAt], [w].[ModifiedBy], [w].[NetWeight], [w].[OperatorUserId], [w].[OrderId], [w].[PricePerUnit], [w].[Status], [w].[SubTotal], [w].[TareWeight], [w].[TotalAmount], [w].[TransactionDate], [w].[TransactionNumber], [w].[TransactionType], [w].[VatAmount], [w].[VatRate], [w].[VehicleRegNumber], [w].[WeighbridgeId], [w].[WeightUnit]
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__fromDate_0 AND [w].[TransactionDate] <= @__toDate_1 AND [w].[Status] = N'Completed'
+2025-11-16 20:53:08.241 +03:00 [INF] Executing ViewResult, running view Operational.
+2025-11-16 20:53:08.296 +03:00 [INF] Executed ViewResult - view Operational executed in 589.5316ms.
+2025-11-16 20:53:08.299 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Operational (QuarryManagementSystem) in 768.4443ms
+2025-11-16 20:53:08.303 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Operational (QuarryManagementSystem)'
+2025-11-16 20:53:08.312 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Operational - 200 null text/html; charset=utf-8 818.1756ms
+2025-11-16 20:53:08.374 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:08.375 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:08.375 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:08.376 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:08.380 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:08.434 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:08.480 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 105.635ms
+2025-11-16 20:53:08.489 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 114.7959ms
+2025-11-16 20:53:08.493 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:08.500 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 65.5859ms
+2025-11-16 20:53:08.508 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 133.9192ms
+2025-11-16 20:53:08.514 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 138.1353ms
+2025-11-16 20:53:08.518 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 138.1736ms
+2025-11-16 20:53:08.535 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:08.539 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:08.544 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:13.735 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:53:13.754 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:13.757 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:13.762 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:13.779 +03:00 [INF] Executed ViewResult - view Index executed in 17.2389ms.
+2025-11-16 20:53:13.783 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 21.0511ms
+2025-11-16 20:53:13.787 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:13.790 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 54.4617ms
+2025-11-16 20:53:13.967 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:13.968 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:13.970 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:13.971 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:13.971 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:13.971 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:13.996 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 28.1333ms
+2025-11-16 20:53:14.004 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 36.4618ms
+2025-11-16 20:53:14.014 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 43.6606ms
+2025-11-16 20:53:14.022 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 51.7702ms
+2025-11-16 20:53:14.029 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:14.034 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 62.7307ms
+2025-11-16 20:53:14.042 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:14.063 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:14.073 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:14.100 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 128.708ms
+2025-11-16 20:53:15.590 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Operational - null null
+2025-11-16 20:53:15.599 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Operational (QuarryManagementSystem)'
+2025-11-16 20:53:15.602 +03:00 [INF] Route matched with {action = "Operational", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Operational(System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:15.655 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[@__fromDate_0='?' (DbType = DateTime2), @__toDate_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT [w].[Id], [w].[ChallanNumber], [w].[CreatedAt], [w].[CreatedBy], [w].[CustomerId], [w].[DriverName], [w].[DriverPhone], [w].[EntryTime], [w].[ExitTime], [w].[GrossWeight], [w].[InvoiceId], [w].[IsInvoiced], [w].[MaterialId], [w].[ModifiedAt], [w].[ModifiedBy], [w].[NetWeight], [w].[OperatorUserId], [w].[OrderId], [w].[PricePerUnit], [w].[Status], [w].[SubTotal], [w].[TareWeight], [w].[TotalAmount], [w].[TransactionDate], [w].[TransactionNumber], [w].[TransactionType], [w].[VatAmount], [w].[VatRate], [w].[VehicleRegNumber], [w].[WeighbridgeId], [w].[WeightUnit]
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__fromDate_0 AND [w].[TransactionDate] <= @__toDate_1 AND [w].[Status] = N'Completed'
+2025-11-16 20:53:15.702 +03:00 [INF] Executing ViewResult, running view Operational.
+2025-11-16 20:53:15.758 +03:00 [INF] Executed ViewResult - view Operational executed in 56.1293ms.
+2025-11-16 20:53:15.766 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Operational (QuarryManagementSystem) in 156.933ms
+2025-11-16 20:53:15.830 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:15.831 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:15.832 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:15.832 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:15.833 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:15.833 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:15.916 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Operational (QuarryManagementSystem)'
+2025-11-16 20:53:15.924 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 94.1314ms
+2025-11-16 20:53:15.939 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 108.1663ms
+2025-11-16 20:53:15.946 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 113.8741ms
+2025-11-16 20:53:15.951 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 118.2178ms
+2025-11-16 20:53:15.955 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 122.5887ms
+2025-11-16 20:53:15.998 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Operational - 200 null text/html; charset=utf-8 408.3526ms
+2025-11-16 20:53:16.020 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:16.034 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:16.055 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 222.386ms
+2025-11-16 20:53:16.058 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:16.077 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:18.817 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:53:18.835 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:18.840 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:18.845 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:18.860 +03:00 [INF] Executed ViewResult - view Index executed in 15.5112ms.
+2025-11-16 20:53:18.865 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 20.5486ms
+2025-11-16 20:53:18.869 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:18.873 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 56.1408ms
+2025-11-16 20:53:18.931 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:18.931 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:18.942 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:18.942 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:18.943 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:18.943 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:18.955 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 24.2579ms
+2025-11-16 20:53:19.032 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 90.5022ms
+2025-11-16 20:53:19.036 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 104.8993ms
+2025-11-16 20:53:19.038 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 96.0406ms
+2025-11-16 20:53:19.046 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:19.065 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:19.072 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 129.7611ms
+2025-11-16 20:53:19.083 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:19.100 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:19.124 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 181.7546ms
+2025-11-16 20:53:20.073 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Tax - null null
+2025-11-16 20:53:20.083 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Tax (QuarryManagementSystem)'
+2025-11-16 20:53:20.096 +03:00 [INF] Route matched with {action = "Tax", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Tax(System.Nullable`1[System.Int32], System.Nullable`1[System.Int32], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:20.196 +03:00 [INF] Executed DbCommand (62ms) [Parameters=[@__startDate_0='?' (DbType = DateTime2), @__endDate_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT [i].[Id], [i].[CreatedAt], [i].[CreatedBy], [i].[CreatedByUserId], [i].[CustomerId], [i].[DueDate], [i].[InvoiceDate], [i].[InvoiceNumber], [i].[LGAReceiptNumber], [i].[Notes], [i].[PaidAmount], [i].[PaymentTerms], [i].[Status], [i].[SubTotal], [i].[TotalAmount], [i].[UpdatedAt], [i].[VatAmount], [i].[WeighmentId]
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__startDate_0 AND [i].[InvoiceDate] <= @__endDate_1
+2025-11-16 20:53:20.799 +03:00 [INF] Executing ViewResult, running view Tax.
+2025-11-16 20:53:20.849 +03:00 [INF] Executed ViewResult - view Tax executed in 544.2289ms.
+2025-11-16 20:53:20.851 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Tax (QuarryManagementSystem) in 747.7392ms
+2025-11-16 20:53:20.854 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Tax (QuarryManagementSystem)'
+2025-11-16 20:53:20.856 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Tax - 200 null text/html; charset=utf-8 783.278ms
+2025-11-16 20:53:20.920 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:20.920 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:20.929 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:20.967 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:20.974 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:20.977 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:20.995 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 76.0242ms
+2025-11-16 20:53:21.004 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 36.5324ms
+2025-11-16 20:53:21.009 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 35.1174ms
+2025-11-16 20:53:21.026 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 106.2024ms
+2025-11-16 20:53:21.031 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:21.055 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 127.3156ms
+2025-11-16 20:53:21.062 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:21.088 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:21.093 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:21.098 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 121.6306ms
+2025-11-16 20:53:24.782 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:53:24.794 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:24.796 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:24.801 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:24.820 +03:00 [INF] Executed ViewResult - view Index executed in 19.3458ms.
+2025-11-16 20:53:24.824 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 22.8926ms
+2025-11-16 20:53:24.828 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:24.832 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 50.4944ms
+2025-11-16 20:53:24.909 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:24.909 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:24.915 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:24.916 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:24.934 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:24.979 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:25.019 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 109.8567ms
+2025-11-16 20:53:25.030 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 95.995ms
+2025-11-16 20:53:25.035 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 120.0581ms
+2025-11-16 20:53:25.038 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 128.5257ms
+2025-11-16 20:53:25.044 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:25.132 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:25.150 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:25.157 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 178.8297ms
+2025-11-16 20:53:25.165 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 250.5226ms
+2025-11-16 20:53:25.176 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:26.519 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Stock - null null
+2025-11-16 20:53:26.531 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem)'
+2025-11-16 20:53:26.547 +03:00 [INF] Route matched with {action = "Stock", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Stock(System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:26.713 +03:00 [INF] Executed DbCommand (59ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [m].[Id], [m].[CreatedAt], [m].[Name], [m].[Status], [m].[Type], [m].[Unit], [m].[UnitPrice], [m].[UpdatedAt], [m].[VatRate], [s].[Id], [s].[CurrentStock], [s].[LastUpdated], [s].[MaterialId], [s].[QuarryId], [s].[ReservedStock]
+FROM [Materials] AS [m]
+LEFT JOIN [StockYards] AS [s] ON [m].[Id] = [s].[MaterialId]
+WHERE [m].[Status] = N'Active'
+ORDER BY [m].[Id]
+2025-11-16 20:53:27.362 +03:00 [INF] Executing ViewResult, running view Stock.
+2025-11-16 20:53:27.399 +03:00 [INF] Executed ViewResult - view Stock executed in 504.8389ms.
+2025-11-16 20:53:27.403 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem) in 845.2402ms
+2025-11-16 20:53:27.406 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem)'
+2025-11-16 20:53:27.408 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Stock - 200 null text/html; charset=utf-8 888.7604ms
+2025-11-16 20:53:27.527 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:27.528 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:27.529 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:27.533 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:27.548 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 20.6293ms
+2025-11-16 20:53:27.548 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:27.549 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:27.554 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 25.7294ms
+2025-11-16 20:53:27.559 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 30.1889ms
+2025-11-16 20:53:27.567 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 34.0417ms
+2025-11-16 20:53:27.573 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:27.582 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 34.438ms
+2025-11-16 20:53:27.616 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:27.650 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 100.9934ms
+2025-11-16 20:53:27.650 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:27.655 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:36.330 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Stock?ReportType=movement - null null
+2025-11-16 20:53:36.344 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem)'
+2025-11-16 20:53:36.348 +03:00 [INF] Route matched with {action = "Stock", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Stock(System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:36.362 +03:00 [INF] Executing ViewResult, running view Stock.
+2025-11-16 20:53:36.377 +03:00 [INF] Executed ViewResult - view Stock executed in 15.9278ms.
+2025-11-16 20:53:36.507 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:36.507 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:36.507 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:36.507 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:36.507 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:36.508 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:36.546 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem) in 185.2299ms
+2025-11-16 20:53:36.552 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 45.031ms
+2025-11-16 20:53:36.555 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 47.71ms
+2025-11-16 20:53:36.565 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 57.1875ms
+2025-11-16 20:53:36.579 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:36.589 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 81.8013ms
+2025-11-16 20:53:36.607 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:36.609 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 101.6841ms
+2025-11-16 20:53:36.610 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem)'
+2025-11-16 20:53:36.618 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 110.5291ms
+2025-11-16 20:53:36.621 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:36.628 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Stock?ReportType=movement - 200 null text/html; charset=utf-8 297.6296ms
+2025-11-16 20:53:36.634 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:39.862 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:53:39.872 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:39.876 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:39.881 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:39.888 +03:00 [INF] Executed ViewResult - view Index executed in 7.0312ms.
+2025-11-16 20:53:39.892 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 10.6766ms
+2025-11-16 20:53:39.897 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:39.943 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:39.944 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:39.951 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:39.951 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:39.951 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:39.954 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 91.3479ms
+2025-11-16 20:53:40.043 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 99.2268ms
+2025-11-16 20:53:40.077 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 133.3417ms
+2025-11-16 20:53:40.086 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 135.4335ms
+2025-11-16 20:53:40.092 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 141.0155ms
+2025-11-16 20:53:40.097 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:40.106 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 154.853ms
+2025-11-16 20:53:40.112 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:40.118 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:40.123 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:40.129 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:40.177 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 80.2448ms
+2025-11-16 20:53:43.331 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Stock - null null
+2025-11-16 20:53:43.347 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem)'
+2025-11-16 20:53:43.349 +03:00 [INF] Route matched with {action = "Stock", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Stock(System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:43.449 +03:00 [INF] Executed DbCommand (90ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [m].[Id], [m].[CreatedAt], [m].[Name], [m].[Status], [m].[Type], [m].[Unit], [m].[UnitPrice], [m].[UpdatedAt], [m].[VatRate], [s].[Id], [s].[CurrentStock], [s].[LastUpdated], [s].[MaterialId], [s].[QuarryId], [s].[ReservedStock]
+FROM [Materials] AS [m]
+LEFT JOIN [StockYards] AS [s] ON [m].[Id] = [s].[MaterialId]
+WHERE [m].[Status] = N'Active'
+ORDER BY [m].[Id]
+2025-11-16 20:53:43.476 +03:00 [INF] Executing ViewResult, running view Stock.
+2025-11-16 20:53:43.569 +03:00 [INF] Executed ViewResult - view Stock executed in 91.672ms.
+2025-11-16 20:53:43.647 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:43.648 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:43.656 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:43.657 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:43.658 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:43.658 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:43.740 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem) in 382.5991ms
+2025-11-16 20:53:43.746 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 98.2929ms
+2025-11-16 20:53:43.753 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 94.7191ms
+2025-11-16 20:53:43.758 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 101.2838ms
+2025-11-16 20:53:43.767 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 119.9441ms
+2025-11-16 20:53:43.783 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:43.795 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:43.805 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:43.805 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 147.0241ms
+2025-11-16 20:53:43.818 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 161.5315ms
+2025-11-16 20:53:43.819 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Stock (QuarryManagementSystem)'
+2025-11-16 20:53:43.821 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Stock - 200 null text/html; charset=utf-8 490.4191ms
+2025-11-16 20:53:43.833 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:47.372 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report - null null
+2025-11-16 20:53:47.383 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:47.388 +03:00 [INF] Route matched with {action = "Index", controller = "Report"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:47.393 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:47.405 +03:00 [INF] Executed ViewResult - view Index executed in 12.6293ms.
+2025-11-16 20:53:47.408 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem) in 15.2983ms
+2025-11-16 20:53:47.410 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:47.412 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report - 200 null text/html; charset=utf-8 40.3962ms
+2025-11-16 20:53:47.461 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:47.461 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:47.463 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:47.464 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:47.467 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:47.470 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:47.572 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 108.4604ms
+2025-11-16 20:53:47.579 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 118.244ms
+2025-11-16 20:53:47.591 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 124.2477ms
+2025-11-16 20:53:47.597 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:47.604 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 143.318ms
+2025-11-16 20:53:47.612 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 149.6006ms
+2025-11-16 20:53:47.624 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:47.652 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:47.659 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:47.693 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 223.025ms
+2025-11-16 20:53:48.984 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Report/Payroll - null null
+2025-11-16 20:53:48.995 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.ReportController.Payroll (QuarryManagementSystem)'
+2025-11-16 20:53:49.009 +03:00 [INF] Route matched with {action = "Payroll", controller = "Report"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Payroll(System.Nullable`1[System.Int32], System.Nullable`1[System.Int32], System.String) on controller QuarryManagementSystem.Controllers.ReportController (QuarryManagementSystem).
+2025-11-16 20:53:49.116 +03:00 [INF] Executed DbCommand (44ms) [Parameters=[@__year_0='?' (DbType = Int32), @__month_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[GrossPay], [p].[NetPay], [p].[PaymentMonth], [p].[ProcessedAt], [p].[ProcessedBy], [p].[RunNumber], [p].[Status], [p].[TotalEmployees], [p].[TotalNHIS], [p].[TotalPAYE], [p].[TotalPension], [t].[Id], [t].[BasicSalary], [t].[CreatedAt], [t].[EmployeeId], [t].[HousingAllowance], [t].[NHF], [t].[NHIS], [t].[OtherAllowances], [t].[PAYE], [t].[PaymentDate], [t].[PaymentReference], [t].[PaymentStatus], [t].[PayrollRunId], [t].[PensionEmployee], [t].[PensionEmployer], [t].[TransportAllowance], [t].[Id0], [t].[BankAccountNumber], [t].[BankName], [t].[BasicSalary0], [t].[CreatedAt0], [t].[DateOfBirth], [t].[DateOfJoining], [t].[Department], [t].[Designation], [t].[Email], [t].[EmployeeCode], [t].[FullName], [t].[HousingAllowance0], [t].[NHISNumber], [t].[OtherAllowances0], [t].[PensionPIN], [t].[Phone], [t].[QuarryId], [t].[Status], [t].[TransportAllowance0], [t].[UpdatedAt]
+FROM [PayrollRuns] AS [p]
+LEFT JOIN (
+    SELECT [e].[Id], [e].[BasicSalary], [e].[CreatedAt], [e].[EmployeeId], [e].[HousingAllowance], [e].[NHF], [e].[NHIS], [e].[OtherAllowances], [e].[PAYE], [e].[PaymentDate], [e].[PaymentReference], [e].[PaymentStatus], [e].[PayrollRunId], [e].[PensionEmployee], [e].[PensionEmployer], [e].[TransportAllowance], [e0].[Id] AS [Id0], [e0].[BankAccountNumber], [e0].[BankName], [e0].[BasicSalary] AS [BasicSalary0], [e0].[CreatedAt] AS [CreatedAt0], [e0].[DateOfBirth], [e0].[DateOfJoining], [e0].[Department], [e0].[Designation], [e0].[Email], [e0].[EmployeeCode], [e0].[FullName], [e0].[HousingAllowance] AS [HousingAllowance0], [e0].[NHISNumber], [e0].[OtherAllowances] AS [OtherAllowances0], [e0].[PensionPIN], [e0].[Phone], [e0].[QuarryId], [e0].[Status], [e0].[TransportAllowance] AS [TransportAllowance0], [e0].[UpdatedAt]
+    FROM [EmployeeSalaries] AS [e]
+    INNER JOIN [Employees] AS [e0] ON [e].[EmployeeId] = [e0].[Id]
+) AS [t] ON [p].[Id] = [t].[PayrollRunId]
+WHERE DATEPART(year, [p].[PaymentMonth]) = @__year_0 AND DATEPART(month, [p].[PaymentMonth]) = @__month_1 AND [p].[Status] = N'Processed'
+ORDER BY [p].[Id], [t].[Id]
+2025-11-16 20:53:49.629 +03:00 [INF] Executing ViewResult, running view Payroll.
+2025-11-16 20:53:49.677 +03:00 [INF] Executed ViewResult - view Payroll executed in 541.8625ms.
+2025-11-16 20:53:49.680 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.ReportController.Payroll (QuarryManagementSystem) in 665.6807ms
+2025-11-16 20:53:49.687 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.ReportController.Payroll (QuarryManagementSystem)'
+2025-11-16 20:53:49.691 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Report/Payroll - 200 null text/html; charset=utf-8 706.7901ms
+2025-11-16 20:53:49.800 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:49.813 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-16 20:53:49.813 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-16 20:53:49.815 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-16 20:53:49.816 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-16 20:53:49.817 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:49.829 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 29.4401ms
+2025-11-16 20:53:49.839 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 26.6821ms
+2025-11-16 20:53:49.858 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 42.116ms
+2025-11-16 20:53:49.862 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 47.0621ms
+2025-11-16 20:53:49.866 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-16 20:53:49.881 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 68.3784ms
+2025-11-16 20:53:49.886 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-16 20:53:49.894 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-16 20:53:49.905 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 87.9773ms
+2025-11-16 20:53:49.909 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-16 20:53:54.220 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Employee - null null
+2025-11-16 20:53:54.235 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.EmployeeController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:54.255 +03:00 [INF] Route matched with {action = "Index", controller = "Employee"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index(System.String, System.String, System.String, Int32) on controller QuarryManagementSystem.Controllers.EmployeeController (QuarryManagementSystem).
+2025-11-16 20:53:54.353 +03:00 [INF] Executed DbCommand (66ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Employees] AS [e]
+2025-11-16 20:53:54.433 +03:00 [INF] Executed DbCommand (51ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[BankAccountNumber], [t].[BankName], [t].[BasicSalary], [t].[CreatedAt], [t].[DateOfBirth], [t].[DateOfJoining], [t].[Department], [t].[Designation], [t].[Email], [t].[EmployeeCode], [t].[FullName], [t].[HousingAllowance], [t].[NHISNumber], [t].[OtherAllowances], [t].[PensionPIN], [t].[Phone], [t].[QuarryId], [t].[Status], [t].[TransportAllowance], [t].[UpdatedAt], [q].[Id], [q].[CreatedAt], [q].[LGA], [q].[Location], [q].[MiningLicenseNumber], [q].[Name], [q].[RCNumber], [q].[State], [q].[Status], [q].[UpdatedAt]
+FROM (
+    SELECT [e].[Id], [e].[BankAccountNumber], [e].[BankName], [e].[BasicSalary], [e].[CreatedAt], [e].[DateOfBirth], [e].[DateOfJoining], [e].[Department], [e].[Designation], [e].[Email], [e].[EmployeeCode], [e].[FullName], [e].[HousingAllowance], [e].[NHISNumber], [e].[OtherAllowances], [e].[PensionPIN], [e].[Phone], [e].[QuarryId], [e].[Status], [e].[TransportAllowance], [e].[UpdatedAt]
+    FROM [Employees] AS [e]
+    ORDER BY [e].[FullName]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [t]
+LEFT JOIN [Quarries] AS [q] ON [t].[QuarryId] = [q].[Id]
+ORDER BY [t].[FullName]
+2025-11-16 20:53:54.449 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-16 20:53:54.462 +03:00 [ERR] The view 'Index' was not found. Searched locations: ["/Views/Employee/Index.cshtml","/Views/Shared/Index.cshtml"]
+2025-11-16 20:53:55.512 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.EmployeeController.Index (QuarryManagementSystem) in 1249.5241ms
+2025-11-16 20:53:55.766 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.EmployeeController.Index (QuarryManagementSystem)'
+2025-11-16 20:53:56.678 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/Employee/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-11-16 20:53:56.774 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Employee - 500 null text/html; charset=utf-8 2554.8453ms
+2025-11-16 20:53:56.834 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-16 20:53:56.834 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-16 20:53:56.860 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13780 application/javascript; charset=utf-8 25.8911ms
+2025-11-16 20:53:56.908 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 74.155ms

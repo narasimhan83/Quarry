@@ -1,0 +1,111 @@
+@model QuarryManagementSystem.ViewModels.TaxReportViewModel
+@{
+    ViewData["Title"] = "Tax Reports";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Tax Reports</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Report")">Reports</a></li>
+                    <li class="breadcrumb-item active">Tax</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <div class="card card-outline card-warning">
+            <div class="card-header">
+                <h3 class="card-title">Filters</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Tax" asp-controller="Report" method="get" class="form-inline">
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Year</label>
+                        <input type="number" name="year" class="form-control" value="@Model.Year" min="2000" max="2100" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Month</label>
+                        <input type="number" name="month" class="form-control" value="@Model.Month" min="1" max="12" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Type</label>
+                        <select asp-for="ReportType" class="form-control">
+                            <option value="vat">VAT</option>
+                            <option value="paye">PAYE</option>
+                            <option value="pension">Pension</option>
+                            <option value="compliance">Compliance</option>
+                            <option value="summary">Summary</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Run</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@Model.ReportTitle</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.ReportType?.ToLower() == "vat" && Model.VATReport != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>Period</th><td>@Model.VATReport.Period</td></tr>
+                        <tr><th>Output VAT (Sales)</th><td>@Model.VATReport.OutputVAT.ToString("C")</td></tr>
+                        <tr><th>Input VAT (Purchases)</th><td>@Model.VATReport.InputVAT.ToString("C")</td></tr>
+                        <tr><th>Net VAT</th><td>@Model.VATReport.NetVAT.ToString("C")</td></tr>
+                        <tr><th>VAT Payable</th><td>@Model.VATReport.VATPayable.ToString("C")</td></tr>
+                        <tr><th>VAT Receivable</th><td>@Model.VATReport.VATReceivable.ToString("C")</td></tr>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "paye" && Model.PAYEReport != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>Period</th><td>@Model.PAYEReport.Period</td></tr>
+                        <tr><th>Total PAYE</th><td>@Model.PAYEReport.TotalPAYE.ToString("C")</td></tr>
+                        <tr><th>Employee Count</th><td>@Model.PAYEReport.EmployeeCount</td></tr>
+                        <tr><th>Monthly Remittance</th><td>@Model.PAYEReport.MonthlyRemittance.ToString("C")</td></tr>
+                        <tr><th>Due Date</th><td>@Model.PAYEReport.DueDate.ToString("yyyy-MM-dd")</td></tr>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "pension" && Model.PensionReport != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>Employee Contributions</th><td>@Model.PensionReport.EmployeeContributions.ToString("C")</td></tr>
+                        <tr><th>Employer Contributions</th><td>@Model.PensionReport.EmployerContributions.ToString("C")</td></tr>
+                        <tr><th>Total Contributions</th><td>@Model.PensionReport.TotalContributions.ToString("C")</td></tr>
+                        <tr><th>Employee Count</th><td>@Model.PensionReport.EmployeeCount</td></tr>
+                    </table>
+                }
+                else if (Model.ReportType?.ToLower() == "compliance" && Model.ComplianceReport != null)
+                {
+                    <table class="table table-bordered">
+                        <tr><th>PAYE Remittance</th><td>@Model.ComplianceReport.PAYERemittance.ToString("C")</td></tr>
+                        <tr><th>Pension Remittance</th><td>@Model.ComplianceReport.PensionRemittance.ToString("C")</td></tr>
+                        <tr><th>NHIS Remittance</th><td>@Model.ComplianceReport.NHISRemittance.ToString("C")</td></tr>
+                        <tr><th>Total Remittance</th><td>@Model.ComplianceReport.TotalRemittance.ToString("C")</td></tr>
+                        <tr><th>Compliance Status</th><td>@Model.ComplianceReport.ComplianceStatus</td></tr>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No tax data available for the selected options.</p>
+                }
+            </div>
+        </div>
+    </div>
+</section>
