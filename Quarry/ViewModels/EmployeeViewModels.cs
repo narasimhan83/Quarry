@@ -88,7 +88,7 @@ namespace QuarryManagementSystem.ViewModels
 
         [Required(ErrorMessage = "Basic salary is required")]
         [Display(Name = "Basic Salary")]
-        [Range(30000, 999999999.99, ErrorMessage = "Basic salary must be at least ₦30,000 (minimum wage)")]
+        [Range(0, 999999999.99, ErrorMessage = "Basic salary must be between ₦0 and ₦999,999,999.99")]
         public decimal BasicSalary { get; set; }
 
         [Display(Name = "Housing Allowance")]
