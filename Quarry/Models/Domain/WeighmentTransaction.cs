@@ -28,7 +28,7 @@ namespace QuarryManagementSystem.Models.Domain
         public string? DriverName { get; set; }
 
         [StringLength(20)]
-        [RegularExpression(@"^(\+234|0)[789][01]\d{9}$", ErrorMessage = "Invalid Nigerian phone number")]
+        [RegularExpression(@"^(?:\+234|0)[\s-]?[7-9]\d{2}[\s-]?\d{3}[\s-]?\d{4}$", ErrorMessage = "Invalid Nigerian phone number")]
         [Display(Name = "Driver Phone")]
         public string? DriverPhone { get; set; }
 

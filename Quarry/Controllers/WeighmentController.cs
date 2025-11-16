@@ -126,7 +126,7 @@ namespace QuarryManagementSystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // Validate customer credit limit if customer is selected
+                    // Validate customer credit limit - warn but do not block creation
                     if (model.CustomerId.HasValue)
                     {
                         var customer = await _context.Customers.FindAsync(model.CustomerId.Value);
@@ -135,15 +135,27 @@ namespace QuarryManagementSystem.Controllers
                             var estimatedAmount = CalculateEstimatedAmount(model);
                             if (customer.HasExceededCreditLimit(estimatedAmount))
                             {
-                                ModelState.AddModelError("", $"Customer has exceeded credit limit. Available credit: {customer.AvailableCredit:C}");
-                                await PopulateDropdowns(model);
-                                return View(model);
+                                TempData["Error"] = $"Warning: customer exceeded credit limit. Available credit: {customer.AvailableCredit:C}. Weighment will still be created.";
                             }
                         }
                     }
 
-                    // Generate transaction number
-                    var transactionNumber = await GenerateNewTransactionNumber();
+                    // Determine transaction number (allow manual entry)
+                    string transactionNumber = model.TransactionNumber;
+                    if (string.IsNullOrWhiteSpace(transactionNumber))
+                    {
+                        transactionNumber = await GenerateNewTransactionNumber();
+                    }
+                    else
+                    {
+                        var exists = await _context.WeighmentTransactions.AnyAsync(w => w.TransactionNumber == transactionNumber);
+                        if (exists)
+                        {
+                            ModelState.AddModelError("TransactionNumber", "Transaction number already exists. Please enter a unique number or use the generator.");
+                            await PopulateDropdowns(model);
+                            return View(model);
+                        }
+                    }
                     
                     var weighment = new WeighmentTransaction
                     {
@@ -260,6 +272,19 @@ namespace QuarryManagementSystem.Controllers
                     if (weighment == null)
                     {
                         return NotFound();
+                    }
+
+                    // Allow updating transaction number (ensure uniqueness)
+                    if (!string.Equals(weighment.TransactionNumber, model.TransactionNumber, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var exists = await _context.WeighmentTransactions.AnyAsync(w => w.TransactionNumber == model.TransactionNumber && w.Id != id);
+                        if (exists)
+                        {
+                            ModelState.AddModelError("TransactionNumber", "Transaction number already exists.");
+                            await PopulateDropdowns(model);
+                            return View(model);
+                        }
+                        weighment.TransactionNumber = model.TransactionNumber;
                     }
 
                     // Store old values for comparison

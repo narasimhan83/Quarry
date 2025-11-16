@@ -25,7 +25,11 @@
 <section class="content">
     <div class="container-fluid">
         <form asp-action="Create" method="post" id="weighmentForm">
+            @Html.AntiForgeryToken()
             <div class="row">
+                <div class="col-12">
+                    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                </div>
                 <div class="col-md-8">
                     <div class="card card-primary">
                         <div class="card-header">
@@ -37,13 +41,14 @@
                                     <div class="form-group">
                                         <label asp-for="TransactionNumber" class="control-label"></label>
                                         <div class="input-group">
-                                            <input asp-for="TransactionNumber" class="form-control" readonly />
+                                            <input asp-for="TransactionNumber" class="form-control" placeholder="WB/NG/@DateTime.Now.Year/0001" />
                                             <div class="input-group-append">
-                                                <button type="button" class="btn btn-outline-secondary" id="generateTransactionNumber">
+                                                <button type="button" class="btn btn-outline-secondary" id="generateTransactionNumber" title="Generate transaction number">
                                                     <i class="fas fa-sync"></i>
                                                 </button>
                                             </div>
                                         </div>
+                                        <small class="form-text text-muted">Leave blank and click the sync icon to auto-generate, or type a custom unique number.</small>
                                         <span asp-validation-for="TransactionNumber" class="text-danger"></span>
                                     </div>
                                 </div>

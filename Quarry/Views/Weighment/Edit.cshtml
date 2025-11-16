@@ -37,7 +37,8 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="TransactionNumber" class="control-label"></label>
-                                        <input asp-for="TransactionNumber" class="form-control" readonly />
+                                        <input asp-for="TransactionNumber" class="form-control" placeholder="WB/NG/@DateTime.Now.Year/0001" />
+                                        <small class="form-text text-muted">You can edit this; it must be unique.</small>
                                         <span asp-validation-for="TransactionNumber" class="text-danger"></span>
                                     </div>
                                 </div>
