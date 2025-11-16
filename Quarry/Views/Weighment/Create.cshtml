@@ -1,0 +1,430 @@
+@model QuarryManagementSystem.ViewModels.WeighmentCreateViewModel
+@{
+    ViewData["Title"] = "Create Weighment";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Create Weighment Transaction</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Weighment")">Weighments</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <form asp-action="Create" method="post" id="weighmentForm">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Weighment Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="TransactionNumber" class="control-label"></label>
+                                        <div class="input-group">
+                                            <input asp-for="TransactionNumber" class="form-control" readonly />
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-outline-secondary" id="generateTransactionNumber">
+                                                    <i class="fas fa-sync"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="TransactionNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="TransactionDate" class="control-label"></label>
+                                        <input asp-for="TransactionDate" class="form-control" />
+                                        <span asp-validation-for="TransactionDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerId" class="control-label"></label>
+                                        <select asp-for="CustomerId" asp-items="Model.Customers" class="form-control">
+                                            <option value="">-- Select Customer (Optional) --</option>
+                                        </select>
+                                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                                        <div id="customerCreditInfo" class="mt-2"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="WeighbridgeId" class="control-label"></label>
+                                        <select asp-for="WeighbridgeId" asp-items="Model.Weighbridges" class="form-control">
+                                            <option value="">-- Select Weighbridge --</option>
+                                        </select>
+                                        <span asp-validation-for="WeighbridgeId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="VehicleRegNumber" class="control-label"></label>
+                                        <input asp-for="VehicleRegNumber" class="form-control" placeholder="ABC-123-XYZ" />
+                                        <span asp-validation-for="VehicleRegNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="DriverName" class="control-label"></label>
+                                        <input asp-for="DriverName" class="form-control" />
+                                        <span asp-validation-for="DriverName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="DriverPhone" class="control-label"></label>
+                                        <input asp-for="DriverPhone" class="form-control" placeholder="+2348012345678" />
+                                        <span asp-validation-for="DriverPhone" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ChallanNumber" class="control-label"></label>
+                                        <input asp-for="ChallanNumber" class="form-control" />
+                                        <span asp-validation-for="ChallanNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Material & Pricing</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="MaterialId" class="control-label"></label>
+                                        <select asp-for="MaterialId" asp-items="Model.Materials" class="form-control">
+                                            <option value="">-- Select Material --</option>
+                                        </select>
+                                        <span asp-validation-for="MaterialId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="TransactionType" class="control-label"></label>
+                                        <select asp-for="TransactionType" asp-items="Model.TransactionTypes" class="form-control"></select>
+                                        <span asp-validation-for="TransactionType" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="PricePerUnit" class="control-label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">₦</span>
+                                            </div>
+                                            <input asp-for="PricePerUnit" class="form-control" readonly />
+                                        </div>
+                                        <span asp-validation-for="PricePerUnit" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="VatRate" class="control-label"></label>
+                                        <div class="input-group">
+                                            <input asp-for="VatRate" class="form-control" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="VatRate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="WeightUnit" class="control-label"></label>
+                                        <select asp-for="WeightUnit" class="form-control">
+                                            <option value="kg">Kilograms (kg)</option>
+                                            <option value="ton">Tonnes (ton)</option>
+                                        </select>
+                                        <span asp-validation-for="WeightUnit" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-warning">
+                        <div class="card-header">
+                            <h3 class="card-title">Weight Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="GrossWeight" class="control-label"></label>
+                                        <input asp-for="GrossWeight" class="form-control" />
+                                        <span asp-validation-for="GrossWeight" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="TareWeight" class="control-label"></label>
+                                        <input asp-for="TareWeight" class="form-control" />
+                                        <span asp-validation-for="TareWeight" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Net Weight</label>
+                                        <input id="NetWeight" class="form-control" readonly value="@Model.NetWeight.ToString("N2")" />
+                                        <small class="form-text text-muted">Gross - Tare</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="EntryTime" class="control-label"></label>
+                                        <input asp-for="EntryTime" type="datetime-local" class="form-control" />
+                                        <span asp-validation-for="EntryTime" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ExitTime" class="control-label"></label>
+                                        <input asp-for="ExitTime" type="datetime-local" class="form-control" />
+                                        <span asp-validation-for="ExitTime" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Financial Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Net Weight (tons)</label>
+                                <input id="NetWeightTons" class="form-control" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Subtotal</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="SubTotal" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">VAT Amount</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="VatAmount" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"><strong>Total Amount</strong></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="TotalAmount" class="form-control form-control-lg font-weight-bold" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title">Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label asp-for="Status" class="control-label"></label>
+                                <select asp-for="Status" asp-items="Model.Statuses" class="form-control"></select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Weighment
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(function () {
+            // Generate transaction number
+            $('#generateTransactionNumber').click(function() {
+                $.ajax({
+                    url: '@Url.Action("GenerateTransactionNumber", "Weighment")',
+                    type: 'GET',
+                    success: function(data) {
+                        if (data.success) {
+                            $('#TransactionNumber').val(data.transactionNumber);
+                        }
+                    },
+                    error: function() {
+                        alert('Error generating transaction number');
+                    }
+                });
+            });
+
+            // Material selection - auto-populate price
+            $('#MaterialId').change(function() {
+                var materialId = $(this).val();
+                if (materialId) {
+                    $.ajax({
+                        url: '@Url.Action("GetMaterialPrice", "Weighment")',
+                        type: 'GET',
+                        data: { materialId: materialId },
+                        success: function(data) {
+                            if (data.success) {
+                                $('#PricePerUnit').val(data.unitPrice);
+                                $('#VatRate').val(data.vatRate);
+                                calculateFinancials();
+                            }
+                        },
+                        error: function() {
+                            alert('Error getting material price');
+                        }
+                    });
+                } else {
+                    $('#PricePerUnit').val('');
+                    calculateFinancials();
+                }
+            });
+
+            // Weight calculations
+            $('#GrossWeight, #TareWeight, #WeightUnit').change(function() {
+                calculateNetWeight();
+                calculateFinancials();
+            });
+
+            // Customer credit check
+            $('#CustomerId').change(function() {
+                var customerId = $(this).val();
+                if (customerId && $('#TotalAmount').val()) {
+                    checkCustomerCredit(customerId, parseFloat($('#TotalAmount').val()) || 0);
+                } else {
+                    $('#customerCreditInfo').html('');
+                }
+            });
+
+            // Auto-set current time for entry/exit if empty
+            if (!$('#EntryTime').val()) {
+                var now = new Date();
+                $('#EntryTime').val(now.toISOString().slice(0, 16));
+            }
+
+            function calculateNetWeight() {
+                var grossWeight = parseFloat($('#GrossWeight').val()) || 0;
+                var tareWeight = parseFloat($('#TareWeight').val()) || 0;
+                var netWeight = grossWeight - tareWeight;
+                
+                $('#NetWeight').val(netWeight.toFixed(2));
+                
+                var weightUnit = $('#WeightUnit').val();
+                var netWeightTons = weightUnit === 'kg' ? netWeight / 1000 : netWeight;
+                $('#NetWeightTons').val(netWeightTons.toFixed(3));
+            }
+
+            function calculateFinancials() {
+                var netWeightTons = parseFloat($('#NetWeightTons').val()) || 0;
+                var pricePerUnit = parseFloat($('#PricePerUnit').val()) || 0;
+                var vatRate = parseFloat($('#VatRate').val()) || 0;
+
+                var subtotal = netWeightTons * pricePerUnit;
+                var vatAmount = subtotal * (vatRate / 100);
+                var totalAmount = subtotal + vatAmount;
+
+                $('#SubTotal').val(subtotal.toFixed(2));
+                $('#VatAmount').val(vatAmount.toFixed(2));
+                $('#TotalAmount').val(totalAmount.toFixed(2));
+
+                // Check customer credit if customer is selected
+                var customerId = $('#CustomerId').val();
+                if (customerId && totalAmount > 0) {
+                    checkCustomerCredit(customerId, totalAmount);
+                }
+            }
+
+            function checkCustomerCredit(customerId, estimatedAmount) {
+                $.ajax({
+                    url: '@Url.Action("CheckCustomerCredit", "Weighment")',
+                    type: 'GET',
+                    data: { customerId: customerId, estimatedAmount: estimatedAmount },
+                    success: function(data) {
+                        if (data.success) {
+                            var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
+                            html += '<strong>Credit Info:</strong><br>';
+                            html += 'Available Credit: ₦' + data.availableCredit.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Current Outstanding: ₦' + data.currentOutstanding.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString();
+                            if (data.exceedsLimit) {
+                                html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
+                            }
+                            html += '</div>';
+                            $('#customerCreditInfo').html(html);
+                        }
+                    },
+                    error: function() {
+                        $('#customerCreditInfo').html('<div class="alert alert-warning alert-sm">Error checking customer credit</div>');
+                    }
+                });
+            }
+
+            // Initial calculations
+            calculateNetWeight();
+            calculateFinancials();
+        });
+    </script>
+}

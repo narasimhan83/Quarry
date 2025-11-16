@@ -1,0 +1,377 @@
+@model QuarryManagementSystem.ViewModels.InvoiceCreateViewModel
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Create Invoice</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Invoice")">Invoices</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <form asp-action="Create" method="post" id="invoiceForm">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Invoice Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerId" class="control-label"></label>
+                                        <select asp-for="CustomerId" asp-items="Model.Customers" class="form-control">
+                                            <option value="">-- Select Customer --</option>
+                                        </select>
+                                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="InvoiceDate" class="control-label"></label>
+                                        <input asp-for="InvoiceDate" type="date" class="form-control" />
+                                        <span asp-validation-for="InvoiceDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="DueDate" class="control-label"></label>
+                                        <input asp-for="DueDate" type="date" class="form-control" />
+                                        <span asp-validation-for="DueDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentTerms" class="control-label"></label>
+                                        <select asp-for="PaymentTerms" asp-items="Model.PaymentTerms" class="form-control"></select>
+                                        <span asp-validation-for="PaymentTerms" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="LGAReceiptNumber" class="control-label"></label>
+                                        <input asp-for="LGAReceiptNumber" class="form-control" />
+                                        <span asp-validation-for="LGAReceiptNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="VatRate" class="control-label"></label>
+                                        <div class="input-group">
+                                            <input asp-for="VatRate" class="form-control" readonly />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="VatRate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label asp-for="Notes" class="control-label"></label>
+                                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                                        <span asp-validation-for="Notes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Select Weighments</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Available Weighments for Selected Customer</label>
+                                <div id="weighmentsList" class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Select</th>
+                                                <th>Transaction #</th>
+                                                <th>Date</th>
+                                                <th>Vehicle</th>
+                                                <th>Material</th>
+                                                <th>Net Weight (kg)</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="weighmentsTableBody">
+                                            <tr>
+                                                <td colspan="7" class="text-center text-muted">
+                                                    <i class="fas fa-info-circle"></i> Please select a customer to view available weighments
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Invoice Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Selected Weighments</label>
+                                <input id="selectedCount" class="form-control" value="0" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Subtotal</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="SubTotal" asp-for="SubTotal" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">VAT Amount (7.5%)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="VatAmount" asp-for="VatAmount" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"><strong>Total Amount</strong></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="TotalAmount" asp-for="TotalAmount" class="form-control form-control-lg font-weight-bold" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-warning">
+                        <div class="card-header">
+                            <h3 class="card-title">Customer Credit Info</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="customerCreditInfo">
+                                <p class="text-muted">Select a customer to view credit information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary" id="createInvoiceBtn" disabled>
+                            <i class="fas fa-save"></i> Create Invoice
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(function () {
+            // Customer selection - load weighments
+            $('#CustomerId').change(function() {
+                var customerId = $(this).val();
+                if (customerId) {
+                    loadCustomerWeighments(customerId);
+                    checkCustomerCredit(customerId);
+                } else {
+                    $('#weighmentsTableBody').html('<tr><td colspan="7" class="text-center text-muted"><i class="fas fa-info-circle"></i> Please select a customer to view available weighments</td></tr>');
+                    $('#customerCreditInfo').html('<p class="text-muted">Select a customer to view credit information</p>');
+                    updateInvoiceSummary();
+                }
+            });
+
+            // Weighment selection change
+            $(document).on('change', '.weighment-checkbox', function() {
+                updateInvoiceSummary();
+            });
+
+            function loadCustomerWeighments(customerId) {
+                $.ajax({
+                    url: '@Url.Action("GetUnpaidWeighments", "Invoice")',
+                    type: 'GET',
+                    data: { customerId: customerId },
+                    success: function(data) {
+                        if (data.success) {
+                            var html = '';
+                            $.each(data.data, function(index, weighment) {
+                                html += '<tr>';
+                                html += '<td><input type="checkbox" class="weighment-checkbox" name="SelectedWeighmentIds" value="' + weighment.id + '" /></td>';
+                                html += '<td>' + weighment.transactionNumber + '</td>';
+                                html += '<td>' + weighment.transactionDate + '</td>';
+                                html += '<td>' + weighment.vehicleRegNumber + '</td>';
+                                html += '<td>' + weighment.materialName + '</td>';
+                                html += '<td>' + weighment.netWeight.toLocaleString() + '</td>';
+                                html += '<td>₦' + weighment.totalAmount.toFixed(2).toLocaleString() + '</td>';
+                                html += '</tr>';
+                            });
+                            $('#weighmentsTableBody').html(html);
+                        } else {
+                            $('#weighmentsTableBody').html('<tr><td colspan="7" class="text-center text-danger">' + data.message + '</td></tr>');
+                        }
+                    },
+                    error: function() {
+                        $('#weighmentsTableBody').html('<tr><td colspan="7" class="text-center text-danger">Error loading weighments</td></tr>');
+                    }
+                });
+            }
+
+            function checkCustomerCredit(customerId) {
+                $.ajax({
+                    url: '@Url.Action("CheckCustomerCredit", "Invoice")',
+                    type: 'GET',
+                    data: { customerId: customerId, estimatedAmount: 0 },
+                    success: function(data) {
+                        if (data.success) {
+                            var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
+                            html += '<strong>Credit Info:</strong><br>';
+                            html += 'Available Credit: ₦' + data.availableCredit.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Current Outstanding: ₦' + data.currentOutstanding.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString();
+                            if (data.exceedsLimit) {
+                                html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
+                            }
+                            html += '</div>';
+                            $('#customerCreditInfo').html(html);
+                        }
+                    },
+                    error: function() {
+                        $('#customerCreditInfo').html('<div class="alert alert-warning alert-sm">Error checking customer credit</div>');
+                    }
+                });
+            }
+
+            function updateInvoiceSummary() {
+                var selectedIds = [];
+                $('.weighment-checkbox:checked').each(function() {
+                    selectedIds.push(parseInt($(this).val()));
+                });
+
+                $('#selectedCount').val(selectedIds.length);
+
+                if (selectedIds.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("CalculateInvoiceTotals", "Invoice")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(selectedIds),
+                        success: function(data) {
+                            if (data.success) {
+                                $('#SubTotal').val(data.subTotal.toFixed(2));
+                                $('#VatAmount').val(data.vatAmount.toFixed(2));
+                                $('#TotalAmount').val(data.totalAmount.toFixed(2));
+                                $('#createInvoiceBtn').prop('disabled', false);
+                                
+                                // Check customer credit with new total
+                                var customerId = $('#CustomerId').val();
+                                if (customerId && data.totalAmount > 0) {
+                                    checkCustomerCreditWithAmount(customerId, data.totalAmount);
+                                }
+                            } else {
+                                $('#SubTotal').val('0.00');
+                                $('#VatAmount').val('0.00');
+                                $('#TotalAmount').val('0.00');
+                                $('#createInvoiceBtn').prop('disabled', true);
+                            }
+                        },
+                        error: function() {
+                            $('#SubTotal').val('0.00');
+                            $('#VatAmount').val('0.00');
+                            $('#TotalAmount').val('0.00');
+                            $('#createInvoiceBtn').prop('disabled', true);
+                        }
+                    });
+                } else {
+                    $('#SubTotal').val('0.00');
+                    $('#VatAmount').val('0.00');
+                    $('#TotalAmount').val('0.00');
+                    $('#createInvoiceBtn').prop('disabled', true);
+                }
+            }
+
+            function checkCustomerCreditWithAmount(customerId, totalAmount) {
+                $.ajax({
+                    url: '@Url.Action("CheckCustomerCredit", "Invoice")',
+                    type: 'GET',
+                    data: { customerId: customerId, estimatedAmount: totalAmount },
+                    success: function(data) {
+                        if (data.success) {
+                            var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
+                            html += '<strong>Credit Info:</strong><br>';
+                            html += 'Available Credit: ₦' + data.availableCredit.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Current Outstanding: ₦' + data.currentOutstanding.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString() + '<br>';
+                            html += 'Invoice Total: ₦' + totalAmount.toFixed(2).toLocaleString();
+                            if (data.exceedsLimit) {
+                                html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
+                                $('#createInvoiceBtn').prop('disabled', true);
+                            } else {
+                                $('#createInvoiceBtn').prop('disabled', false);
+                            }
+                            html += '</div>';
+                            $('#customerCreditInfo').html(html);
+                        }
+                    },
+                    error: function() {
+                        $('#customerCreditInfo').html('<div class="alert alert-warning alert-sm">Error checking customer credit</div>');
+                    }
+                });
+            }
+
+            // Auto-set due date based on payment terms
+            $('#PaymentTerms').change(function() {
+                var terms = $(this).val();
+                var invoiceDate = new Date($('#InvoiceDate').val());
+                var days = parseInt(terms) || 30;
+                var dueDate = new Date(invoiceDate);
+                dueDate.setDate(dueDate.getDate() + days);
+                $('#DueDate').val(dueDate.toISOString().split('T')[0]);
+            });
+
+            // Initial setup
+            updateInvoiceSummary();
+        });
+    </script>
+}

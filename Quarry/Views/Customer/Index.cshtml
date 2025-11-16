@@ -1,0 +1,267 @@
+@model QuarryManagementSystem.ViewModels.CustomerListViewModel
+@{
+    ViewData["Title"] = "Customer Management";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Customer Management</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item active">Customers</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> Success!</h5>
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                @TempData["Error"]
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                @Model.ErrorMessage
+            </div>
+        }
+
+        <!-- Search and Filter Card -->
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">Search & Filter Customers</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get" asp-action="Index" class="form-horizontal">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="SearchTerm" class="control-label"></label>
+                                <input asp-for="SearchTerm" class="form-control" placeholder="Search by name, phone, or email" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="SelectedState" class="control-label"></label>
+                                <select asp-for="SelectedState" asp-items="Model.States" class="form-control">
+                                    <option value="">-- All States --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="SelectedStatus" class="control-label"></label>
+                                <select asp-for="SelectedStatus" asp-items="Model.Statuses" class="form-control">
+                                    <option value="">-- All Statuses --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">&nbsp;</label>
+                                <div class="input-group">
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Customer List Card -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Customer List</h3>
+                <div class="card-tools">
+                    <a asp-action="Create" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Add New Customer
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Contact Person</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Location</th>
+                                <th>State</th>
+                                <th>Credit Limit</th>
+                                <th>Outstanding</th>
+                                <th>Available Credit</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Customers.Any())
+                            {
+                                @foreach (var customer in Model.Customers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@customer.Name</strong>
+                                            @if (!string.IsNullOrEmpty(customer.RCNumber))
+                                            {
+                                                <br><small class="text-muted">RC: @customer.RCNumber</small>
+                                            }
+                                        </td>
+                                        <td>@customer.ContactPerson</td>
+                                        <td>@customer.Phone</td>
+                                        <td>@customer.Email</td>
+                                        <td>@customer.Location</td>
+                                        <td>@customer.State</td>
+                                        <td>@customer.CreditLimit.ToString("C")</td>
+                                        <td>@customer.OutstandingBalance.ToString("C")</td>
+                                        <td>
+                                            @{
+                                                var availableCredit = customer.AvailableCredit;
+                                                var creditClass = availableCredit < 0 ? "text-danger" : availableCredit < customer.CreditLimit * 0.2m ? "text-warning" : "text-success";
+                                            }
+                                            <span class="@creditClass">@availableCredit.ToString("C")</span>
+                                        </td>
+                                        <td>
+                                            @{
+                                                var statusClass = customer.Status switch
+                                                {
+                                                    "Active" => "badge-success",
+                                                    "Inactive" => "badge-secondary",
+                                                    "Blacklisted" => "badge-danger",
+                                                    _ => "badge-warning"
+                                                };
+                                            }
+                                            <span class="badge @statusClass">@customer.Status</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-action="Details" asp-route-id="@customer.Id" class="btn btn-info" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@customer.Id" class="btn btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@customer.Id" class="btn btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this customer?');">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="11" class="text-center text-muted">
+                                        <i class="fas fa-info-circle"></i> No customers found matching your criteria.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="dataTables_info">
+                            Showing @((Model.CurrentPage - 1) * 20 + 1) to @(Math.Min(Model.CurrentPage * 20, Model.TotalCount)) of @Model.TotalCount entries
+                        </div>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="dataTables_paginate paging_simple_numbers">
+                            <ul class="pagination">
+                                @if (Model.HasPreviousPage)
+                                {
+                                    <li class="paginate_button page-item">
+                                        <a asp-action="Index" 
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-state="@Model.SelectedState"
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-page="@(Model.CurrentPage - 1)"
+                                           class="page-link">Previous</a>
+                                    </li>
+                                }
+                                
+                                @for (int i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <li class="paginate_button page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a asp-action="Index" 
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-state="@Model.SelectedState"
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-page="@i"
+                                           class="page-link">@i</a>
+                                    </li>
+                                }
+                                
+                                @if (Model.HasNextPage)
+                                {
+                                    <li class="paginate_button page-item">
+                                        <a asp-action="Index" 
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-state="@Model.SelectedState"
+                                           asp-route-status="@Model.SelectedStatus"
+                                           asp-route-page="@(Model.CurrentPage + 1)"
+                                           class="page-link">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // State change handler for LGA dropdown (if implemented)
+            $('#SelectedState').change(function() {
+                // Implement LGA loading based on selected state
+                // This would require an AJAX call to get LGAs for the selected state
+            });
+        });
+    </script>
+}

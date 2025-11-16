@@ -1,0 +1,362 @@
+/* TRACO Mining Nigeria - High-class UI Theme
+   Brand: Green #008753, White #ffffff, Orange #ff6b35, Charcoal #0f0f0f
+   Fonts: Poppins + Inter
+*/
+
+:root {
+  --brand-green: #008753;
+  --brand-orange: #ff6b35;
+  --brand-white: #ffffff;
+  --brand-charcoal: #0f0f0f;
+  --brand-ink: #121417;
+  --brand-ink-2: #171a20;
+  --slate-50: #f6f8fb;
+  --slate-100: #edf1f7;
+  --slate-200: #dfe4ee;
+  --slate-300: #cbd2e1;
+  --slate-600: #5b6374;
+  --slate-700: #424b5c;
+  --slate-900: #111827;
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --shadow-1: 0 10px 25px rgba(17, 24, 39, 0.08);
+  --shadow-2: 0 16px 40px rgba(17, 24, 39, 0.12);
+}
+
+html, body {
+  font-family: 'Poppins', 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--slate-50);
+  color: var(--slate-900);
+}
+
+/* ---------------------------------------------
+   NAVBAR
+---------------------------------------------- */
+.main-header.navbar {
+  background: linear-gradient(90deg, var(--brand-charcoal) 0%, #16181c 40%, #1b1f25 100%);
+  color: var(--brand-white);
+  border: 0;
+  box-shadow: var(--shadow-1);
+}
+
+.main-header.navbar .nav-link {
+  color: #d7dbe4 !important;
+  transition: color .2s ease, opacity .2s ease;
+  font-weight: 500;
+}
+
+.main-header.navbar .nav-link:hover {
+  color: var(--brand-white) !important;
+  opacity: .95;
+}
+
+.navbar-white.navbar-light .form-control-navbar {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--brand-white);
+}
+
+.navbar-white.navbar-light .btn-navbar {
+  color: #d7dbe4 !important;
+}
+
+/* Accent tri-color bar under navbar */
+.traco-accent-bar {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--brand-green) 0%, #ffffff 50%, var(--brand-orange) 100%);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.06);
+}
+
+/* ---------------------------------------------
+   SIDEBAR / BRANDING
+---------------------------------------------- */
+.main-sidebar {
+  background: linear-gradient(180deg, var(--brand-ink) 0%, var(--brand-ink-2) 100%);
+  box-shadow: var(--shadow-2);
+}
+
+.brand-link.traco-brand-link {
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: transparent;
+}
+
+.traco-brand-image {
+  background: radial-gradient(60% 60% at 50% 40%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 70%);
+  border: 2px solid rgba(255,255,255,.15);
+}
+
+.traco-brand-text {
+  letter-spacing: .08em;
+  color: #f2f5f9;
+}
+
+.sidebar .user-panel .image img {
+  border: 2px solid rgba(255,255,255,.1);
+}
+
+.nav-sidebar .nav-link {
+  border-radius: var(--radius-md);
+  margin: 4px 8px;
+  padding: 10px 12px;
+  color: #c9d1de;
+  transition: all .18s ease;
+}
+
+.nav-sidebar .nav-link:hover {
+  background: rgba(255,255,255,.05);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.nav-sidebar .nav-link.active {
+  color: #ffffff;
+  background: linear-gradient(90deg, rgba(0,135,83,.18) 0%, rgba(255,107,53,.18) 100%);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+/* Sidebar section headers */
+.nav-header {
+  color: #93a0b5;
+  letter-spacing: .12em;
+  font-weight: 600;
+  margin: 14px 14px 6px;
+}
+
+/* ---------------------------------------------
+   CONTENT WRAPPER
+---------------------------------------------- */
+.content-wrapper {
+  background: linear-gradient(180deg, var(--slate-50) 0%, #f9fbff 100%);
+}
+
+.content-header .m-0 {
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+/* ---------------------------------------------
+   CARDS & SMALL BOXES
+---------------------------------------------- */
+.card {
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+}
+
+.card .card-header {
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.small-box {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  position: relative;
+  overflow: hidden;
+}
+
+.small-box .icon {
+  color: rgba(255,255,255,.35);
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,.18));
+}
+
+.small-box.bg-info {
+  background: linear-gradient(135deg, #1ea7ff 0%, #5ac8ff 100%);
+}
+.small-box.bg-success {
+  background: linear-gradient(135deg, #17c964 0%, #2ad58e 100%);
+}
+.small-box.bg-warning {
+  background: linear-gradient(135deg, #f0b429 0%, #ffd166 100%);
+  color: #1c1c1c;
+}
+.small-box.bg-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #fb7185 100%);
+}
+
+/* ---------------------------------------------
+   BUTTONS
+---------------------------------------------- */
+.btn-primary, .bg-primary, .btn.bg-primary {
+  background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-orange) 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover {
+  filter: brightness(.95);
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+}
+.btn-outline-primary:hover {
+  background: var(--brand-green);
+  color: #ffffff;
+}
+
+/* ---------------------------------------------
+   TABLES
+---------------------------------------------- */
+.table {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.table thead th {
+  background: #f3f6fb;
+  border-bottom: 1px solid var(--slate-200);
+  color: var(--slate-700);
+  font-weight: 600;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #fafcff;
+}
+
+/* ---------------------------------------------
+   FORMS
+---------------------------------------------- */
+.form-control {
+  border-radius: 10px;
+  border: 1px solid var(--slate-200);
+  box-shadow: none;
+}
+
+.form-control:focus {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 3px rgba(0,135,83,.12);
+}
+
+/* ---------------------------------------------
+   BADGES / STATUS
+---------------------------------------------- */
+.badge-success {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+}
+.badge-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  color: #111827;
+}
+
+/* ---------------------------------------------
+   FOOTER
+---------------------------------------------- */
+.main-footer {
+  background: #ffffff;
+  border-top: 1px solid var(--slate-200);
+  color: var(--slate-700);
+}
+
+/* ---------------------------------------------
+   UTILITIES
+---------------------------------------------- */
+.rounded-lg { border-radius: var(--radius-lg) !important; }
+.rounded-md { border-radius: var(--radius-md) !important; }
+
+.shadow-1 { box-shadow: var(--shadow-1) !important; }
+.shadow-2 { box-shadow: var(--shadow-2) !important; }
+
+/* ---------------------------------------------
+   BRAND COMPOSITION PROMO (optional header ribbon)
+---------------------------------------------- */
+.traco-hero-ribbon {
+  height: 160px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background:
+    radial-gradient(80% 120% at -10% -30%, rgba(255,107,53,.18) 0%, rgba(255,107,53,0) 70%),
+    radial-gradient(120% 120% at 110% -60%, rgba(0,135,83,.18) 0%, rgba(0,135,83,0) 70%),
+    linear-gradient(180deg, #0e1115 0%, #131720 100%);
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.06);
+}
+
+.traco-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 40px;
+  background: rgba(255,255,255,.08);
+  color: #f1f3f6;
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+/* ---------------------------------------------
+   LOGIN PAGE INTEGRATION (consistency)
+---------------------------------------------- */
+.login-page .company-name {
+  letter-spacing: .15em;
+}
+
+.login-page .nigerian-accent {
+  background: linear-gradient(90deg, var(--brand-green) 0%, #ffffff 50%, var(--brand-orange) 100%);
+}
+
+/* ---------------------------------------------
+   RESPONSIVE TWEAKS
+---------------------------------------------- */
+@media (max-width: 1400px) {
+  .small-box .icon {
+    right: 10px;
+    top: 0;
+    font-size: 60px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .main-header.navbar .nav-link {
+    padding-left: .5rem;
+    padding-right: .5rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .content-wrapper {
+    background: linear-gradient(180deg, #0b0e12 0%, #0f1318 100%);
+  }
+  .card, .table {
+    background: #10151c;
+    color: #e9edf4;
+  }
+  .table thead th {
+    background: #0f141b;
+    color: #cbd5e1;
+    border-color: #1f2937;
+  }
+  .form-control {
+    background: #0e1218;
+    border-color: #1f2937;
+    color: #e5e7eb;
+  }
+  .main-footer {
+    background: #0e1218;
+    border-top-color: #1f2937;
+    color: #cbd5e1;
+  }
+}
+
+/* ---------------------------------------------
+   PLACEHOLDER LOGO HELP
+---------------------------------------------- */
+/* If the TRACO logo file is not yet placed at /wwwroot/images/traco-logo.png,
+   this creates a subtle placeholder ring so the UI remains premium. */
+.traco-brand-image {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  background-color: rgba(255,255,255,.06);
+}
+
+.brand-link.traco-brand-link {
+  display: flex;
+  align-items: center;
+}
+
+.traco-brand-text {
+  margin-left: 6px;
+  font-size: 0.95rem;
+}

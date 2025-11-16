@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "QuarryManagementSystem": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:53551;http://localhost:53552"
+    }
+  }
+}

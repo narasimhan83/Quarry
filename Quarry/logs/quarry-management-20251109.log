@@ -1,0 +1,516 @@
+2025-11-09 08:16:31.025 +03:00 [INF] User profile is available. Using 'C:\Users\dell\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-09 08:16:33.117 +03:00 [INF] Executed DbCommand (165ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-09 08:16:33.140 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-09 08:16:33.151 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-09 08:16:33.158 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-09 08:16:33.177 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-11-09 08:16:33.193 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-09 08:16:33.331 +03:00 [INF] Executed DbCommand (127ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-09 08:16:33.398 +03:00 [INF] Executed DbCommand (60ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-09 08:16:33.555 +03:00 [INF] Executed DbCommand (151ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-11-09 08:16:33.707 +03:00 [INF] Executed DbCommand (142ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-11-09 08:16:33.787 +03:00 [INF] Executed DbCommand (73ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-11-09 08:16:33.799 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-09 08:16:34.002 +03:00 [INF] Executed DbCommand (24ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-09 08:16:34.040 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-09 08:16:34.055 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-09 08:16:34.063 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-09 08:16:34.080 +03:00 [INF] Executed DbCommand (15ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-09 08:16:34.099 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[CreatedAt], [a].[Department], [a].[Designation], [a].[Email], [a].[EmailConfirmed], [a].[FullName], [a].[IsActive], [a].[LastLogin], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UpdatedAt], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedEmail] = @__normalizedEmail_0
+2025-11-09 08:16:34.154 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Quarries] AS [q]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-11-09 08:16:34.163 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Weighbridges] AS [w]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-11-09 08:16:34.184 +03:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Materials] AS [m]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-11-09 08:16:34.410 +03:00 [INF] Now listening on: https://localhost:53551
+2025-11-09 08:16:34.411 +03:00 [INF] Now listening on: http://localhost:53552
+2025-11-09 08:16:34.437 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 08:16:34.438 +03:00 [INF] Hosting environment: Development
+2025-11-09 08:16:34.440 +03:00 [INF] Content root path: C:\Cursor\Quarry
+2025-11-09 08:16:36.205 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/ - null null
+2025-11-09 08:16:36.356 +03:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2025-11-09 08:16:36.369 +03:00 [INF] AuthenticationScheme: Identity.Application was challenged.
+2025-11-09 08:16:36.373 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/ - 302 0 null 176.0974ms
+2025-11-09 08:16:36.379 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Account/Login?ReturnUrl=%2F - null null
+2025-11-09 08:16:36.389 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-09 08:16:36.405 +03:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller QuarryManagementSystem.Controllers.AccountController (QuarryManagementSystem).
+2025-11-09 08:16:39.563 +03:00 [INF] Executing ViewResult, running view Login.
+2025-11-09 08:16:39.616 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:16:39.619 +03:00 [INF] Executed ViewResult - view Login executed in 3181.7602ms.
+2025-11-09 08:16:39.630 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem) in 3221.8078ms
+2025-11-09 08:16:39.632 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-09 08:16:39.634 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 17.8244ms
+2025-11-09 08:16:39.640 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Account/Login?ReturnUrl=%2F - 200 null text/html; charset=utf-8 3261.0236ms
+2025-11-09 08:16:39.676 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-09 08:16:39.727 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 50.9731ms
+2025-11-09 08:16:41.468 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/favicon.ico - null null
+2025-11-09 08:16:41.476 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/favicon.ico - 404 0 null 8.0707ms
+2025-11-09 08:16:41.481 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/favicon.ico, Response status code: 404
+2025-11-09 08:17:10.444 +03:00 [INF] Request starting HTTP/2 POST https://localhost:53551/Account/Login?ReturnUrl=%2F - application/x-www-form-urlencoded 36
+2025-11-09 08:17:10.449 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-09 08:17:10.458 +03:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(QuarryManagementSystem.ViewModels.LoginViewModel, System.String) on controller QuarryManagementSystem.Controllers.AccountController (QuarryManagementSystem).
+2025-11-09 08:17:16.651 +03:00 [INF] === RAW FORM DATA DEBUG ===
+2025-11-09 08:17:16.652 +03:00 [INF] Raw Username from Form: 'admin'
+2025-11-09 08:17:16.653 +03:00 [INF] Raw Password from Form: '*****'
+2025-11-09 08:17:16.654 +03:00 [INF] === MODEL DATA DEBUG ===
+2025-11-09 08:17:16.654 +03:00 [INF] Username from model: 'admin'
+2025-11-09 08:17:16.655 +03:00 [INF] Password from model: '*****'
+2025-11-09 08:17:16.655 +03:00 [INF] RememberMe: False
+2025-11-09 08:17:16.656 +03:00 [INF] === END DEBUG ===
+2025-11-09 08:17:16.656 +03:00 [INF] Attempting login for user: admin
+2025-11-09 08:17:16.851 +03:00 [INF] Executed DbCommand (180ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[CreatedAt], [a].[Department], [a].[Designation], [a].[Email], [a].[EmailConfirmed], [a].[FullName], [a].[IsActive], [a].[LastLogin], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UpdatedAt], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-11-09 08:17:16.970 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[@__user_Id_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-11-09 08:17:16.999 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+2025-11-09 08:17:17.008 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-11-09 08:17:17.017 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__role_Id_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[ClaimType], [a].[ClaimValue]
+FROM [AspNetRoleClaims] AS [a]
+WHERE [a].[RoleId] = @__role_Id_0
+2025-11-09 08:17:17.024 +03:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-11-09 08:17:17.026 +03:00 [INF] User logged in successfully.
+2025-11-09 08:17:17.030 +03:00 [INF] Executing RedirectResult, redirecting to /.
+2025-11-09 08:17:17.030 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem) in 6571.3058ms
+2025-11-09 08:17:17.031 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.AccountController.Login (QuarryManagementSystem)'
+2025-11-09 08:17:17.034 +03:00 [INF] Request finished HTTP/2 POST https://localhost:53551/Account/Login?ReturnUrl=%2F - 302 0 null 6589.9814ms
+2025-11-09 08:17:17.035 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/ - null null
+2025-11-09 08:17:17.044 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.DashboardController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:17.047 +03:00 [INF] Route matched with {action = "Index", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller QuarryManagementSystem.Controllers.DashboardController (QuarryManagementSystem).
+2025-11-09 08:17:17.156 +03:00 [INF] Executed DbCommand (57ms) [Parameters=[@__User_Identity_Name_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[CreatedAt], [a].[Department], [a].[Designation], [a].[Email], [a].[EmailConfirmed], [a].[FullName], [a].[IsActive], [a].[LastLogin], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UpdatedAt], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[UserName] = @__User_Identity_Name_0
+2025-11-09 08:17:17.370 +03:00 [INF] Executed DbCommand (173ms) [Parameters=[@__today_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__today_0
+2025-11-09 08:17:17.583 +03:00 [INF] Executed DbCommand (196ms) [Parameters=[@__today_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE CONVERT(date, [w].[TransactionDate]) = @__today_0 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:17.791 +03:00 [INF] Executed DbCommand (201ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__thisMonth_0
+2025-11-09 08:17:17.890 +03:00 [INF] Executed DbCommand (92ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__thisMonth_0 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:17.907 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Customers] AS [c]
+WHERE [c].[Status] = N'Active'
+2025-11-09 08:17:17.920 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__thisMonth_0='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Customers] AS [c]
+WHERE [c].[Status] = N'Active' AND EXISTS (
+    SELECT 1
+    FROM [WeighmentTransactions] AS [w]
+    WHERE [c].[Id] = [w].[CustomerId] AND [w].[TransactionDate] >= @__thisMonth_0)
+2025-11-09 08:17:17.930 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Materials] AS [m]
+WHERE [m].[Status] = N'Active'
+2025-11-09 08:17:17.936 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Invoices] AS [i]
+2025-11-09 08:17:17.949 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] IN (N'Unpaid', N'Overdue')
+2025-11-09 08:17:17.954 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] = N'Overdue'
+2025-11-09 08:17:17.964 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount] - [i].[PaidAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[Status] IN (N'Unpaid', N'Overdue')
+2025-11-09 08:17:18.024 +03:00 [INF] Executed DbCommand (15ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[TransactionNumber], [t].[TransactionDate], CASE
+    WHEN [c].[Id] IS NOT NULL THEN [c].[Name]
+    ELSE N'Walk-in Customer'
+END AS [CustomerName], CASE
+    WHEN [m].[Id] IS NOT NULL THEN [m].[Name]
+    ELSE N'Unknown'
+END AS [MaterialName], [t].[VehicleRegNumber], [t].[NetWeight], COALESCE([t].[TotalAmount], 0.0) AS [TotalAmount], [t].[Status]
+FROM (
+    SELECT TOP(@__p_0) [w].[Id], [w].[CustomerId], [w].[MaterialId], [w].[NetWeight], [w].[Status], [w].[TotalAmount], [w].[TransactionDate], [w].[TransactionNumber], [w].[VehicleRegNumber]
+    FROM [WeighmentTransactions] AS [w]
+    WHERE [w].[Status] = N'Completed'
+    ORDER BY [w].[TransactionDate] DESC
+) AS [t]
+LEFT JOIN [Customers] AS [c] ON [t].[CustomerId] = [c].[Id]
+LEFT JOIN [Materials] AS [m] ON [t].[MaterialId] = [m].[Id]
+ORDER BY [t].[TransactionDate] DESC
+2025-11-09 08:17:18.037 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [m].[Id], [m].[Name], [m].[Type], [m].[UnitPrice], (
+    SELECT COALESCE(SUM([s0].[CurrentStock]), 0.0)
+    FROM [StockYards] AS [s0]
+    WHERE [m].[Id] = [s0].[MaterialId]) AS [CurrentStock], 50.0 AS [MinimumStock]
+FROM [Materials] AS [m]
+WHERE [m].[Status] = N'Active' AND (
+    SELECT COALESCE(SUM([s].[CurrentStock]), 0.0)
+    FROM [StockYards] AS [s]
+    WHERE [m].[Id] = [s].[MaterialId]) < 50.0
+2025-11-09 08:17:18.048 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.057 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.069 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.073 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.077 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.086 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.091 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.097 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.359 +03:00 [INF] Executed DbCommand (260ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.493 +03:00 [INF] Executed DbCommand (129ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.572 +03:00 [INF] Executed DbCommand (77ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.743 +03:00 [INF] Executed DbCommand (167ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.755 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.763 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.769 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.774 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.778 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.786 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.790 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.796 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.826 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.831 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.835 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.838 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.841 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.867 +03:00 [INF] Executed DbCommand (25ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.872 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.875 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.881 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.900 +03:00 [INF] Executed DbCommand (18ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.903 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.906 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:18.910 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:18.937 +03:00 [INF] Executed DbCommand (25ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([w].[TotalAmount]), 0.0)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1 AND [w].[TotalAmount] IS NOT NULL
+2025-11-09 08:17:18.957 +03:00 [INF] Executed DbCommand (16ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([i].[TotalAmount]), 0.0)
+FROM [Invoices] AS [i]
+WHERE [i].[InvoiceDate] >= @__monthStart_0 AND [i].[InvoiceDate] <= @__monthEnd_1
+2025-11-09 08:17:19.016 +03:00 [INF] Executed DbCommand (56ms) [Parameters=[@__monthStart_0='?' (DbType = DateTime2), @__monthEnd_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+WHERE [w].[TransactionDate] >= @__monthStart_0 AND [w].[TransactionDate] <= @__monthEnd_1
+2025-11-09 08:17:19.021 +03:00 [INF] User admin accessed dashboard at "2025-11-09T08:17:19.0209266+03:00"
+2025-11-09 08:17:19.457 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-09 08:17:19.866 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-09 08:17:19.867 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/css/site.css - null null
+2025-11-09 08:17:19.870 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - null null
+2025-11-09 08:17:19.889 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 23.3396ms
+2025-11-09 08:17:19.890 +03:00 [INF] Executed ViewResult - view Index executed in 868.4835ms.
+2025-11-09 08:17:19.891 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.DashboardController.Index (QuarryManagementSystem) in 2842.9982ms
+2025-11-09 08:17:19.892 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-09 08:17:19.893 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-09 08:17:19.894 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.DashboardController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:19.896 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user1-128x128.jpg - 404 0 null 27.5542ms
+2025-11-09 08:17:19.896 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 4.916ms
+2025-11-09 08:17:19.906 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user1-128x128.jpg, Response status code: 404
+2025-11-09 08:17:19.906 +03:00 [INF] The file /css/site.css was not modified
+2025-11-09 08:17:19.907 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-09 08:17:19.909 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/ - 200 null text/html; charset=utf-8 2874.173ms
+2025-11-09 08:17:19.910 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/css/site.css - 304 null text/css 43.7375ms
+2025-11-09 08:17:19.914 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/js/site.js - null null
+2025-11-09 08:17:19.917 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-09 08:17:19.917 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:17:19.917 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/js/site.js - 404 0 null 3.8902ms
+2025-11-09 08:17:19.919 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/images/traco-logo.png - null null
+2025-11-09 08:17:19.919 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - null null
+2025-11-09 08:17:19.926 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 9.6628ms
+2025-11-09 08:17:19.929 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/js/site.js, Response status code: 404
+2025-11-09 08:17:19.935 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/images/traco-logo.png - 404 0 null 15.259ms
+2025-11-09 08:17:19.949 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 31.9927ms
+2025-11-09 08:17:19.949 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/images/traco-logo.png, Response status code: 404
+2025-11-09 08:17:19.950 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/img/user2-160x160.jpg - 404 0 null 31.2802ms
+2025-11-09 08:17:19.955 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:53551/img/user2-160x160.jpg, Response status code: 404
+2025-11-09 08:17:25.173 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Weighment - null null
+2025-11-09 08:17:25.182 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.WeighmentController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:25.186 +03:00 [INF] Route matched with {action = "Index", controller = "Weighment"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index(System.String, System.String, System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], Int32) on controller QuarryManagementSystem.Controllers.WeighmentController (QuarryManagementSystem).
+2025-11-09 08:17:25.201 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+2025-11-09 08:17:25.254 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[ChallanNumber], [t].[CreatedAt], [t].[CreatedBy], [t].[CustomerId], [t].[DriverName], [t].[DriverPhone], [t].[EntryTime], [t].[ExitTime], [t].[GrossWeight], [t].[InvoiceId], [t].[IsInvoiced], [t].[MaterialId], [t].[ModifiedAt], [t].[ModifiedBy], [t].[NetWeight], [t].[OperatorUserId], [t].[OrderId], [t].[PricePerUnit], [t].[Status], [t].[SubTotal], [t].[TareWeight], [t].[TotalAmount], [t].[TransactionDate], [t].[TransactionNumber], [t].[TransactionType], [t].[VatAmount], [t].[VatRate], [t].[VehicleRegNumber], [t].[WeighbridgeId], [t].[WeightUnit], [c].[Id], [c].[AvailableCredit], [c].[BVN], [c].[BillingAddress], [c].[ContactPerson], [c].[CreatedAt], [c].[CreditLimit], [c].[Email], [c].[LGA], [c].[Location], [c].[MiningLicenseNumber], [c].[Name], [c].[OutstandingBalance], [c].[Phone], [c].[RCNumber], [c].[State], [c].[Status], [c].[TIN], [c].[UpdatedAt], [m].[Id], [m].[CreatedAt], [m].[Name], [m].[Status], [m].[Type], [m].[Unit], [m].[UnitPrice], [m].[UpdatedAt], [m].[VatRate], [w0].[Id], [w0].[Capacity], [w0].[ConnectionString], [w0].[ConnectionType], [w0].[CreatedAt], [w0].[Location], [w0].[Name], [w0].[QuarryId], [w0].[Status], [w0].[UpdatedAt]
+FROM (
+    SELECT [w].[Id], [w].[ChallanNumber], [w].[CreatedAt], [w].[CreatedBy], [w].[CustomerId], [w].[DriverName], [w].[DriverPhone], [w].[EntryTime], [w].[ExitTime], [w].[GrossWeight], [w].[InvoiceId], [w].[IsInvoiced], [w].[MaterialId], [w].[ModifiedAt], [w].[ModifiedBy], [w].[NetWeight], [w].[OperatorUserId], [w].[OrderId], [w].[PricePerUnit], [w].[Status], [w].[SubTotal], [w].[TareWeight], [w].[TotalAmount], [w].[TransactionDate], [w].[TransactionNumber], [w].[TransactionType], [w].[VatAmount], [w].[VatRate], [w].[VehicleRegNumber], [w].[WeighbridgeId], [w].[WeightUnit]
+    FROM [WeighmentTransactions] AS [w]
+    ORDER BY [w].[TransactionDate] DESC, [w].[Id] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [t]
+LEFT JOIN [Customers] AS [c] ON [t].[CustomerId] = [c].[Id]
+LEFT JOIN [Materials] AS [m] ON [t].[MaterialId] = [m].[Id]
+LEFT JOIN [Weighbridges] AS [w0] ON [t].[WeighbridgeId] = [w0].[Id]
+ORDER BY [t].[TransactionDate] DESC, [t].[Id] DESC
+2025-11-09 08:17:25.848 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-09 08:17:25.860 +03:00 [INF] Executed ViewResult - view Index executed in 600.3803ms.
+2025-11-09 08:17:25.861 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.WeighmentController.Index (QuarryManagementSystem) in 672.9908ms
+2025-11-09 08:17:25.862 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.WeighmentController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:25.870 +03:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2025-11-09 08:17:25.871 +03:00 [WRN] Unable to configure browser refresh script injection on the response. Consider manually adding '<script src="/_framework/aspnetcore-browser-refresh.js"></script>' to the body of the page.
+2025-11-09 08:17:25.872 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Weighment - 200 null text/html; charset=utf-8 699.3163ms
+2025-11-09 08:17:29.960 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:17:29.963 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 2.7303ms
+2025-11-09 08:17:49.374 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Weighment - null null
+2025-11-09 08:17:49.378 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.WeighmentController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:49.379 +03:00 [INF] Route matched with {action = "Index", controller = "Weighment"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index(System.String, System.String, System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], Int32) on controller QuarryManagementSystem.Controllers.WeighmentController (QuarryManagementSystem).
+2025-11-09 08:17:49.385 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [WeighmentTransactions] AS [w]
+2025-11-09 08:17:49.392 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[ChallanNumber], [t].[CreatedAt], [t].[CreatedBy], [t].[CustomerId], [t].[DriverName], [t].[DriverPhone], [t].[EntryTime], [t].[ExitTime], [t].[GrossWeight], [t].[InvoiceId], [t].[IsInvoiced], [t].[MaterialId], [t].[ModifiedAt], [t].[ModifiedBy], [t].[NetWeight], [t].[OperatorUserId], [t].[OrderId], [t].[PricePerUnit], [t].[Status], [t].[SubTotal], [t].[TareWeight], [t].[TotalAmount], [t].[TransactionDate], [t].[TransactionNumber], [t].[TransactionType], [t].[VatAmount], [t].[VatRate], [t].[VehicleRegNumber], [t].[WeighbridgeId], [t].[WeightUnit], [c].[Id], [c].[AvailableCredit], [c].[BVN], [c].[BillingAddress], [c].[ContactPerson], [c].[CreatedAt], [c].[CreditLimit], [c].[Email], [c].[LGA], [c].[Location], [c].[MiningLicenseNumber], [c].[Name], [c].[OutstandingBalance], [c].[Phone], [c].[RCNumber], [c].[State], [c].[Status], [c].[TIN], [c].[UpdatedAt], [m].[Id], [m].[CreatedAt], [m].[Name], [m].[Status], [m].[Type], [m].[Unit], [m].[UnitPrice], [m].[UpdatedAt], [m].[VatRate], [w0].[Id], [w0].[Capacity], [w0].[ConnectionString], [w0].[ConnectionType], [w0].[CreatedAt], [w0].[Location], [w0].[Name], [w0].[QuarryId], [w0].[Status], [w0].[UpdatedAt]
+FROM (
+    SELECT [w].[Id], [w].[ChallanNumber], [w].[CreatedAt], [w].[CreatedBy], [w].[CustomerId], [w].[DriverName], [w].[DriverPhone], [w].[EntryTime], [w].[ExitTime], [w].[GrossWeight], [w].[InvoiceId], [w].[IsInvoiced], [w].[MaterialId], [w].[ModifiedAt], [w].[ModifiedBy], [w].[NetWeight], [w].[OperatorUserId], [w].[OrderId], [w].[PricePerUnit], [w].[Status], [w].[SubTotal], [w].[TareWeight], [w].[TotalAmount], [w].[TransactionDate], [w].[TransactionNumber], [w].[TransactionType], [w].[VatAmount], [w].[VatRate], [w].[VehicleRegNumber], [w].[WeighbridgeId], [w].[WeightUnit]
+    FROM [WeighmentTransactions] AS [w]
+    ORDER BY [w].[TransactionDate] DESC, [w].[Id] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [t]
+LEFT JOIN [Customers] AS [c] ON [t].[CustomerId] = [c].[Id]
+LEFT JOIN [Materials] AS [m] ON [t].[MaterialId] = [m].[Id]
+LEFT JOIN [Weighbridges] AS [w0] ON [t].[WeighbridgeId] = [w0].[Id]
+ORDER BY [t].[TransactionDate] DESC, [t].[Id] DESC
+2025-11-09 08:17:49.394 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-09 08:17:49.397 +03:00 [INF] Executed ViewResult - view Index executed in 3.5592ms.
+2025-11-09 08:17:49.398 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.WeighmentController.Index (QuarryManagementSystem) in 17.7657ms
+2025-11-09 08:17:49.398 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.WeighmentController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:49.399 +03:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2025-11-09 08:17:49.399 +03:00 [WRN] Unable to configure browser refresh script injection on the response. Consider manually adding '<script src="/_framework/aspnetcore-browser-refresh.js"></script>' to the body of the page.
+2025-11-09 08:17:49.400 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Weighment - 200 null text/html; charset=utf-8 26.6389ms
+2025-11-09 08:17:55.561 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:17:55.564 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 3.4203ms
+2025-11-09 08:17:57.597 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Customer - null null
+2025-11-09 08:17:57.602 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.CustomerController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:57.609 +03:00 [INF] Route matched with {action = "Index", controller = "Customer"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index(System.String, System.String, System.String, Int32) on controller QuarryManagementSystem.Controllers.CustomerController (QuarryManagementSystem).
+2025-11-09 08:17:57.744 +03:00 [INF] Executed DbCommand (127ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Customers] AS [c]
+2025-11-09 08:17:57.916 +03:00 [INF] Executed DbCommand (162ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[AvailableCredit], [c].[BVN], [c].[BillingAddress], [c].[ContactPerson], [c].[CreatedAt], [c].[CreditLimit], [c].[Email], [c].[LGA], [c].[Location], [c].[MiningLicenseNumber], [c].[Name], [c].[OutstandingBalance], [c].[Phone], [c].[RCNumber], [c].[State], [c].[Status], [c].[TIN], [c].[UpdatedAt]
+FROM [Customers] AS [c]
+ORDER BY [c].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-11-09 08:17:58.091 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-09 08:17:58.098 +03:00 [INF] Executed ViewResult - view Index executed in 176.3998ms.
+2025-11-09 08:17:58.099 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.CustomerController.Index (QuarryManagementSystem) in 487.5462ms
+2025-11-09 08:17:58.100 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.CustomerController.Index (QuarryManagementSystem)'
+2025-11-09 08:17:58.100 +03:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2025-11-09 08:17:58.101 +03:00 [WRN] Unable to configure browser refresh script injection on the response. Consider manually adding '<script src="/_framework/aspnetcore-browser-refresh.js"></script>' to the body of the page.
+2025-11-09 08:17:58.101 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Customer - 200 null text/html; charset=utf-8 505.1081ms
+2025-11-09 08:18:00.234 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:18:00.237 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 2.9156ms
+2025-11-09 08:18:01.357 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/Material - null null
+2025-11-09 08:18:01.362 +03:00 [INF] Executing endpoint 'QuarryManagementSystem.Controllers.MaterialController.Index (QuarryManagementSystem)'
+2025-11-09 08:18:01.365 +03:00 [INF] Route matched with {action = "Index", controller = "Material"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index(System.String, System.String, System.String, Int32) on controller QuarryManagementSystem.Controllers.MaterialController (QuarryManagementSystem).
+2025-11-09 08:18:01.629 +03:00 [INF] Executed DbCommand (259ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Materials] AS [m]
+2025-11-09 08:18:01.865 +03:00 [INF] Executed DbCommand (217ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[CreatedAt], [t].[Name], [t].[Status], [t].[Type], [t].[Unit], [t].[UnitPrice], [t].[UpdatedAt], [t].[VatRate], [s].[Id], [s].[CurrentStock], [s].[LastUpdated], [s].[MaterialId], [s].[QuarryId], [s].[ReservedStock]
+FROM (
+    SELECT [m].[Id], [m].[CreatedAt], [m].[Name], [m].[Status], [m].[Type], [m].[Unit], [m].[UnitPrice], [m].[UpdatedAt], [m].[VatRate]
+    FROM [Materials] AS [m]
+    ORDER BY [m].[Name]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [t]
+LEFT JOIN [StockYards] AS [s] ON [t].[Id] = [s].[MaterialId]
+ORDER BY [t].[Name], [t].[Id]
+2025-11-09 08:18:01.890 +03:00 [INF] Executing ViewResult, running view Index.
+2025-11-09 08:18:01.895 +03:00 [ERR] The view 'Index' was not found. Searched locations: ["/Views/Material/Index.cshtml","/Views/Shared/Index.cshtml"]
+2025-11-09 08:18:01.905 +03:00 [INF] Executed action QuarryManagementSystem.Controllers.MaterialController.Index (QuarryManagementSystem) in 538.5054ms
+2025-11-09 08:18:01.906 +03:00 [INF] Executed endpoint 'QuarryManagementSystem.Controllers.MaterialController.Index (QuarryManagementSystem)'
+2025-11-09 08:18:01.908 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/Material/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-11-09 08:18:01.937 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/Material - 500 null text/html; charset=utf-8 580.6187ms
+2025-11-09 08:18:01.944 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:18:01.945 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_vs/browserLink - null null
+2025-11-09 08:18:01.948 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 3.4831ms
+2025-11-09 08:18:01.965 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_vs/browserLink - 200 null text/javascript; charset=UTF-8 20.0715ms
+2025-11-09 08:18:06.242 +03:00 [INF] Request starting HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-09 08:18:06.245 +03:00 [INF] Request finished HTTP/2 GET https://localhost:53551/_framework/aspnetcore-browser-refresh.js - 200 13796 application/javascript; charset=utf-8 3.9919ms

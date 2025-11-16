@@ -1,0 +1,125 @@
+{
+  "Version": 1,
+  "Hash": "AeqV33icvN19uw7J/LgPrxnGiir+k4cqSxU3UisKal8=",
+  "Source": "QuarryManagementSystem",
+  "BasePath": "_content/QuarryManagementSystem",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "QuarryManagementSystem\\wwwroot",
+      "Source": "QuarryManagementSystem",
+      "ContentRoot": "C:\\Cursor\\Quarry\\wwwroot\\",
+      "BasePath": "_content/QuarryManagementSystem",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Cursor\\Quarry\\wwwroot\\css\\site.css",
+      "SourceId": "QuarryManagementSystem",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Cursor\\Quarry\\wwwroot\\",
+      "BasePath": "_content/QuarryManagementSystem",
+      "RelativePath": "css/site#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "k51gbik254",
+      "Integrity": "KGM8iYtWC+iJCDT04Pg4GI5xASYeTHzInLOuDlLqQpE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\site.css"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "css/site.css",
+      "AssetFile": "C:\\Cursor\\Quarry\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9288"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KGM8iYtWC+iJCDT04Pg4GI5xASYeTHzInLOuDlLqQpE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 08 Nov 2025 17:39:47 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-KGM8iYtWC+iJCDT04Pg4GI5xASYeTHzInLOuDlLqQpE="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.k51gbik254.css",
+      "AssetFile": "C:\\Cursor\\Quarry\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9288"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KGM8iYtWC+iJCDT04Pg4GI5xASYeTHzInLOuDlLqQpE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 08 Nov 2025 17:39:47 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "k51gbik254"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-KGM8iYtWC+iJCDT04Pg4GI5xASYeTHzInLOuDlLqQpE="
+        }
+      ]
+    }
+  ]
+}

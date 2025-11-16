@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Cursor\\Quarry\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.QuarryManagementSystem.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.QuarryManagementSystem.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.QuarryManagementSystem.props",
+      "PackagePath": "build\\QuarryManagementSystem.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.QuarryManagementSystem.props",
+      "PackagePath": "buildMultiTargeting\\QuarryManagementSystem.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.QuarryManagementSystem.props",
+      "PackagePath": "buildTransitive\\QuarryManagementSystem.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

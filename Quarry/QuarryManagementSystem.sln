@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuarryManagementSystem", "QuarryManagementSystem.csproj", "{F99C2EA4-9F55-4AA4-8910-C5A99A9E3BEF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F99C2EA4-9F55-4AA4-8910-C5A99A9E3BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F99C2EA4-9F55-4AA4-8910-C5A99A9E3BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F99C2EA4-9F55-4AA4-8910-C5A99A9E3BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F99C2EA4-9F55-4AA4-8910-C5A99A9E3BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

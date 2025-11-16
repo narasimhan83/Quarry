@@ -1,0 +1,529 @@
+@model QuarryManagementSystem.ViewModels.ReportDashboardViewModel
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Reports Dashboard</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item active">Reports</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                @Model.ErrorMessage
+            </div>
+        }
+
+        <!-- Quick Action Buttons -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Financial", "Report")" class="btn btn-primary">
+                        <i class="fas fa-chart-line"></i> Financial Reports
+                    </a>
+                    <a href="@Url.Action("Operational", "Report")" class="btn btn-info">
+                        <i class="fas fa-cogs"></i> Operational Reports
+                    </a>
+                    <a href="@Url.Action("Tax", "Report")" class="btn btn-warning">
+                        <i class="fas fa-calculator"></i> Tax Reports
+                    </a>
+                    <a href="@Url.Action("Stock", "Report")" class="btn btn-success">
+                        <i class="fas fa-boxes"></i> Stock Reports
+                    </a>
+                    <a href="@Url.Action("Payroll", "Report")" class="btn btn-secondary">
+                        <i class="fas fa-money-check-alt"></i> Payroll Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards Row 1: Financial -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@Model.TotalRevenue.ToString("C")</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-cash"></i>
+                    </div>
+                    <a href="@Url.Action("Financial", "Report", new { reportType = "summary" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@Model.MonthlyRevenue.ToString("C")</h3>
+                        <p>Monthly Revenue</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-stats-bars"></i>
+                    </div>
+                    <a href="@Url.Action("Financial", "Report", new { reportType = "profitloss" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@Model.OutstandingAmount.ToString("C")</h3>
+                        <p>Outstanding</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-clock"></i>
+                    </div>
+                    <a href="@Url.Action("Financial", "Report", new { reportType = "summary" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>@Model.OverdueAmount.ToString("C")</h3>
+                        <p>Overdue Amount</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-alert"></i>
+                    </div>
+                    <a href="@Url.Action("Financial", "Report", new { reportType = "summary" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards Row 2: Operational -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>@Model.TotalWeighments.ToString("N0")</h3>
+                        <p>Total Weighments</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-weight"></i>
+                    </div>
+                    <a href="@Url.Action("Operational", "Report", new { reportType = "summary" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@Model.MonthlyWeighments.ToString("N0")</h3>
+                        <p>Monthly Weighments</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-calendar"></i>
+                    </div>
+                    <a href="@Url.Action("Operational", "Report", new { reportType = "daily" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@Model.ActiveCustomers.ToString("N0")</h3>
+                        <p>Active Customers</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person-stalker"></i>
+                    </div>
+                    <a href="@Url.Action("Operational", "Report", new { reportType = "customer" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@Model.TotalMaterials.ToString("N0")</h3>
+                        <p>Total Materials</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-cube"></i>
+                    </div>
+                    <a href="@Url.Action("Stock", "Report", new { reportType = "summary" })" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Revenue Trend</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart">
+                            <canvas id="revenueChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Daily Weighments</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart">
+                            <canvas id="weighmentsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts and Quick Stats Row -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">Low Stock Alerts</h3>
+                        <div class="card-tools">
+                            <span class="badge badge-warning">@Model.LowStockMaterials.Count</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Available</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.LowStockMaterials.Take(5))
+                                {
+                                    <tr>
+                                        <td>@item.MaterialName</td>
+                                        <td>@item.AvailableStock.ToString("N2")</td>
+                                        <td>
+                                            <span class="badge badge-@(item.Status == "Low Stock" ? "warning" : "danger")">
+                                                @item.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @if (Model.LowStockMaterials.Count > 5)
+                        {
+                            <div class="card-footer text-center">
+                                <a href="@Url.Action("Stock", "Report", new { reportType = "reorder" })" class="text-warning">
+                                    View all @Model.LowStockMaterials.Count materials
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">Overdue Invoices</h3>
+                        <div class="card-tools">
+                            <span class="badge badge-danger">@Model.OverdueInvoices.Count</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OverdueInvoices.Take(5))
+                                {
+                                    <tr>
+                                        <td>@item.InvoiceNumber</td>
+                                        <td>@item.CustomerName</td>
+                                        <td>@item.OutstandingAmount.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @if (Model.OverdueInvoices.Count > 5)
+                        {
+                            <div class="card-footer text-center">
+                                <a href="@Url.Action("Financial", "Report")" class="text-danger">
+                                    View all @Model.OverdueInvoices.Count invoices
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Stats</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-box mb-2">
+                            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-chart-line"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Avg Transaction Value</span>
+                                <span class="info-box-number">@Model.AverageTransactionValue.ToString("C")</span>
+                            </div>
+                        </div>
+                        <div class="info-box mb-2">
+                            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-percentage"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Collection Rate</span>
+                                <span class="info-box-number">@Model.CollectionRate.ToString("P1")</span>
+                            </div>
+                        </div>
+                        <div class="info-box mb-0">
+                            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Employee Retention</span>
+                                <span class="info-box-number">@Model.EmployeeRetentionRate.ToString("P1")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Material Sales Chart -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Material Sales Analysis</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart">
+                            <canvas id="materialSalesChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Outstanding Chart -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">Customer Outstanding Analysis</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart">
+                            <canvas id="customerOutstandingChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(function () {
+            // Monthly Revenue Chart
+            var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            var revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.MonthlyRevenueChart.Select(m => m.Month))),
+                    datasets: [{
+                        label: 'Monthly Revenue',
+                        data: @Html.Raw(Json.Serialize(Model.MonthlyRevenueChart.Select(m => m.Revenue))),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₦' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Daily Weighments Chart
+            var weighmentsCtx = document.getElementById('weighmentsChart').getContext('2d');
+            var weighmentsChart = new Chart(weighmentsCtx, {
+                type: 'bar',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.DailyWeighmentsChart.Select(d => d.Date))),
+                    datasets: [{
+                        label: 'Transaction Count',
+                        data: @Html.Raw(Json.Serialize(Model.DailyWeighmentsChart.Select(d => d.Count))),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Total Weight (kg)',
+                        data: @Html.Raw(Json.Serialize(Model.DailyWeighmentsChart.Select(d => d.TotalWeight))),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Transaction Count'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Weight (kg)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+
+            // Material Sales Chart
+            var materialCtx = document.getElementById('materialSalesChart').getContext('2d');
+            var materialChart = new Chart(materialCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.MaterialSalesChart.Select(m => m.MaterialName))),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(Model.MaterialSalesChart.Select(m => m.TotalRevenue))),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Customer Outstanding Chart
+            var customerCtx = document.getElementById('customerOutstandingChart').getContext('2d');
+            var customerChart = new Chart(customerCtx, {
+                type: 'horizontalBar',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.CustomerOutstandingChart.Select(c => c.CustomerName))),
+                    datasets: [{
+                        label: 'Outstanding Balance',
+                        data: @Html.Raw(Json.Serialize(Model.CustomerOutstandingChart.Select(c => c.OutstandingBalance))),
+                        backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₦' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Auto-refresh every 30 seconds
+            setInterval(function() {
+                location.reload();
+            }, 30000);
+        });
+    </script>
+}
