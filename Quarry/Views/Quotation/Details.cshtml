@@ -1,0 +1,213 @@
+@model QuarryManagementSystem.ViewModels.QuotationDetailsViewModel
+@{
+    ViewData["Title"] = "Quotation Details";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quotation Details</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Quotation")">Quotations</a></li>
+                    <li class="breadcrumb-item active">@Model.Quotation.QuotationNumber</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-primary">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h3 class="card-title">Quotation Information</h3>
+                        <div>
+                            <span class="badge @(
+                                Model.Quotation.Status switch {
+                                    "Accepted" => "badge-success",
+                                    "Sent" => "badge-info",
+                                    "Rejected" => "badge-warning",
+                                    "Cancelled" => "badge-secondary",
+                                    "Expired" => "badge-danger",
+                                    _ => "badge-dark"
+                                })">
+                                @Model.Quotation.Status
+                            </span>
+                            @if (Model.IsExpired)
+                            {
+                                <span class="badge badge-danger ml-1">Expired</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quotation Number</label>
+                                    <input class="form-control" value="@Model.Quotation.QuotationNumber" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Quotation Date</label>
+                                    <input class="form-control" value="@Model.Quotation.QuotationDate.ToString("yyyy-MM-dd")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Expiry Date</label>
+                                    <input class="form-control" value="@(Model.Quotation.ExpiryDate?.ToString("yyyy-MM-dd") ?? "-")" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    <input class="form-control" value="@(Model.Quotation.Customer?.Name ?? "Unknown")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Contact Person</label>
+                                    <input class="form-control" value="@(Model.Quotation.Customer?.ContactPerson ?? "-")" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea class="form-control" rows="2" readonly>@Model.Quotation.Notes</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Items</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Items != null && Model.Items.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Material</th>
+                                            <th>Description</th>
+                                            <th class="text-right">Qty</th>
+                                            <th>Unit</th>
+                                            <th class="text-right">Unit Price</th>
+                                            <th class="text-right">VAT</th>
+                                            <th class="text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var i = 1;
+                                            foreach (var it in Model.Items)
+                                            {
+                                                <tr>
+                                                    <td>@i</td>
+                                                    <td>@(it.Material?.Name ?? "-")</td>
+                                                    <td>@(string.IsNullOrWhiteSpace(it.Description) ? "-" : it.Description)</td>
+                                                    <td class="text-right">@it.Quantity.ToString("N2")</td>
+                                                    <td>@it.Unit</td>
+                                                    <td class="text-right">₦@it.UnitPrice.ToString("N2")</td>
+                                                    <td class="text-right">₦@it.LineVatAmount.ToString("N2")</td>
+                                                    <td class="text-right">₦@it.LineTotal.ToString("N2")</td>
+                                                </tr>
+                                                i++;
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="6" class="text-right">Subtotal:</th>
+                                            <th class="text-right">₦@Model.Quotation.VatAmount.ToString("N2")</th>
+                                            <th class="text-right">₦@Model.Quotation.SubTotal.ToString("N2")</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">No items on this quotation.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Totals</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Subtotal</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control" value="@Model.Quotation.SubTotal.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>VAT</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control" value="@Model.Quotation.VatAmount.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Total</strong></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                <input class="form-control form-control-lg font-weight-bold" value="@Model.Quotation.TotalAmount.ToString("N2")" readonly />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount in Words</label>
+                            <textarea class="form-control" rows="2" readonly>@Model.AmountInWords</textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex flex-wrap gap-2">
+                        <a asp-action="Index" class="btn btn-secondary mr-2"><i class="fas fa-arrow-left"></i> Back</a>
+                        <a asp-action="Print" asp-route-id="@Model.Quotation.Id" class="btn btn-info mr-2" target="_blank"><i class="fas fa-print"></i> Print</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Quotation.Id" class="btn btn-primary mr-2"><i class="fas fa-edit"></i> Edit</a>
+                        <a asp-action="Delete" asp-route-id="@Model.Quotation.Id" class="btn btn-danger" onclick="return confirm('Delete this quotation? This cannot be undone.');">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card @((Model.IsExpired) ? "card-danger" : "card-outline card-secondary")">
+                    <div class="card-header">
+                        <h3 class="card-title">Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Current:</strong> @Model.Quotation.Status</p>
+                        <p class="mb-0"><strong>Expired:</strong> @(Model.IsExpired ? "Yes" : "No")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

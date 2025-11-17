@@ -83,6 +83,7 @@ namespace QuarryManagementSystem.Models.Domain
         // Navigation properties
         public virtual ICollection<WeighmentTransaction> WeighmentTransactions { get; set; } = new List<WeighmentTransaction>();
         public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+        public virtual ICollection<Quotation> Quotations { get; set; } = new List<Quotation>();
 
         // Helper methods
         public bool HasExceededCreditLimit(decimal additionalAmount)

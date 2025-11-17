@@ -1,0 +1,348 @@
+@model QuarryManagementSystem.ViewModels.QuotationCreateEditViewModel
+@{
+    ViewData["Title"] = "Create Quotation";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Create Quotation</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Quotation")">Quotations</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <form asp-action="Create" method="post" id="quotationForm">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Quotation Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerId" class="control-label"></label>
+                                        <select asp-for="CustomerId" asp-items="Model.Customers" class="form-control">
+                                            <option value="">-- Select Customer --</option>
+                                        </select>
+                                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="QuotationDate" class="control-label"></label>
+                                        <input asp-for="QuotationDate" type="date" class="form-control" />
+                                        <span asp-validation-for="QuotationDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="ExpiryDate" class="control-label"></label>
+                                        <input asp-for="ExpiryDate" type="date" class="form-control" />
+                                        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <label asp-for="Notes" class="control-label"></label>
+                                        <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                                        <span asp-validation-for="Notes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="Status" class="control-label"></label>
+                                        <select asp-for="Status" class="form-control">
+                                            <option value="Draft">Draft</option>
+                                            <option value="Sent">Sent</option>
+                                            <option value="Accepted">Accepted</option>
+                                            <option value="Rejected">Rejected</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                        <span asp-validation-for="Status" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items -->
+                    <div class="card card-info">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Items</h3>
+                            <button type="button" id="addItemBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="itemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 22%;">Material</th>
+                                            <th style="width: 22%;">Description</th>
+                                            <th style="width: 12%;">Qty</th>
+                                            <th style="width: 10%;">Unit</th>
+                                            <th style="width: 12%;">Unit Price</th>
+                                            <th style="width: 10%;">VAT %</th>
+                                            <th style="width: 12%;">Total</th>
+                                            <th style="width: 5%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsBody">
+                                        @{
+                                            var index = 0;
+                                            foreach (var item in Model.Items)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <select name="Items[@index].MaterialId" class="form-control form-control-sm material-select">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var m in Model.Materials)
+                                                            {
+                                                                if (item.MaterialId?.ToString() == m.Value)
+                                                                {
+                                                                    <option value="@m.Value" selected="selected">@m.Text</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@m.Value">@m.Text</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input name="Items[@index].Description" value="@item.Description" class="form-control form-control-sm desc-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" min="0" name="Items[@index].Quantity" value="@item.Quantity" class="form-control form-control-sm qty-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input name="Items[@index].Unit" value="@item.Unit" class="form-control form-control-sm unit-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" min="0" name="Items[@index].UnitPrice" value="@item.UnitPrice" class="form-control form-control-sm price-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" min="0" max="100" name="Items[@index].VatRate" value="@item.VatRate" class="form-control form-control-sm vat-input" />
+                                                    </td>
+                                                    <td class="text-right align-middle">
+                                                        <span class="line-total">0.00</span>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                index++;
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5"></td>
+                                            <td class="text-right"><strong>Subtotal:</strong></td>
+                                            <td class="text-right"><span id="subTotal">0.00</span></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5"></td>
+                                            <td class="text-right"><strong>VAT:</strong></td>
+                                            <td class="text-right"><span id="vatAmount">0.00</span></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5"></td>
+                                            <td class="text-right"><strong>Total:</strong></td>
+                                            <td class="text-right"><span id="grandTotal">0.00</span></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <small class="text-muted">Tip: Selecting a material helps fill price/unit context; you can override values.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Summary -->
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Quotation Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Subtotal</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                    <input id="SummarySubTotal" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">VAT Amount</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                    <input id="SummaryVat" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"><strong>Total Amount</strong></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                    <input id="SummaryTotal" class="form-control form-control-lg font-weight-bold" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card">
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary" id="createQuotationBtn">
+                                <i class="fas fa-save"></i> Create Quotation
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</section>
+
+@section Scripts{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (function () {
+            function recalcRow($tr) {
+                var qty = parseFloat($tr.find('.qty-input').val()) || 0;
+                var price = parseFloat($tr.find('.price-input').val()) || 0;
+                var vat = parseFloat($tr.find('.vat-input').val()) || 0;
+                var lineSub = qty * price;
+                var lineVat = lineSub * (vat / 100.0);
+                var lineTotal = lineSub + lineVat;
+                $tr.find('.line-total').text(lineTotal.toFixed(2));
+            }
+
+            function recalcTotals() {
+                var sub = 0.0, vat = 0.0, total = 0.0;
+                $('#itemsBody tr').each(function () {
+                    var $tr = $(this);
+                    var qty = parseFloat($tr.find('.qty-input').val()) || 0;
+                    var price = parseFloat($tr.find('.price-input').val()) || 0;
+                    var vatRate = parseFloat($tr.find('.vat-input').val()) || 0;
+                    var lineSub = qty * price;
+                    var lineVat = lineSub * (vatRate / 100.0);
+                    sub += lineSub;
+                    vat += lineVat;
+                    total += (lineSub + lineVat);
+                });
+
+                $('#subTotal').text(sub.toFixed(2));
+                $('#vatAmount').text(vat.toFixed(2));
+                $('#grandTotal').text(total.toFixed(2));
+
+                $('#SummarySubTotal').val(sub.toFixed(2));
+                $('#SummaryVat').val(vat.toFixed(2));
+                $('#SummaryTotal').val(total.toFixed(2));
+            }
+
+            function wireRowEvents($tr) {
+                $tr.on('input', '.qty-input, .price-input, .vat-input', function () {
+                    recalcRow($tr);
+                    recalcTotals();
+                });
+
+                $tr.find('.remove-item').on('click', function () {
+                    $tr.remove();
+                    renumberRows();
+                    recalcTotals();
+                });
+
+                $tr.find('.material-select').on('change', function () {
+                    // Optional: Could auto-fill price/unit if desired from option text
+                    // Keep simple; user can override price/unit manually
+                });
+            }
+
+            function renumberRows() {
+                $('#itemsBody tr').each(function (idx) {
+                    $(this).find('input, select, textarea').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        var newName = name.replace(/Items\[\d+\]/, 'Items[' + idx + ']');
+                        $(this).attr('name', newName);
+                    });
+                });
+            }
+
+            function addEmptyRow() {
+                var idx = $('#itemsBody tr').length;
+                var materialsHtml = '@Html.Raw(string.Join("", Model.Materials.Select(m => $"<option value=\\\"{m.Value}\\\">{System.Net.WebUtility.HtmlEncode(m.Text)}</option>")))';
+                var row = `
+<tr>
+  <td>
+    <select name="Items[${idx}].MaterialId" class="form-control form-control-sm material-select">
+      <option value="">-- Select --</option>${materialsHtml}
+    </select>
+  </td>
+  <td><input name="Items[${idx}].Description" class="form-control form-control-sm desc-input" /></td>
+  <td><input type="number" step="0.01" min="0" name="Items[${idx}].Quantity" value="0" class="form-control form-control-sm qty-input" /></td>
+  <td><input name="Items[${idx}].Unit" value="Ton" class="form-control form-control-sm unit-input" /></td>
+  <td><input type="number" step="0.01" min="0" name="Items[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input" /></td>
+  <td><input type="number" step="0.01" min="0" max="100" name="Items[${idx}].VatRate" value="7.5" class="form-control form-control-sm vat-input" /></td>
+  <td class="text-right align-middle"><span class="line-total">0.00</span></td>
+  <td class="text-center align-middle">
+    <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash"></i></button>
+  </td>
+</tr>`;
+                var $row = $(row);
+                $('#itemsBody').append($row);
+                wireRowEvents($row);
+                recalcRow($row);
+                recalcTotals();
+            }
+
+            // Initialize
+            if ($('#itemsBody tr').length === 0) {
+                addEmptyRow();
+            } else {
+                $('#itemsBody tr').each(function () { wireRowEvents($(this)); recalcRow($(this)); });
+                recalcTotals();
+            }
+
+            $('#addItemBtn').on('click', function () {
+                addEmptyRow();
+            });
+
+            // Keep ExpiryDate default relative to QuotationDate (+30 days)
+            $('#QuotationDate').on('change', function () {
+                var d = new Date($(this).val());
+                if (isNaN(d)) return;
+                var expiry = new Date(d);
+                expiry.setDate(expiry.getDate() + 30);
+                $('#ExpiryDate').val(expiry.toISOString().split('T')[0]);
+            });
+        })();
+    </script>
+}

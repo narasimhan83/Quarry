@@ -9,469 +9,216 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@ViewData["Title"] - TRACO Mining Ltd. Nigeria</title>
-
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
+    <title>@ViewData["Title"] - Quarry NG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Bootstrap 4 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <!-- AdminLTE -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Source Sans Pro', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        :root{
+            --bg-1:#0b1020;
+            --bg-2:#121a2e;
+            --bg-3:#1e1b2c;
+            --brand-g:#008753;
+            --brand-o:#ff6b35;
+            --accent-1:#6366f1;
+            --accent-2:#7c3aed;
+            --ink:#0f172a;
+            --muted:#94a3b8;
         }
-
-        .login-page {
-            background: none;
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:#111827;
+            background:
+                radial-gradient(1200px 600px at -10% -10%, #1e293b 15%, rgba(30,41,59,0) 60%),
+                radial-gradient(900px 500px at 110% -10%, #0f766e 15%, rgba(15,118,110,0) 60%),
+                radial-gradient(900px 600px at 50% 120%, #4c1d95 5%, rgba(76,29,149,0) 60%),
+                linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 40%, var(--bg-3) 100%);
+            display:flex;align-items:center;justify-content:center;
         }
-
-        .login-container {
-            max-width: 450px;
-            width: 100%;
-            margin: 20px;
+        body::before{
+            content:"";position:fixed;inset:0;pointer-events:none;
+            background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+            background-size:22px 22px;mix-blend-mode:screen;
         }
-
-        .login-card {
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            animation: slideUp 0.5s ease-out;
+        .layout{
+            width:100%;max-width:1100px;margin:42px 18px;
+            display:grid;grid-template-columns: 1.1fr .9fr; gap:28px;
         }
-
-        @@keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @@media (max-width: 980px){ .layout{grid-template-columns:1fr} .hero{display:none} }
+        .card{
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.25);
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border-radius:22px; box-shadow:0 30px 80px rgba(0,0,0,.35);
+            overflow:hidden;
         }
-
-        .login-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 40px 30px;
-            text-align: center;
-            border-bottom: 4px solid #ff6b35;
+        .hero{color:rgba(255,255,255,.92); padding:38px;}
+        .badge{
+            display:inline-flex;align-items:center;gap:10px;
+            background:linear-gradient(90deg, var(--brand-g), #ffffff 55%, var(--brand-o));
+            color:#0a0a0a;font-weight:700;letter-spacing:.4px;
+            padding:8px 14px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.28)
         }
-
-        .company-logo {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-            animation: fadeIn 1s ease-in;
+        .hero h1{margin:22px 0 10px;font-weight:800;font-size:34px}
+        .hero p{color:rgba(255,255,255,.78); margin:0 0 18px}
+        .hero ul{margin:18px 0 0 0; padding:0; list-style:none}
+        .hero li{display:flex;gap:10px; color:rgba(255,255,255,.75); margin:8px 0}
+        .hero li i{color:#60a5fa; margin-top:2px}
+        .panel{background:#fff;border-radius:22px; overflow:hidden}
+        .panel-head{
+            padding:26px 28px 16px 28px; border-bottom:1px solid #eef0f4;
+            background:
+              radial-gradient(600px 120px at 20% -30%, rgba(0,135,83,.18), transparent 60%),
+              radial-gradient(600px 120px at 80% -35%, rgba(255,107,53,.18), transparent 60%),
+              linear-gradient(180deg,#ffffff, #fbfbfe);
         }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .title{margin:0;font-size:22px;font-weight:800;color:var(--ink)}
+        .flag{height:4px;background:linear-gradient(90deg,var(--brand-g),#ffffff 50%,var(--brand-o));border-radius:2px;width:160px;margin-top:10px}
+        .panel-body{padding:26px 28px 28px 28px}
+        .input-wrap{position:relative}
+        input[type="text"], input[type="password"]{
+            width:100%;height:50px;border-radius:12px;border:1.8px solid #e7e9ee;
+            padding:12px 44px 12px 16px;font-size:15px;outline:none;
+            transition:border .2s, box-shadow .2s;
         }
-
-        .logo-placeholder {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #ff6b35 0%, #ffffff 50%, #00843d 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        input:focus{border-color:var(--accent-1); box-shadow:0 0 0 .2rem rgba(99,102,241,.15)}
+        .icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#98a2b3}
+        .eye{position:absolute;right:42px;top:50%;transform:translateY(-50%);color:#94a3b8;cursor:pointer}
+        .remember{display:flex;align-items:center;gap:8px;color:#334155;margin-top:2px}
+        .btn{
+            height:50px;border-radius:12px;border:0;color:#fff;font-weight:800;letter-spacing:.4px;
+            background:linear-gradient(135deg,var(--accent-1) 0%, var(--accent-2) 100%);
+            box-shadow:0 10px 20px rgba(99,102,241,.35);cursor:pointer;
+            transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
         }
-
-        .company-name {
-            color: #ffffff;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .company-tagline {
-            color: #b8b8b8;
-            font-size: 14px;
-            margin-top: 5px;
-            letter-spacing: 1px;
-        }
-
-        .login-body {
-            padding: 40px 30px 30px;
-        }
-
-        .login-title {
-            text-align: center;
-            color: #333;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-control {
-            height: 50px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 15px 20px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-        .input-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-        }
-
-        .input-group-custom {
-            position: relative;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .remember-me label {
-            margin-left: 10px;
-            margin-bottom: 0;
-            color: #666;
-            cursor: pointer;
-        }
-
-        .btn-login {
-            height: 50px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .divider {
-            text-align: center;
-            margin: 25px 0;
-            position: relative;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
-            height: 1px;
-            background: #e0e0e0;
-        }
-
-        .divider-text {
-            background: white;
-            padding: 0 15px;
-            position: relative;
-            color: #999;
-            font-size: 13px;
-        }
-
-        .default-credentials {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf3 100%);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .default-credentials h6 {
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .credential-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .credential-label {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .credential-value {
-            background: #fff;
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .forgot-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .forgot-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .forgot-link a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        .footer-text {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            color: #999;
-            font-size: 12px;
-        }
-
-        .text-danger {
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-        /* Nigerian flag colors accent */
-        .nigerian-accent {
-            height: 4px;
-            background: linear-gradient(90deg, #008753 0%, #ffffff 50%, #ff6b35 100%);
-            margin-top: 15px;
-        }
-
-        /* Checkbox styling */
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        /* Loading animation */
-        .btn-login.loading {
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        .btn-login.loading::after {
-            content: ' ';
-            width: 16px;
-            height: 16px;
-            margin-left: 10px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
-            display: inline-block;
-        }
-
-        @@keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive design */
-        @@media (max-width: 576px) {
-            .login-container {
-                margin: 10px;
-            }
-            
-            .login-header {
-                padding: 30px 20px;
-            }
-            
-            .company-name {
-                font-size: 22px;
-            }
-            
-            .login-body {
-                padding: 30px 20px;
-            }
+        .btn:hover{transform:translateY(-1px); filter:saturate(108%); box-shadow:0 14px 28px rgba(99,102,241,.35)}
+        .btn.loading{opacity:.85; pointer-events:none}
+        .btn.loading::after{content:"";display:inline-block;margin-left:10px;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.9);border-top-color:transparent;animation:spin .6s linear infinite}
+        @@keyframes spin{to{transform:rotate(360deg)}}
+        .divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:#64748b;font-size:12.5px}
+        .divider::before,.divider::after{content:"";flex:1;height:1px;background:#e8ebf3}
+        .chips{display:flex;flex-wrap:wrap;gap:8px}
+        .chip{display:inline-flex;align-items:center;gap:8px;border:1px dashed #e0e4ee;border-radius:999px;padding:6px 12px;background:#f8fafc;font-size:13px;color:#1f2937}
+        .chip .copy{cursor:pointer;color:var(--accent-1)}
+        .chip .copy:hover{color:#4f46e5}
+        .val{background:#fff1f2;border:1px solid #fecdd3;color:#be123c;border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:13px}
+        .foot{font-size:12px;color:#94a3b8;text-align:center;padding-top:14px}
+        .brand-logo{
+            height:114px;
+            width:auto;
+            max-width:none;
+            object-fit:contain;
+            border-radius:10px;
+            background:transparent;
+            box-shadow:0 6px 16px rgba(0,0,0,.25)
         }
     </style>
 </head>
-<body class="login-page">
-    <div class="login-container">
-        <div class="login-card">
-            <!-- Header with Logo -->
-            <div class="login-header">
-                <!-- Logo Placeholder - Replace with actual logo -->
-                <div class="logo-placeholder">
-                    <i class="fas fa-mountain"></i>
+<body>
+    <div class="layout">
+        <aside class="card hero">
+            <span class="badge"><i class="fa-solid fa-mountain"></i> TRACO MINING • NG</span>
+            <h1>Modern Quarry Management</h1>
+            <p>All-in-one platform for weighment, quotations, invoices and analytics.</p>
+            <ul>
+                <li><i class="fa-regular fa-circle-check"></i> Role-based access: Admin, Manager, Accountant, Operator</li>
+                <li><i class="fa-regular fa-circle-check"></i> Nigerian VAT-ready invoicing with printing</li>
+                <li><i class="fa-regular fa-circle-check"></i> Real-time dashboard and insights</li>
+            </ul>
+        </aside>
+        <section class="panel">
+            <div class="panel-head">
+                <div class="d-flex" style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <h2 class="title">Sign in to your account</h2>
+                        <div class="flag"></div>
+                    </div>
+                    <div>
+                        <img src="~/images/quarrylogo.png" alt="TRACO MINING LTD. Nigeria" class="brand-logo" onerror="this.onerror=null;this.src='/images/traco-logo.png';" />
+                    </div>
                 </div>
-                <!-- Company Name -->
-                <h1 class="company-name">TRACO MINING LTD.</h1>
-                <p class="company-tagline">Nigeria's Premier Quarry Management System</p>
-                <div class="nigerian-accent"></div>
             </div>
-
-            <!-- Login Form -->
-            <div class="login-body">
-                <h2 class="login-title">Welcome Back</h2>
-
+            <div class="panel-body">
+                <div asp-validation-summary="ModelOnly" class="val" style="display:@(ViewData.ModelState?.IsValid==false ? "block" : "none")"></div>
                 <form asp-action="Login" method="post" id="loginForm" asp-antiforgery="true">
-                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
-                    
-                    <!-- Username Field -->
                     <div class="form-group">
-                        <label asp-for="Username" class="small text-muted mb-2">Username</label>
-                        <div class="input-group-custom">
-                            <input asp-for="Username"
-                                   id="Username"
-                                   name="Username"
-                                   class="form-control"
-                                   placeholder="Enter your username"
-                                   autocomplete="username"
-                                   value="" />
-                            <i class="fas fa-user input-icon"></i>
+                        <label for="Username" class="text-secondary small" style="color:#6b7280;font-size:12px">Username</label>
+                        <div class="input-wrap">
+                            <input asp-for="Username" id="Username" name="Username" type="text" placeholder="e.g. admin" autocomplete="username" />
+                            <i class="fas fa-user icon"></i>
                         </div>
                         <span asp-validation-for="Username" class="text-danger"></span>
                     </div>
-
-                    <!-- Password Field -->
-                    <div class="form-group">
-                        <label asp-for="Password" class="small text-muted mb-2">Password</label>
-                        <div class="input-group-custom">
-                            <input asp-for="Password"
-                                   id="Password"
-                                   name="Password"
-                                   type="password"
-                                   class="form-control"
-                                   placeholder="Enter your password"
-                                   autocomplete="current-password"
-                                   value="" />
-                            <i class="fas fa-lock input-icon"></i>
+                    <div class="form-group" style="margin-top:14px">
+                        <div class="d-flex" style="display:flex;align-items:center;justify-content:space-between">
+                            <label for="Password" class="text-secondary small" style="color:#6b7280;font-size:12px">Password</label>
+                            <small id="caps" style="display:none;color:#eab308"><i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON</small>
+                        </div>
+                        <div class="input-wrap">
+                            <input asp-for="Password" id="Password" name="Password" type="password" placeholder="Your secure password" autocomplete="current-password" />
+                            <i class="fas fa-eye eye" id="eye" title="Show/Hide password"></i>
+                            <i class="fas fa-lock icon"></i>
                         </div>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
-
-                    <!-- Remember Me -->
-                    <div class="remember-me">
-                        <input asp-for="RememberMe" id="rememberMe">
-                        <label asp-for="RememberMe">Keep me signed in</label>
+                    <div class="remember" style="margin:14px 0 18px 0">
+                        <input asp-for="RememberMe" id="rememberMe" type="checkbox">
+                        <label asp-for="RememberMe" class="mb-0">Keep me signed in</label>
                     </div>
-
-                    <!-- Login Button -->
-                    <div class="form-group mb-0">
-                        <button type="submit" class="btn btn-primary btn-login btn-block">
-                            <i class="fas fa-sign-in-alt mr-2"></i> Sign In
-                        </button>
-                    </div>
+                    <button class="btn btn-block" type="submit" style="width:100%"><i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Sign In</button>
                 </form>
-
-                <!-- Divider -->
-                <div class="divider">
-                    <span class="divider-text">OR USE DEFAULT CREDENTIALS</span>
+                <div class="divider"><span>Quick demo</span></div>
+                <div class="chips">
+                    <span class="chip">Username: <strong>admin</strong> <i class="fa-regular fa-copy copy" data-copy="admin" title="Copy"></i></span>
+                    <span class="chip">Password: <strong>Admin@2024</strong> <i class="fa-regular fa-copy copy" data-copy="Admin@2024" title="Copy"></i></span>
+                    <button id="fill" type="button" class="btn" style="height:36px;padding:0 12px;border-radius:999px"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Fill & Focus</button>
                 </div>
-
-                <!-- Default Credentials -->
-                <div class="default-credentials">
-                    <h6><i class="fas fa-key mr-2"></i>Demo Access</h6>
-                    <div class="credential-item">
-                        <span class="credential-label">Username:</span>
-                        <span class="credential-value">admin</span>
-                    </div>
-                    <div class="credential-item">
-                        <span class="credential-label">Password:</span>
-                        <span class="credential-value">Admin@2024</span>
-                    </div>
-                </div>
-
-                <!-- Forgot Password Link -->
-                <div class="forgot-link">
-                    <a href="#"><i class="fas fa-question-circle mr-1"></i> Forgot your password?</a>
-                </div>
-
-                <!-- Footer -->
-                <div class="footer-text">
-                    <i class="fas fa-shield-alt mr-1"></i> Secure Login Portal<br>
-                    &copy; 2024 TRACO Mining Ltd. All rights reserved.
+                <div class="foot">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Secure Login • © 2024 TRACO Mining Ltd.
                 </div>
             </div>
-        </div>
-
-        <!-- Info Text Below Card -->
-        <div class="text-center mt-4">
-            <p style="color: rgba(255,255,255,0.8); font-size: 13px;">
-                <i class="fas fa-info-circle mr-1"></i> 
-                Powered by Nigerian Quarry Management System v1.0
-            </p>
-        </div>
+        </section>
     </div>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery Validation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
-
     <script>
-        $(document).ready(function() {
-            // Debug: Log form submission
-            $('#loginForm').on('submit', function(e) {
-                console.log('Form submission triggered');
-                console.log('Username field value:', $('#Username').val());
-                console.log('Password field value:', $('#Password').val());
-                
-                var btn = $(this).find('button[type="submit"]');
-                btn.addClass('loading');
-                btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Signing In...');
+        (function(){
+            const btn = document.querySelector('.btn');
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', function(){
+                btn.classList.add('loading');
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Signing in...';
             });
-
-            // Auto-fill demo credentials on click
-            $('.default-credentials').on('click', function() {
-                $('#Username').val('admin');
-                $('#Password').val('Admin@2024');
-                console.log('Demo credentials filled - Username:', $('#Username').val(), 'Password:', $('#Password').val());
+            // toggle eye
+            const pwd = document.getElementById('Password');
+            const eye = document.getElementById('eye');
+            eye.addEventListener('click', function(){
+                const isPwd = pwd.type === 'password';
+                pwd.type = isPwd ? 'text' : 'password';
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
             });
-
-            // Add focus animation to inputs
-            $('.form-control').on('focus', function() {
-                $(this).parent().find('.input-icon').css('color', '#667eea');
-            }).on('blur', function() {
-                $(this).parent().find('.input-icon').css('color', '#999');
+            // caps lock notice
+            const caps = document.getElementById('caps');
+            ['keyup','keydown'].forEach(ev => {
+                pwd.addEventListener(ev, function(e){
+                    const on = e.getModifierState && e.getModifierState('CapsLock');
+                    caps.style.display = on ? 'inline' : 'none';
+                });
             });
-        });
+            // fill demo + copy chips
+            document.getElementById('fill').addEventListener('click', function(){
+                document.getElementById('Username').value = 'admin';
+                pwd.value = 'Admin@2024';
+                document.getElementById('Username').focus();
+            });
+            document.querySelectorAll('.copy').forEach(el=>{
+                el.addEventListener('click', ()=>navigator.clipboard && navigator.clipboard.writeText(el.dataset.copy||''));
+            });
+        })();
     </script>
 </body>
 </html>

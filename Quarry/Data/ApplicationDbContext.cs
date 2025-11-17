@@ -23,6 +23,9 @@ namespace QuarryManagementSystem.Data
         public DbSet<JournalEntry> JournalEntries { get; set; }
         public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+        // Quotations
+        public DbSet<Quotation> Quotations { get; set; }
+        public DbSet<QuotationItem> QuotationItems { get; set; }
         public DbSet<PayrollRun> PayrollRuns { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
         public DbSet<StockYard> StockYards { get; set; }
@@ -71,6 +74,25 @@ namespace QuarryManagementSystem.Data
                 .HasForeignKey<Invoice>(i => i.WeighmentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configure Quotation relationships
+            modelBuilder.Entity<Quotation>()
+                .HasOne(q => q.Customer)
+                .WithMany(c => c.Quotations)
+                .HasForeignKey(q => q.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuotationItem>()
+                .HasOne(qi => qi.Quotation)
+                .WithMany(q => q.Items)
+                .HasForeignKey(qi => qi.QuotationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<QuotationItem>()
+                .HasOne(qi => qi.Material)
+                .WithMany()
+                .HasForeignKey(qi => qi.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+ 
             // Configure Employee relationships
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.Quarry)
@@ -137,10 +159,14 @@ namespace QuarryManagementSystem.Data
             modelBuilder.Entity<WeighmentTransaction>()
                 .HasIndex(w => w.TransactionNumber)
                 .IsUnique();
+modelBuilder.Entity<Invoice>()
+    .HasIndex(i => i.InvoiceNumber)
+    .IsUnique();
 
-            modelBuilder.Entity<Invoice>()
-                .HasIndex(i => i.InvoiceNumber)
-                .IsUnique();
+modelBuilder.Entity<Quotation>()
+    .HasIndex(q => q.QuotationNumber)
+    .IsUnique();
+
 
             modelBuilder.Entity<Employee>()
                 .HasIndex(e => e.EmployeeCode)

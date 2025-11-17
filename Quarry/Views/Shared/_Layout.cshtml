@@ -24,10 +24,30 @@
 
     <!-- Custom site styles (brand theme) -->
     <link rel="stylesheet" href="~/css/site.css">
-
+    <style>
+        /* Sidebar brand badge to match login page style (compact) */
+        .brand-badge{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:6px 10px; border-radius:999px;
+            font-weight:700; letter-spacing:.35px; font-size:.88rem;
+            background:linear-gradient(90deg,#008753,#ffffff 55%,#ff6b35);
+            color:#0a0a0a; box-shadow:0 6px 18px rgba(0,0,0,.15);
+            text-transform:uppercase; font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+            transform:scale(.90);
+            transform-origin:left center;
+        }
+        .brand-badge .fa-mountain{margin-right:6px}
+        /* Reduce brand area padding so the sidebar search shows fully below */
+        .main-sidebar .brand-link{
+            display:flex;align-items:center;justify-content:center;
+            padding:10px 10px !important; /* smaller than default */
+            min-height:52px;
+        }
+    </style>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    
     <meta name="theme-color" content="#0f0f0f" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -120,18 +140,14 @@
 
                 <!-- User Account Menu -->
                 <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="~/img/user2-160x160.jpg" class="user-image img-circle elevation-2" alt="User Image">
-                        <span class="d-none d-md-inline">@User.Identity?.Name</span>
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-label="Account">
+                        <i class="fas fa-user-circle"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <!-- User image -->
+                        <!-- Simplified user header (no avatar/name) -->
                         <li class="user-header bg-primary">
-                            <img src="~/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-                            <p>
-                                @User.Identity?.Name
-                                <small>Member since @DateTime.Now.ToString("MMMM yyyy")</small>
-                            </p>
+                            <p class="mb-0">Account</p>
+                            <small class="d-block">Signed in</small>
                         </li>
                         <!-- Menu Footer-->
                         <li class="user-footer">
@@ -163,21 +179,12 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             <a href="@Url.Action("Index", "Dashboard")" class="brand-link traco-brand-link">
-                <img src="~/images/traco-logo.png" alt="TRACO Mining Logo" class="brand-image img-circle elevation-3 traco-brand-image">
-                <span class="brand-text font-weight-bold traco-brand-text">TRACO Mining • Nigeria</span>
+                <span class="brand-badge"><i class="fa-solid fa-mountain"></i> TRACO MINING • NG</span>
             </a>
 
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- Sidebar user panel (optional) -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                    <div class="image">
-                        <img src="~/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-                    </div>
-                    <div class="info">
-                        <a href="#" class="d-block">@User.Identity?.Name</a>
-                    </div>
-                </div>
+                <!-- Sidebar user panel removed per request -->
 
                 <!-- SidebarSearch Form -->
                 <div class="form-inline">
@@ -232,6 +239,12 @@
                                 <a href="@Url.Action("Index", "Invoice")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" ? "active" : "")">
                                     <i class="nav-icon fas fa-file-invoice"></i>
                                     <p>Invoice Management</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Quotation")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Quotation" ? "active" : "")">
+                                    <i class="nav-icon fas fa-file-signature"></i>
+                                    <p>Quotation Management</p>
                                 </a>
                             </li>
                             <li class="nav-item">
