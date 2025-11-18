@@ -298,16 +298,29 @@ namespace QuarryManagementSystem.Controllers
                     return Json(new { success = false, message = "Customer not found" });
                 }
 
-                var exceedsLimit = customer.HasExceededCreditLimit(additionalAmount);
+                // Include prepayment wallet when evaluating credit limit
+                var prepaymentBalance = await GetAvailablePrepaymentAsync(customerId);
+
+                var effectiveOutstanding = customer.OutstandingBalance - prepaymentBalance;
+                if (effectiveOutstanding < 0)
+                {
+                    effectiveOutstanding = 0;
+                }
+
+                var projectedOutstanding = effectiveOutstanding + additionalAmount;
+                var exceedsLimit = projectedOutstanding > customer.CreditLimit;
                 var availableCredit = customer.AvailableCredit;
 
-                return Json(new 
-                { 
-                    success = true, 
-                    exceedsLimit, 
+                return Json(new
+                {
+                    success = true,
+                    exceedsLimit,
                     availableCredit,
                     currentOutstanding = customer.OutstandingBalance,
-                    creditLimit = customer.CreditLimit
+                    creditLimit = customer.CreditLimit,
+                    prepaymentBalance,
+                    effectiveOutstanding,
+                    projectedOutstanding
                 });
             }
             catch (Exception ex)
@@ -316,11 +329,20 @@ namespace QuarryManagementSystem.Controllers
                 return Json(new { success = false, message = "Error checking credit limit" });
             }
         }
-
+ 
         // Helper methods
         private bool CustomerExists(int id)
         {
             return _context.Customers.Any(e => e.Id == id);
+        }
+
+        private async Task<decimal> GetAvailablePrepaymentAsync(int customerId)
+        {
+            var prepayments = await _context.CustomerPrepayments
+                .Where(p => p.CustomerId == customerId && p.Status == "Active")
+                .ToListAsync();
+
+            return prepayments.Sum(p => p.Amount - p.UsedAmount);
         }
 
         private List<SelectListItem> GetNigerianStates()

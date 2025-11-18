@@ -93,130 +93,170 @@ namespace QuarryManagementSystem.Controllers
             }
         }
 
-        // GET: Invoice/Create
-        public async Task<IActionResult> Create()
-        {
-            try
-            {
-                var viewModel = new InvoiceCreateViewModel
+                // GET: Invoice/Create
+                public async Task<IActionResult> Create()
                 {
-                    InvoiceDate = DateTime.Now,
-                    DueDate = DateTime.Now.AddDays(30), // Default 30 days
-                    VatRate = 7.5m, // Nigerian VAT rate
-                    SelectedPaymentTerms = "30 days"
-                };
-
-                await PopulateDropdowns(viewModel);
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading create invoice form");
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        // POST: Invoice/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(InvoiceCreateViewModel model)
-        {
-            try
-            {
-                if (ModelState.IsValid && model.SelectedWeighmentIds != null && model.SelectedWeighmentIds.Any())
-                {
-                    // Validate customer selection
-                    if (!model.CustomerId.HasValue)
+                    try
                     {
-                        ModelState.AddModelError("", "Please select a customer for the invoice.");
-                        await PopulateDropdowns(model);
-                        return View(model);
+                        var viewModel = new InvoiceCreateViewModel
+                        {
+                            InvoiceDate = DateTime.Now,
+                            DueDate = DateTime.Now.AddDays(30), // Default 30 days
+                            VatRate = 7.5m, // Nigerian VAT rate
+                            SelectedPaymentTerms = "30 days",
+                            PaymentMode = "Credit"
+                        };
+        
+                        await PopulateDropdowns(viewModel);
+                        return View(viewModel);
                     }
-
-                    // Get selected weighments
-                    var weighments = await _context.WeighmentTransactions
-                        .Include(w => w.Material)
-                        .Include(w => w.Customer)
-                        .Where(w => model.SelectedWeighmentIds.Contains(w.Id) && 
-                                   w.Status == "Completed" && 
-                                   !w.IsInvoiced)
-                        .ToListAsync();
-
-                    if (!weighments.Any())
+                    catch (Exception ex)
                     {
-                        ModelState.AddModelError("", "No valid weighments selected for invoicing.");
-                        await PopulateDropdowns(model);
-                        return View(model);
+                        _logger.LogError(ex, "Error loading create invoice form");
+                        return RedirectToAction(nameof(Index));
                     }
-
-                    // Validate all weighments belong to the same customer
-                    var differentCustomer = weighments.FirstOrDefault(w => w.CustomerId != model.CustomerId);
-                    if (differentCustomer != null)
-                    {
-                        ModelState.AddModelError("", "All selected weighments must belong to the same customer.");
-                        await PopulateDropdowns(model);
-                        return View(model);
-                    }
-
-                    // Calculate totals
-                    decimal subTotal = weighments.Sum(w => w.SubTotal ?? 0);
-                    decimal vatAmount = subTotal * (model.VatRate / 100);
-                    decimal totalAmount = subTotal + vatAmount;
-
-                    // Generate invoice number
-                    var invoiceNumber = await GenerateInvoiceNumber();
-
-                    // Create invoice
-                    var invoice = new Invoice
-                    {
-                        InvoiceNumber = invoiceNumber,
-                        CustomerId = model.CustomerId.Value,
-                        InvoiceDate = model.InvoiceDate,
-                        DueDate = model.DueDate,
-                        SubTotal = subTotal,
-                        VatAmount = vatAmount,
-                        TotalAmount = totalAmount,
-                        PaidAmount = 0,
-                        Status = "Unpaid",
-                        PaymentTerms = model.SelectedPaymentTerms,
-                        LGAReceiptNumber = model.LGAReceiptNumber,
-                        Notes = model.Notes,
-                        CreatedBy = User.Identity?.Name,
-                        CreatedAt = DateTime.Now
-                    };
-
-                    _context.Add(invoice);
-                    await _context.SaveChangesAsync();
-
-                    // Update weighments as invoiced
-                    foreach (var weighment in weighments)
-                    {
-                        weighment.IsInvoiced = true;
-                        weighment.ModifiedBy = User.Identity?.Name;
-                        weighment.ModifiedAt = DateTime.Now;
-                    }
-                    await _context.SaveChangesAsync();
-
-                    TempData["Success"] = $"Invoice {invoiceNumber} created successfully.";
-                    _logger.LogInformation("Invoice {InvoiceNumber} created by user {UserName} for customer {CustomerId}", 
-                        invoiceNumber, User.Identity?.Name, model.CustomerId);
-                    
-                    return RedirectToAction(nameof(Index));
                 }
-                else if (model.SelectedWeighmentIds == null || !model.SelectedWeighmentIds.Any())
+        
+                // POST: Invoice/Create
+                [HttpPost]
+                [ValidateAntiForgeryToken]
+                public async Task<IActionResult> Create(InvoiceCreateViewModel model)
                 {
-                    ModelState.AddModelError("", "Please select at least one weighment to invoice.");
+                    try
+                    {
+                        if (ModelState.IsValid && model.SelectedWeighmentIds != null && model.SelectedWeighmentIds.Any())
+                        {
+                            // Validate customer selection
+                            if (!model.CustomerId.HasValue)
+                            {
+                                ModelState.AddModelError("", "Please select a customer for the invoice.");
+                                await PopulateDropdowns(model);
+                                return View(model);
+                            }
+        
+                            // Get selected weighments
+                            var weighments = await _context.WeighmentTransactions
+                                .Include(w => w.Material)
+                                .Include(w => w.Customer)
+                                .Where(w => model.SelectedWeighmentIds.Contains(w.Id) &&
+                                           w.Status == "Completed" &&
+                                           !w.IsInvoiced)
+                                .ToListAsync();
+        
+                            if (!weighments.Any())
+                            {
+                                ModelState.AddModelError("", "No valid weighments selected for invoicing.");
+                                await PopulateDropdowns(model);
+                                return View(model);
+                            }
+        
+                            // Validate all weighments belong to the same customer
+                            var differentCustomer = weighments.FirstOrDefault(w => w.CustomerId != model.CustomerId);
+                            if (differentCustomer != null)
+                            {
+                                ModelState.AddModelError("", "All selected weighments must belong to the same customer.");
+                                await PopulateDropdowns(model);
+                                return View(model);
+                            }
+        
+                            // Calculate totals
+                            decimal subTotal = weighments.Sum(w => w.SubTotal ?? 0);
+                            decimal vatAmount = subTotal * (model.VatRate / 100);
+                            decimal totalAmount = subTotal + vatAmount;
+        
+                            // Generate invoice number
+                            var invoiceNumber = await GenerateInvoiceNumber();
+        
+                            // Determine prepayment usage (wallet)
+                            decimal prepaymentApplied = 0;
+                            if (model.CustomerId.HasValue && string.Equals(model.PaymentMode, "Prepayment", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var availablePrepayment = await GetAvailablePrepaymentAsync(model.CustomerId.Value);
+                                if (availablePrepayment <= 0)
+                                {
+                                    ModelState.AddModelError("PaymentMode", "No available prepayment for this customer. Please select Credit or create a prepayment first.");
+                                    await PopulateDropdowns(model);
+                                    model.SubTotal = subTotal;
+                                    model.VatAmount = vatAmount;
+                                    model.TotalAmount = totalAmount;
+                                    model.AvailablePrepayment = 0;
+                                    return View(model);
+                                }
+        
+                                prepaymentApplied = Math.Min(availablePrepayment, totalAmount);
+                                model.AvailablePrepayment = availablePrepayment;
+                            }
+        
+                            // Determine invoice status based on prepayment
+                            string status = "Unpaid";
+                            if (prepaymentApplied >= totalAmount)
+                            {
+                                status = "Paid";
+                            }
+                            else if (prepaymentApplied > 0)
+                            {
+                                status = "Partial";
+                            }
+        
+                            // Create invoice
+                            var invoice = new Invoice
+                            {
+                                InvoiceNumber = invoiceNumber,
+                                CustomerId = model.CustomerId.Value,
+                                InvoiceDate = model.InvoiceDate,
+                                DueDate = model.DueDate,
+                                SubTotal = subTotal,
+                                VatAmount = vatAmount,
+                                TotalAmount = totalAmount,
+                                PaidAmount = prepaymentApplied,
+                                PrepaymentApplied = prepaymentApplied,
+                                IsFullyPrepaid = prepaymentApplied >= totalAmount,
+                                Status = status,
+                                PaymentTerms = model.SelectedPaymentTerms,
+                                LGAReceiptNumber = model.LGAReceiptNumber,
+                                Notes = model.Notes,
+                                CreatedBy = User.Identity?.Name,
+                                CreatedAt = DateTime.Now
+                            };
+        
+                            _context.Add(invoice);
+                            await _context.SaveChangesAsync();
+        
+                            // Apply prepayment wallet after invoice exists
+                            if (prepaymentApplied > 0 && string.Equals(model.PaymentMode, "Prepayment", StringComparison.OrdinalIgnoreCase))
+                            {
+                                await ApplyPrepaymentToInvoiceAsync(invoice, prepaymentApplied);
+                            }
+        
+                            // Update weighments as invoiced
+                            foreach (var weighment in weighments)
+                            {
+                                weighment.IsInvoiced = true;
+                                weighment.ModifiedBy = User.Identity?.Name;
+                                weighment.ModifiedAt = DateTime.Now;
+                            }
+                            await _context.SaveChangesAsync();
+        
+                            TempData["Success"] = $"Invoice {invoiceNumber} created successfully.";
+                            _logger.LogInformation("Invoice {InvoiceNumber} created by user {UserName} for customer {CustomerId}",
+                                invoiceNumber, User.Identity?.Name, model.CustomerId);
+        
+                            return RedirectToAction(nameof(Index));
+                        }
+                        else if (model.SelectedWeighmentIds == null || !model.SelectedWeighmentIds.Any())
+                        {
+                            ModelState.AddModelError("", "Please select at least one weighment to invoice.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error creating invoice");
+                        ModelState.AddModelError("", "An error occurred while creating the invoice. Please try again.");
+                    }
+        
+                    await PopulateDropdowns(model);
+                    return View(model);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating invoice");
-                ModelState.AddModelError("", "An error occurred while creating the invoice. Please try again.");
-            }
-
-            await PopulateDropdowns(model);
-            return View(model);
-        }
 
         // GET: Invoice/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -580,7 +620,7 @@ namespace QuarryManagementSystem.Controllers
             try
             {
                 var entryNumber = JournalEntry.GenerateEntryNumber("PAY");
-                
+
                 var journalEntry = new JournalEntry
                 {
                     EntryNumber = entryNumber,
@@ -610,12 +650,63 @@ namespace QuarryManagementSystem.Controllers
                     LineDescription = $"Reduce receivable for invoice {invoice.InvoiceNumber}"
                 });
 
+                journalEntry.RecalculateTotals();
+
                 _context.JournalEntries.Add(journalEntry);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating journal entry for payment");
+            }
+        }
+
+        private async Task CreatePrepaymentApplicationJournalEntry(Invoice invoice, decimal prepaymentAmount)
+        {
+            try
+            {
+                if (prepaymentAmount <= 0)
+                    return;
+
+                var entryNumber = JournalEntry.GenerateEntryNumber("ADVAPPLY");
+
+                var journalEntry = new JournalEntry
+                {
+                    EntryNumber = entryNumber,
+                    EntryDate = DateTime.Now,
+                    Reference = $"Prepayment applied to Invoice {invoice.InvoiceNumber}",
+                    Description = $"Customer prepayment of {prepaymentAmount:C} applied to invoice {invoice.InvoiceNumber}",
+                    PostedBy = User.Identity?.Name,
+                    IsAutoGenerated = true,
+                    CreatedAt = DateTime.Now
+                };
+
+                // Debit Customer Prepayments (liability down)
+                journalEntry.JournalEntryLines.Add(new JournalEntryLine
+                {
+                    AccountId = await GetCustomerPrepaymentAccountId(),
+                    DebitAmount = prepaymentAmount,
+                    CreditAmount = 0,
+                    LineDescription = $"Reduce customer prepayment for invoice {invoice.InvoiceNumber}"
+                });
+
+                // Credit Accounts Receivable (receivable down)
+                journalEntry.JournalEntryLines.Add(new JournalEntryLine
+                {
+                    AccountId = await GetAccountsReceivableId(),
+                    DebitAmount = 0,
+                    CreditAmount = prepaymentAmount,
+                    LineDescription = $"Reduce receivable for invoice {invoice.InvoiceNumber} (prepayment applied)"
+                });
+
+                journalEntry.RecalculateTotals();
+
+                _context.JournalEntries.Add(journalEntry);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating journal entry for prepayment application");
             }
         }
 
@@ -631,6 +722,83 @@ namespace QuarryManagementSystem.Controllers
             var arAccount = await _context.ChartOfAccounts
                 .FirstOrDefaultAsync(ca => ca.AccountCode == "1101");
             return arAccount?.Id ?? 2;
+        }
+
+        private async Task<int> GetCustomerPrepaymentAccountId()
+        {
+            var prepayAccount = await _context.ChartOfAccounts
+                .FirstOrDefaultAsync(ca => ca.AccountCode == "2103");
+            return prepayAccount?.Id ?? 5; // fallback to Accounts Payable if not found
+        }
+
+        private async Task<decimal> GetAvailablePrepaymentAsync(int customerId)
+        {
+            var prepayments = await _context.CustomerPrepayments
+                .Where(p => p.CustomerId == customerId && p.Status == "Active")
+                .ToListAsync();
+
+            return prepayments.Sum(p => p.Amount - p.UsedAmount);
+        }
+
+        private async Task ApplyPrepaymentToInvoiceAsync(Invoice invoice, decimal amountToApply)
+        {
+            if (amountToApply <= 0)
+                return;
+
+            decimal remaining = amountToApply;
+
+            var prepayments = await _context.CustomerPrepayments
+                .Where(p => p.CustomerId == invoice.CustomerId && p.Status == "Active")
+                .OrderBy(p => p.PrepaymentDate)
+                .ThenBy(p => p.Id)
+                .ToListAsync();
+
+            foreach (var prepayment in prepayments)
+            {
+                var available = prepayment.Amount - prepayment.UsedAmount;
+                if (available <= 0)
+                    continue;
+
+                var apply = Math.Min(available, remaining);
+                if (apply <= 0)
+                    continue;
+
+                var application = new PrepaymentApplication
+                {
+                    CustomerPrepaymentId = prepayment.Id,
+                    InvoiceId = invoice.Id,
+                    AppliedAmount = apply,
+                    AppliedDate = DateTime.Now,
+                    Description = $"Prepayment applied to invoice {invoice.InvoiceNumber}"
+                };
+
+                prepayment.UsedAmount += apply;
+                if (prepayment.Amount - prepayment.UsedAmount <= 0)
+                {
+                    prepayment.Status = "Exhausted";
+                }
+
+                _context.PrepaymentApplications.Add(application);
+
+                remaining -= apply;
+                if (remaining <= 0)
+                    break;
+            }
+
+            // Adjust customer outstanding balance
+            var customer = await _context.Customers.FindAsync(invoice.CustomerId);
+            if (customer != null)
+            {
+                customer.OutstandingBalance -= amountToApply;
+                if (customer.OutstandingBalance < 0)
+                {
+                    customer.OutstandingBalance = 0;
+                }
+                customer.UpdateAvailableCredit();
+            }
+
+            await CreatePrepaymentApplicationJournalEntry(invoice, amountToApply);
+            await _context.SaveChangesAsync();
         }
 
         private CompanyDetailsViewModel GetCompanyDetails()

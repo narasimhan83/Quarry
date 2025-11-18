@@ -91,6 +91,19 @@
                             </div>
 
                             <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentMode" class="control-label"></label>
+                                        <select asp-for="PaymentMode" class="form-control">
+                                            <option value="Credit">Credit (Pay after)</option>
+                                            <option value="Prepayment">Use Prepayment (Wallet)</option>
+                                        </select>
+                                        <span asp-validation-for="PaymentMode" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+ 
+                            <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label asp-for="Notes" class="control-label"></label>
@@ -172,6 +185,16 @@
                                     </div>
                                     <input id="TotalAmount" asp-for="TotalAmount" class="form-control form-control-lg font-weight-bold" readonly />
                                 </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Available Prepayment</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input id="AvailablePrepayment" asp-for="AvailablePrepayment" class="form-control" readonly />
+                                </div>
+                                <small class="form-text text-muted">If you choose "Use Prepayment (Wallet)", this balance will be used to pay this invoice first.</small>
                             </div>
                         </div>
                     </div>

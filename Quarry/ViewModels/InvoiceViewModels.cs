@@ -58,46 +58,53 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "Invoice Date")]
         [DataType(DataType.Date)]
         public DateTime InvoiceDate { get; set; } = DateTime.Now;
-
+ 
         [Display(Name = "Due Date")]
         [DataType(DataType.Date)]
         public DateTime? DueDate { get; set; }
-
+ 
         [Display(Name = "Customer")]
         public int? CustomerId { get; set; }
-
+ 
         [Display(Name = "Selected Payment Terms")]
         public string? SelectedPaymentTerms { get; set; } = "30 days";
-
+ 
+        [Display(Name = "Payment Mode")]
+        public string PaymentMode { get; set; } = "Credit"; // Credit or Prepayment
+ 
         [StringLength(50)]
         [Display(Name = "LGA Receipt Number")]
         public string? LGAReceiptNumber { get; set; }
-
+ 
         [StringLength(500)]
         [Display(Name = "Notes")]
         public string? Notes { get; set; }
-
+ 
         // VAT Information
         [Display(Name = "VAT Rate (%)")]
         public decimal VatRate { get; set; } = 7.5m;
-
+ 
         // Weighment Selection
         [Display(Name = "Selected Weighments")]
         public int[] SelectedWeighmentIds { get; set; } = Array.Empty<int>();
-
+ 
         // Calculated Fields
         [Display(Name = "Subtotal")]
         [DataType(DataType.Currency)]
         public decimal SubTotal { get; set; }
-
+ 
         [Display(Name = "VAT Amount")]
         [DataType(DataType.Currency)]
         public decimal VatAmount { get; set; }
-
+ 
         [Display(Name = "Total Amount")]
         [DataType(DataType.Currency)]
         public decimal TotalAmount { get; set; }
-
+ 
+        [Display(Name = "Available Prepayment")]
+        [DataType(DataType.Currency)]
+        public decimal AvailablePrepayment { get; set; }
+ 
         // Dropdown data
         public List<SelectListItem> Customers { get; set; } = new();
         public List<SelectListItem> PaymentTermsList { get; set; } = new();
@@ -144,37 +151,45 @@ namespace QuarryManagementSystem.ViewModels
     public class InvoiceDetailsViewModel
     {
         public Invoice Invoice { get; set; } = new();
-
+ 
         [Display(Name = "Amount in Words")]
         public string AmountInWords { get; set; } = string.Empty;
-
+ 
         [Display(Name = "Can Edit Payment")]
         public bool CanEditPayment { get; set; }
-
+ 
         [Display(Name = "Can Cancel")]
         public bool CanCancel { get; set; }
-
+ 
         [Display(Name = "Overdue Days")]
         public int? OverdueDays => Invoice.GetOverdueDays()?.Days;
-
+ 
         [Display(Name = "Payment Status")]
         public string PaymentStatus => Invoice.IsPaid() ? "Paid" : Invoice.IsOverdue() ? "Overdue" : "Outstanding";
+ 
+        [Display(Name = "Prepayment Applied")]
+        [DataType(DataType.Currency)]
+        public decimal PrepaymentApplied => Invoice.PrepaymentApplied;
     }
 
     public class InvoicePrintViewModel
     {
         public Invoice Invoice { get; set; } = new();
-
+ 
         [Display(Name = "Amount in Words")]
         public string AmountInWords { get; set; } = string.Empty;
-
+ 
         public CompanyDetailsViewModel CompanyDetails { get; set; } = new();
-
+ 
         public List<InvoiceItemViewModel> InvoiceItems { get; set; } = new();
-
+ 
         [Display(Name = "Print Date")]
         [DataType(DataType.DateTime)]
         public DateTime PrintDate { get; set; } = DateTime.Now;
+ 
+        [Display(Name = "Prepayment Applied")]
+        [DataType(DataType.Currency)]
+        public decimal PrepaymentApplied => Invoice.PrepaymentApplied;
     }
 
     public class InvoiceItemViewModel

@@ -242,6 +242,12 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="@Url.Action("Index", "Prepayment")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Prepayment" ? "active" : "")">
+                                    <i class="nav-icon fas fa-wallet"></i>
+                                    <p>Customer Prepayments</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="@Url.Action("Index", "Quotation")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Quotation" ? "active" : "")">
                                     <i class="nav-icon fas fa-file-signature"></i>
                                     <p>Quotation Management</p>
@@ -251,6 +257,26 @@
                                 <a href="@Url.Action("Index", "Report")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Report" ? "active" : "")">
                                     <i class="nav-icon fas fa-chart-line"></i>
                                     <p>Reports</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-header">ACCOUNTING</li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "ChartOfAccounts")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ChartOfAccounts" ? "active" : "")">
+                                    <i class="nav-icon fas fa-list-ul"></i>
+                                    <p>Chart of Accounts</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "JournalEntry")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "JournalEntry" ? "active" : "")">
+                                    <i class="nav-icon fas fa-book"></i>
+                                    <p>Journal Entries</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "OpeningBalance")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "OpeningBalance" ? "active" : "")">
+                                    <i class="nav-icon fas fa-balance-scale"></i>
+                                    <p>Opening Balances</p>
                                 </a>
                             </li>
                         }

@@ -451,16 +451,29 @@ namespace QuarryManagementSystem.Controllers
                     return Json(new { success = false, message = "Customer not found" });
                 }
 
-                var exceedsLimit = customer.HasExceededCreditLimit(estimatedAmount);
+                // Include prepayment wallet in effective exposure
+                var prepaymentBalance = await GetAvailablePrepaymentAsync(customerId);
+
+                var effectiveOutstanding = customer.OutstandingBalance - prepaymentBalance;
+                if (effectiveOutstanding < 0)
+                {
+                    effectiveOutstanding = 0;
+                }
+
+                var projectedOutstanding = effectiveOutstanding + estimatedAmount;
+                var exceedsLimit = projectedOutstanding > customer.CreditLimit;
                 var availableCredit = customer.AvailableCredit;
 
-                return Json(new 
-                { 
-                    success = true, 
-                    exceedsLimit, 
+                return Json(new
+                {
+                    success = true,
+                    exceedsLimit,
                     availableCredit,
                     currentOutstanding = customer.OutstandingBalance,
-                    creditLimit = customer.CreditLimit
+                    creditLimit = customer.CreditLimit,
+                    prepaymentBalance,
+                    effectiveOutstanding,
+                    projectedOutstanding
                 });
             }
             catch (Exception ex)
@@ -582,6 +595,15 @@ namespace QuarryManagementSystem.Controllers
             }
         }
 
+        private async Task<decimal> GetAvailablePrepaymentAsync(int customerId)
+        {
+            var prepayments = await _context.CustomerPrepayments
+                .Where(p => p.CustomerId == customerId && p.Status == "Active")
+                .ToListAsync();
+
+            return prepayments.Sum(p => p.Amount - p.UsedAmount);
+        }
+ 
         // GET: Weighment/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {

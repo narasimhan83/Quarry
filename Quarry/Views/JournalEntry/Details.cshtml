@@ -1,0 +1,112 @@
+@model QuarryManagementSystem.Models.Domain.JournalEntry
+
+@{
+    ViewData["Title"] = "Journal Entry Details";
+}
+
+@section Breadcrumb {
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "JournalEntry")">Journal Entries</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Journal Entry Details</h3>
+        <div class="card-tools">
+            <a asp-action="Index" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (Model == null)
+        {
+            <div class="alert alert-danger">
+                Journal entry not found.
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Entry Number</dt>
+                        <dd class="col-sm-8">@Model.EntryNumber</dd>
+
+                        <dt class="col-sm-4">Entry Date</dt>
+                        <dd class="col-sm-8">@Model.EntryDate.ToString("yyyy-MM-dd")</dd>
+
+                        <dt class="col-sm-4">Reference</dt>
+                        <dd class="col-sm-8">@Model.Reference</dd>
+
+                        <dt class="col-sm-4">Description</dt>
+                        <dd class="col-sm-8">@Model.Description</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Total Debit (₦)</dt>
+                        <dd class="col-sm-8">@Model.TotalDebit.ToString("N2")</dd>
+
+                        <dt class="col-sm-4">Total Credit (₦)</dt>
+                        <dd class="col-sm-8">@Model.TotalCredit.ToString("N2")</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">@Model.GetStatus()</dd>
+
+                        <dt class="col-sm-4">Posted By</dt>
+                        <dd class="col-sm-8">@Model.PostedBy</dd>
+
+                        <dt class="col-sm-4">Created At</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <hr />
+
+            <h5>Lines</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Account Code</th>
+                            <th>Account Name</th>
+                            <th>Description</th>
+                            <th class="text-right">Debit (₦)</th>
+                            <th class="text-right">Credit (₦)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.JournalEntryLines != null && Model.JournalEntryLines.Any())
+                        {
+                            foreach (var line in Model.JournalEntryLines)
+                            {
+                                <tr>
+                                    <td>@line.Account?.AccountCode</td>
+                                    <td>@line.Account?.AccountName</td>
+                                    <td>@line.LineDescription</td>
+                                    <td class="text-right">
+                                        @(line.DebitAmount > 0 ? line.DebitAmount.ToString("N2") : "-")
+                                    </td>
+                                    <td class="text-right">
+                                        @(line.CreditAmount > 0 ? line.CreditAmount.ToString("N2") : "-")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No lines found for this entry.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -41,11 +41,18 @@ namespace QuarryManagementSystem.Models.Domain
         [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "Paid Amount")]
         public decimal PaidAmount { get; set; } = 0;
-
+ 
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Prepayment Applied")]
+        public decimal PrepaymentApplied { get; set; } = 0;
+ 
+        [Display(Name = "Fully Prepaid")]
+        public bool IsFullyPrepaid { get; set; } = false;
+ 
         [NotMapped]
         [Display(Name = "Outstanding Balance")]
         public decimal OutstandingBalance => TotalAmount - PaidAmount;
-
+ 
         [StringLength(20)]
         [Display(Name = "Status")]
         public string Status { get; set; } = "Unpaid"; // Unpaid, Paid, Overdue, Cancelled
@@ -77,6 +84,7 @@ namespace QuarryManagementSystem.Models.Domain
         public virtual Customer Customer { get; set; } = null!;
         public virtual WeighmentTransaction? WeighmentTransaction { get; set; }
         public virtual ApplicationUser? CreatedByUser { get; set; }
+        public virtual ICollection<PrepaymentApplication> PrepaymentApplications { get; set; } = new List<PrepaymentApplication>();
 
         // Helper methods
         public bool IsPaid()

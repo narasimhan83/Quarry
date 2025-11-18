@@ -29,6 +29,8 @@ namespace QuarryManagementSystem.Data
         public DbSet<PayrollRun> PayrollRuns { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
         public DbSet<StockYard> StockYards { get; set; }
+        public DbSet<CustomerPrepayment> CustomerPrepayments { get; set; }
+        public DbSet<PrepaymentApplication> PrepaymentApplications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -263,7 +265,8 @@ modelBuilder.Entity<Quotation>()
                 new ChartOfAccounts { Id = 6, AccountCode = "2101", AccountName = "VAT Output Tax", AccountType = "Liability", SubType = "Current" },
                 new ChartOfAccounts { Id = 7, AccountCode = "2102", AccountName = "VAT Input Tax", AccountType = "Asset", SubType = "Current" },
                 new ChartOfAccounts { Id = 8, AccountCode = "4001", AccountName = "Sale of Aggregates", AccountType = "Revenue", SubType = "Sales" },
-                new ChartOfAccounts { Id = 9, AccountCode = "5001", AccountName = "Cost of Materials Sold", AccountType = "Expense", SubType = "COGS" }
+                new ChartOfAccounts { Id = 9, AccountCode = "5001", AccountName = "Cost of Materials Sold", AccountType = "Expense", SubType = "COGS" },
+                new ChartOfAccounts { Id = 10, AccountCode = "2103", AccountName = "Customer Prepayments", AccountType = "Liability", SubType = "Current" }
             );
 
             modelBuilder.Entity<Material>().HasData(

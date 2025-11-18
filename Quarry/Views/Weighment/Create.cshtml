@@ -407,13 +407,20 @@
                     url: '@Url.Action("CheckCustomerCredit", "Weighment")',
                     type: 'GET',
                     data: { customerId: customerId, estimatedAmount: estimatedAmount },
-                    success: function(data) {
+                    success: function (data) {
                         if (data.success) {
                             var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
                             html += '<strong>Credit Info:</strong><br>';
                             html += 'Available Credit: ₦' + data.availableCredit.toFixed(2).toLocaleString() + '<br>';
                             html += 'Current Outstanding: ₦' + data.currentOutstanding.toFixed(2).toLocaleString() + '<br>';
+                            if (data.prepaymentBalance !== undefined) {
+                                html += 'Prepayment Balance (Wallet): ₦' + data.prepaymentBalance.toFixed(2).toLocaleString() + '<br>';
+                                html += 'Effective Outstanding (after prepayment): ₦' + data.effectiveOutstanding.toFixed(2).toLocaleString() + '<br>';
+                            }
                             html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString();
+                            if (data.projectedOutstanding !== undefined) {
+                                html += '<br>Projected Outstanding (this load): ₦' + data.projectedOutstanding.toFixed(2).toLocaleString();
+                            }
                             if (data.exceedsLimit) {
                                 html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
                             }
@@ -421,7 +428,7 @@
                             $('#customerCreditInfo').html(html);
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $('#customerCreditInfo').html('<div class="alert alert-warning alert-sm">Error checking customer credit</div>');
                     }
                 });
