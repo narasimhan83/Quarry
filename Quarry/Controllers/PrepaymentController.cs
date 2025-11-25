@@ -173,6 +173,10 @@ namespace QuarryManagementSystem.Controllers
             {
                 var entryNumber = JournalEntry.GenerateEntryNumber("ADV");
 
+                // Resolve account ids once so we can also recalculate their balances later
+                var cashAccountId = await GetCashAccountId();
+                var customerPrepaymentAccountId = await GetCustomerPrepaymentAccountId();
+
                 var journalEntry = new JournalEntry
                 {
                     EntryNumber = entryNumber,
@@ -187,7 +191,7 @@ namespace QuarryManagementSystem.Controllers
                 // Debit Cash/Bank
                 journalEntry.JournalEntryLines.Add(new JournalEntryLine
                 {
-                    AccountId = await GetCashAccountId(),
+                    AccountId = cashAccountId,
                     DebitAmount = prepayment.Amount,
                     CreditAmount = 0,
                     LineDescription = $"Prepayment received - {prepayment.PrepaymentNumber}"
@@ -196,7 +200,7 @@ namespace QuarryManagementSystem.Controllers
                 // Credit Customer Prepayments (liability)
                 journalEntry.JournalEntryLines.Add(new JournalEntryLine
                 {
-                    AccountId = await GetCustomerPrepaymentAccountId(),
+                    AccountId = customerPrepaymentAccountId,
                     DebitAmount = 0,
                     CreditAmount = prepayment.Amount,
                     LineDescription = $"Customer prepayment liability - {prepayment.PrepaymentNumber}"
@@ -206,11 +210,57 @@ namespace QuarryManagementSystem.Controllers
 
                 _context.JournalEntries.Add(journalEntry);
                 await _context.SaveChangesAsync();
+
+                // After the journal entry is saved, recalculate balances for the affected accounts
+                await RecalculateAccountBalanceAsync(cashAccountId);
+                await RecalculateAccountBalanceAsync(customerPrepaymentAccountId);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating journal entry for prepayment");
             }
+        }
+
+        /// <summary>
+        /// Recalculates a single account's CurrentBalance from all its journal entry lines
+        /// plus its OpeningBalance. This guarantees the Chart of Accounts ledger is accurate.
+        /// </summary>
+        private async Task RecalculateAccountBalanceAsync(int accountId)
+        {
+            var account = await _context.ChartOfAccounts
+                .FirstOrDefaultAsync(a => a.Id == accountId);
+
+            if (account == null)
+                return;
+
+            var totals = await _context.JournalEntryLines
+                .Where(l => l.AccountId == accountId)
+                .GroupBy(l => l.AccountId)
+                .Select(g => new
+                {
+                    Debit = g.Sum(l => l.DebitAmount),
+                    Credit = g.Sum(l => l.CreditAmount)
+                })
+                .FirstOrDefaultAsync();
+
+            decimal totalDebit = totals?.Debit ?? 0;
+            decimal totalCredit = totals?.Credit ?? 0;
+
+            decimal netMovement;
+
+            if (account.IsAssetAccount() || account.IsExpenseAccount())
+            {
+                // Assets & Expenses: debit increases, credit decreases
+                netMovement = totalDebit - totalCredit;
+            }
+            else
+            {
+                // Liabilities, Equity, Revenue: credit increases, debit decreases
+                netMovement = totalCredit - totalDebit;
+            }
+
+            account.CurrentBalance = account.OpeningBalance + netMovement;
         }
 
         private async Task<int> GetCashAccountId()
