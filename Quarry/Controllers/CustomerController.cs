@@ -138,8 +138,11 @@ namespace QuarryManagementSystem.Controllers
                     _context.Add(customer);
                     await _context.SaveChangesAsync();
 
+                    // Create a dedicated ledger account for this customer in Chart of Accounts
+                    await EnsureCustomerLedgerAccountAsync(customer);
+
                     TempData["Success"] = "Customer created successfully.";
-                    _logger.LogInformation("Customer {CustomerName} created by user {UserName}", 
+                    _logger.LogInformation("Customer {CustomerName} created by user {UserName}",
                         customer.Name, User.Identity?.Name);
                     
                     return RedirectToAction(nameof(Index));
@@ -419,6 +422,63 @@ namespace QuarryManagementSystem.Controllers
                 new SelectListItem { Value = "Inactive", Text = "Inactive" },
                 new SelectListItem { Value = "Blacklisted", Text = "Blacklisted" }
             };
+        }
+
+        // Ledger helpers: create/sync a Chart of Accounts entry for each customer
+        private string GenerateCustomerAccountCode(int customerId)
+        {
+            // Accounts Receivable base account is 1101; append zero-padded customer id
+            return $"1101-{customerId:D6}";
+        }
+
+        private async Task EnsureCustomerLedgerAccountAsync(Customer customer)
+        {
+            try
+            {
+                var accountCode = GenerateCustomerAccountCode(customer.Id);
+
+                var existing = await _context.ChartOfAccounts
+                    .FirstOrDefaultAsync(a => a.AccountCode == accountCode);
+
+                if (existing != null)
+                {
+                    // Keep in sync with latest customer info
+                    var desiredName = $"Accounts Receivable - {customer.Name}";
+                    var desiredActive = customer.Status == "Active";
+                    if (!string.Equals(existing.AccountName, desiredName, StringComparison.Ordinal) ||
+                        existing.IsActive != desiredActive ||
+                        existing.CurrentBalance != customer.OutstandingBalance)
+                    {
+                        existing.AccountName = desiredName;
+                        existing.IsActive = desiredActive;
+                        existing.CurrentBalance = customer.OutstandingBalance;
+                        await _context.SaveChangesAsync();
+                    }
+                    return;
+                }
+
+                var account = new ChartOfAccounts
+                {
+                    AccountCode = accountCode,
+                    AccountName = $"Accounts Receivable - {customer.Name}",
+                    AccountType = "Asset",
+                    SubType = "Current",
+                    OpeningBalance = 0m,
+                    CurrentBalance = customer.OutstandingBalance,
+                    IsActive = customer.Status == "Active",
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.ChartOfAccounts.Add(account);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Created ledger account {AccountCode} for customer {CustomerId}", accountCode, customer.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating or syncing ledger account for customer {CustomerId}", customer.Id);
+                // Do not block customer creation if ledger fails; can be addressed later by admins
+            }
         }
     }
 }
