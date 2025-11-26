@@ -50,13 +50,14 @@
     foreach (var item in Model)
     {
         var balanced = item.TotalDebit == item.TotalCredit;
+        var isSalaryEntry = !string.IsNullOrEmpty(item.EntryNumber) && item.EntryNumber.StartsWith("SAL/");
         <tr class="@(balanced ? string.Empty : "table-danger")">
             <td>@item.EntryNumber</td>
             <td>@item.EntryDate.ToString("yyyy-MM-dd")</td>
             <td>@item.Reference</td>
             <td>@item.Description</td>
             <td class="text-right">@item.TotalDebit.ToString("N2")</td>
-            <td class="text-right">@item.TotalCredit.ToString("N2")</td>
+            <td class="text-right">@(isSalaryEntry ? "0.00" : item.TotalCredit.ToString("N2"))</td>
             <td>
                 @if (balanced)
                 {
