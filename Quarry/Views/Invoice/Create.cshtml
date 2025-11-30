@@ -242,6 +242,7 @@
                 } else {
                     $('#weighmentsTableBody').html('<tr><td colspan="7" class="text-center text-muted"><i class="fas fa-info-circle"></i> Please select a customer to view available weighments</td></tr>');
                     $('#customerCreditInfo').html('<p class="text-muted">Select a customer to view credit information</p>');
+                    $('#AvailablePrepayment').val('0.00');
                     updateInvoiceSummary();
                 }
             });
@@ -286,7 +287,7 @@
                     url: '@Url.Action("CheckCustomerCredit", "Invoice")',
                     type: 'GET',
                     data: { customerId: customerId, estimatedAmount: 0 },
-                    success: function(data) {
+                    success: function (data) {
                         if (data.success) {
                             var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
                             html += '<strong>Credit Info:</strong><br>';
@@ -298,10 +299,18 @@
                             }
                             html += '</div>';
                             $('#customerCreditInfo').html(html);
+
+                            // Update Available Prepayment field from wallet balance
+                            if (typeof data.prepaymentBalance === 'number') {
+                                $('#AvailablePrepayment').val(data.prepaymentBalance.toFixed(2));
+                            } else {
+                                $('#AvailablePrepayment').val('0.00');
+                            }
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $('#customerCreditInfo').html('<div class="alert alert-warning alert-sm">Error checking customer credit</div>');
+                        $('#AvailablePrepayment').val('0.00');
                     }
                 });
             }
@@ -359,7 +368,7 @@
                     url: '@Url.Action("CheckCustomerCredit", "Invoice")',
                     type: 'GET',
                     data: { customerId: customerId, estimatedAmount: totalAmount },
-                    success: function(data) {
+                    success: function (data) {
                         if (data.success) {
                             var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
                             html += '<strong>Credit Info:</strong><br>';
@@ -368,17 +377,23 @@
                             html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString() + '<br>';
                             html += 'Invoice Total: ₦' + totalAmount.toFixed(2).toLocaleString();
                             if (data.exceedsLimit) {
-                                html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
-                                $('#createInvoiceBtn').prop('disabled', true);
-                            } else {
-                                $('#createInvoiceBtn').prop('disabled', false);
+                                html += '<br><strong class="text-danger">Credit limit exceeded! (Invoice can still be created; this is a warning only.)</strong>';
+                                // Do NOT disable the Create Invoice button here; just warn
                             }
                             html += '</div>';
                             $('#customerCreditInfo').html(html);
+
+                            // Update Available Prepayment field from wallet balance
+                            if (typeof data.prepaymentBalance === 'number') {
+                                $('#AvailablePrepayment').val(data.prepaymentBalance.toFixed(2));
+                            } else {
+                                $('#AvailablePrepayment').val('0.00');
+                            }
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $('#customerCreditInfo').html('<div class="alert alert-warning alert-sm">Error checking customer credit</div>');
+                        $('#AvailablePrepayment').val('0.00');
                     }
                 });
             }

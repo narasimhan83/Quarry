@@ -17,18 +17,16 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "RC Number")]
         public string? RCNumber { get; set; }
 
-        [Required(ErrorMessage = "Location is required")]
         [StringLength(255)]
-        public string Location { get; set; } = string.Empty;
+        [Display(Name = "Location")]
+        public string? Location { get; set; }
 
-        [Required(ErrorMessage = "LGA is required")]
         [StringLength(100)]
         [Display(Name = "Local Government Area")]
-        public string LGA { get; set; } = string.Empty;
+        public string? LGA { get; set; }
 
-        [Required(ErrorMessage = "State is required")]
         [StringLength(50)]
-        public string State { get; set; } = string.Empty;
+        public string? State { get; set; }
 
         [StringLength(50)]
         [Display(Name = "Mining License Number")]
@@ -98,7 +96,16 @@ namespace QuarryManagementSystem.Models.Domain
 
         public string GetFullAddress()
         {
-            return $"{Location}, {LGA}, {State}";
+            var addressParts = new List<string>();
+            
+            if (!string.IsNullOrWhiteSpace(Location))
+                addressParts.Add(Location);
+            if (!string.IsNullOrWhiteSpace(LGA))
+                addressParts.Add(LGA);
+            if (!string.IsNullOrWhiteSpace(State))
+                addressParts.Add(State);
+                
+            return string.Join(", ", addressParts);
         }
 
         public void UpdateAvailableCredit()

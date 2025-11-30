@@ -28,6 +28,7 @@ namespace QuarryManagementSystem.Controllers
         {
             var query = _context.CustomerPrepayments
                 .Include(p => p.Customer)
+                .Include(p => p.Applications)
                 .AsQueryable();
 
             if (customerId.HasValue)
@@ -50,6 +51,33 @@ namespace QuarryManagementSystem.Controllers
                 .ThenByDescending(p => p.Id)
                 .ToListAsync();
 
+            // Ensure UsedAmount is always in sync with actual applications.
+            // This fixes any historical data where UsedAmount was not updated correctly
+            // when invoices applied prepayments.
+            bool anyUpdated = false;
+            foreach (var p in prepayments)
+            {
+                var appliedTotal = p.Applications?.Sum(a => a.AppliedAmount) ?? 0m;
+                if (appliedTotal != p.UsedAmount)
+                {
+                    p.UsedAmount = appliedTotal;
+                    p.UpdatedAt = DateTime.Now;
+                    p.UpdatedBy = User.Identity?.Name;
+                    anyUpdated = true;
+
+                    // If fully used, mark as Exhausted
+                    if (p.Amount - p.UsedAmount <= 0 && p.Status == "Active")
+                    {
+                        p.Status = "Exhausted";
+                    }
+                }
+            }
+
+            if (anyUpdated)
+            {
+                await _context.SaveChangesAsync();
+            }
+ 
             ViewBag.Customers = await _context.Customers
                 .OrderBy(c => c.Name)
                 .Select(c => new SelectListItem
@@ -58,7 +86,7 @@ namespace QuarryManagementSystem.Controllers
                     Text = c.Name
                 })
                 .ToListAsync();
-
+ 
             return View(prepayments);
         }
 

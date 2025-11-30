@@ -91,7 +91,7 @@
                                     <div class="form-group">
                                         <label asp-for="State" class="control-label"></label>
                                         <select asp-for="State" asp-items="ViewBag.States" class="form-control">
-                                            <option value="">-- Select State --</option>
+                                            <option value="">-- Select State (Optional) --</option>
                                         </select>
                                         <span asp-validation-for="State" class="text-danger"></span>
                                     </div>
@@ -100,7 +100,7 @@
                                     <div class="form-group">
                                         <label asp-for="LGA" class="control-label"></label>
                                         <select asp-for="LGA" asp-items="ViewBag.LGAs" class="form-control">
-                                            <option value="">-- Select LGA --</option>
+                                            <option value="">-- Select LGA (Optional) --</option>
                                         </select>
                                         <span asp-validation-for="LGA" class="text-danger"></span>
                                     </div>
@@ -111,7 +111,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="Location" class="control-label"></label>
-                                        <input asp-for="Location" class="form-control" />
+                                        <input asp-for="Location" class="form-control" placeholder="Location (Optional)" />
                                         <span asp-validation-for="Location" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -157,7 +157,12 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="Status" class="control-label"></label>
-                                        <select asp-for="Status" asp-items="ViewBag.Statuses" class="form-control"></select>
+                                        <select asp-for="Status" asp-items="ViewBag.Statuses" class="form-control">
+                                            @if (ViewBag.SelectedStatus != null)
+                                            {
+                                                <option value="@ViewBag.SelectedStatus" selected>@ViewBag.SelectedStatus</option>
+                                            }
+                                        </select>
                                         <span asp-validation-for="Status" class="text-danger"></span>
                                     </div>
                                 </div>

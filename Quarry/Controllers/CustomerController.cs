@@ -110,10 +110,13 @@ namespace QuarryManagementSystem.Controllers
         // GET: Customer/Create
         public IActionResult Create()
         {
+            var customer = new Customer { Status = "Active" };
+            
             ViewBag.States = GetNigerianStates();
             ViewBag.LGAs = GetNigerianLGAs();
             ViewBag.Statuses = GetCustomerStatuses();
-            return View();
+            ViewBag.SelectedStatus = "Active"; // Pre-select Active status
+            return View(customer);
         }
 
         // POST: Customer/Create
@@ -134,6 +137,22 @@ namespace QuarryManagementSystem.Controllers
                     customer.CreatedAt = DateTime.Now;
                     customer.OutstandingBalance = 0;
                     customer.Status = "Active";
+                    
+                    // Handle optional location fields - store trimmed value or empty string (avoid DB errors on NOT NULL columns)
+                    if (!string.IsNullOrWhiteSpace(customer.Location))
+                        customer.Location = customer.Location.Trim();
+                    else
+                        customer.Location = string.Empty;
+
+                    if (!string.IsNullOrWhiteSpace(customer.LGA))
+                        customer.LGA = customer.LGA.Trim();
+                    else
+                        customer.LGA = string.Empty;
+
+                    if (!string.IsNullOrWhiteSpace(customer.State))
+                        customer.State = customer.State.Trim();
+                    else
+                        customer.State = string.Empty;
 
                     _context.Add(customer);
                     await _context.SaveChangesAsync();
@@ -177,6 +196,7 @@ namespace QuarryManagementSystem.Controllers
             ViewBag.States = GetNigerianStates();
             ViewBag.LGAs = GetNigerianLGAs();
             ViewBag.Statuses = GetCustomerStatuses();
+            ViewBag.SelectedStatus = customer.Status;
             return View(customer);
         }
 
@@ -202,6 +222,22 @@ namespace QuarryManagementSystem.Controllers
                 {
                     try
                     {
+                        // Normalize optional address fields before saving
+                        if (!string.IsNullOrWhiteSpace(customer.Location))
+                            customer.Location = customer.Location.Trim();
+                        else
+                            customer.Location = string.Empty;
+
+                        if (!string.IsNullOrWhiteSpace(customer.LGA))
+                            customer.LGA = customer.LGA.Trim();
+                        else
+                            customer.LGA = string.Empty;
+
+                        if (!string.IsNullOrWhiteSpace(customer.State))
+                            customer.State = customer.State.Trim();
+                        else
+                            customer.State = string.Empty;
+
                         customer.UpdatedAt = DateTime.Now;
                         _context.Update(customer);
                         await _context.SaveChangesAsync();

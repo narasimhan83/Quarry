@@ -170,6 +170,19 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "Prepayment Applied")]
         [DataType(DataType.Currency)]
         public decimal PrepaymentApplied => Invoice.PrepaymentApplied;
+
+        /// <summary>
+        /// Journal entries representing payments recorded against this invoice (PAY entries).
+        /// Used to show payment history and generate receipts.
+        /// </summary>
+        [Display(Name = "Payments")]
+        public List<JournalEntry> PaymentJournalEntries { get; set; } = new();
+
+        /// <summary>
+        /// Prepayment applications (wallet usages) applied to this invoice.
+        /// </summary>
+        [Display(Name = "Prepayment Applications")]
+        public List<PrepaymentApplication> PrepaymentApplications { get; set; } = new();
     }
 
     public class InvoicePrintViewModel
@@ -190,6 +203,18 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "Prepayment Applied")]
         [DataType(DataType.Currency)]
         public decimal PrepaymentApplied => Invoice.PrepaymentApplied;
+    }
+
+    /// <summary>
+    /// View model for a payment receipt issued when an invoice payment is recorded.
+    /// </summary>
+    public class PaymentReceiptViewModel
+    {
+        public Invoice Invoice { get; set; } = new();
+
+        public JournalEntry PaymentEntry { get; set; } = new();
+
+        public CompanyDetailsViewModel CompanyDetails { get; set; } = new();
     }
 
     public class InvoiceItemViewModel

@@ -190,17 +190,95 @@
                             <label>Amount in Words</label>
                             <textarea class="form-control" rows="2" readonly>@Model.AmountInWords</textarea>
                         </div>
+
+                        @* Payment history (journal entries) *@
+                        @if (Model.PaymentJournalEntries != null && Model.PaymentJournalEntries.Any())
+                        {
+                            <hr />
+                            <h5>Payment History</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped mb-2">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Entry #</th>
+                                            <th>Description</th>
+                                            <th class="text-right">Amount (₦)</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var entry in Model.PaymentJournalEntries)
+                                        {
+                                            <tr>
+                                                <td>@entry.EntryDate.ToString("dd/MM/yyyy")</td>
+                                                <td>@entry.EntryNumber</td>
+                                                <td>@entry.Description</td>
+                                                <td class="text-right">@entry.TotalDebit.ToString("N2")</td>
+                                                <td class="text-right">
+                                                    <a asp-controller="JournalEntry" asp-action="Details" asp-route-id="@entry.Id" class="btn btn-xs btn-outline-secondary">
+                                                        <i class="fas fa-book"></i>
+                                                    </a>
+                                                    <a asp-action="PaymentReceipt"
+                                                       asp-route-id="@Model.Invoice.Id"
+                                                       asp-route-journalEntryId="@entry.Id"
+                                                       class="btn btn-xs btn-outline-primary">
+                                                        <i class="fas fa-receipt"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+
+                        @* Prepayment applications (wallet usage) *@
+                        @if (Model.PrepaymentApplications != null && Model.PrepaymentApplications.Any())
+                        {
+                            <hr />
+                            <h5>Prepayment Applications</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Prepayment #</th>
+                                            <th class="text-right">Applied (₦)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var app in Model.PrepaymentApplications)
+                                        {
+                                            <tr>
+                                                <td>@app.AppliedDate.ToString("dd/MM/yyyy")</td>
+                                                <td>@app.CustomerPrepayment?.PrepaymentNumber</td>
+                                                <td class="text-right">@app.AppliedAmount.ToString("N2")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
                     </div>
                     <div class="card-footer d-flex gap-2">
                         <a asp-action="Index" class="btn btn-secondary mr-2"><i class="fas fa-arrow-left"></i> Back</a>
                         <a asp-action="Print" asp-route-id="@Model.Invoice.Id" class="btn btn-info mr-2"><i class="fas fa-print"></i> Print</a>
+                        @if (Model.Invoice.PaidAmount > 0)
+                        {
+                            <a asp-action="PaymentReceipt" asp-route-id="@Model.Invoice.Id" class="btn btn-success mr-2">
+                                <i class="fas fa-receipt"></i> Payment Receipt
+                            </a>
+                        }
                         @if (Model.CanEditPayment)
                         {
-                            <a asp-action="RecordPayment" asp-route-id="@Model.Invoice.Id" class="btn btn-primary mr-2"><i class="fas fa-cash-register"></i> Record Payment</a>
+                            <a asp-action="RecordPayment" asp-route-id="@Model.Invoice.Id" class="btn btn-primary mr-2">
+                                <i class="fas fa-cash-register"></i> Record Payment
+                            </a>
                         }
                         @if (Model.CanCancel)
                         {
-                            <form asp-action="Cancel" asp-route-id="@Model.Invoice.Id" method="post" class="d-inline" onsubmit="return confirm('Cancel this invoice? This cannot be undone.');">
+                            <form asp-action="Cancel" asp-route-id="@Model.Invoice.Id" method="post" class="d-inline" onsubmit="return confirm("Cancel this invoice? This cannot be undone.");">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>
                             </form>

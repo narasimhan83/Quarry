@@ -23,7 +23,10 @@ namespace QuarryManagementSystem.Data
                 // Seed admin user
                 await SeedAdminUser(userManager);
     
-                // Seed default data
+                // Ensure core Chart of Accounts rows exist (safe even if some were deleted)
+                await SeedChartOfAccountsAsync(context);
+
+                // Seed other default data
                 await SeedDefaultQuarry(context);
                 await SeedDefaultWeighbridge(context);
                 await SeedDefaultMaterials(context);
@@ -187,6 +190,73 @@ namespace QuarryManagementSystem.Data
                 await context.Materials.AddRangeAsync(defaultMaterials);
                 await context.SaveChangesAsync();
                 Console.WriteLine("Default materials seeded successfully");
+            }
+        }
+
+        /// <summary>
+        /// Ensures that the core Chart of Accounts rows exist even if they were
+        /// accidentally deleted. This runs at startup and only inserts missing
+        /// accounts; it is safe to call repeatedly.
+        /// </summary>
+        private static async Task SeedChartOfAccountsAsync(ApplicationDbContext context)
+        {
+            var requiredAccounts = new List<ChartOfAccounts>
+            {
+                // Assets
+                new ChartOfAccounts { AccountCode = "1001", AccountName = "Cash & Bank Balances",             AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { AccountCode = "1101", AccountName = "Accounts Receivable",               AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { AccountCode = "1201", AccountName = "Raw Material Stock",                AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { AccountCode = "1501", AccountName = "Plant & Machinery (Quarry Equipment)", AccountType = "Asset", SubType = "Fixed" },
+
+                // Liabilities
+                new ChartOfAccounts { AccountCode = "2001", AccountName = "Accounts Payable",                  AccountType = "Liability", SubType = "Current" },
+                new ChartOfAccounts { AccountCode = "2101", AccountName = "VAT Output Tax",                    AccountType = "Liability", SubType = "Current" },
+                new ChartOfAccounts { AccountCode = "2102", AccountName = "VAT Input Tax",                     AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { AccountCode = "2103", AccountName = "Customer Prepayments",             AccountType = "Liability", SubType = "Current" },
+
+                // Revenue
+                new ChartOfAccounts { AccountCode = "4001", AccountName = "Sale of Aggregates",                AccountType = "Revenue",   SubType = "Sales" },
+                new ChartOfAccounts { AccountCode = "4002", AccountName = "Transport & Delivery Income",   AccountType = "Revenue",   SubType = "Service" },
+                new ChartOfAccounts { AccountCode = "4003", AccountName = "Other Operating Income",            AccountType = "Revenue",   SubType = "Other" },
+
+                // Direct costs / COGS
+                new ChartOfAccounts { AccountCode = "5001", AccountName = "Cost of Materials Sold",            AccountType = "Expense",   SubType = "COGS" },
+                new ChartOfAccounts { AccountCode = "5002", AccountName = "Production & Quarrying Costs", AccountType = "Expense",   SubType = "COGS" },
+                new ChartOfAccounts { AccountCode = "5003", AccountName = "Transport & Loading Costs",    AccountType = "Expense",   SubType = "COGS" },
+
+                // Operating expenses
+                new ChartOfAccounts { AccountCode = "6001", AccountName = "Salaries & Wages",              AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { AccountCode = "6002", AccountName = "Fuel & Lubricants",            AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { AccountCode = "6003", AccountName = "Repairs & Maintenance",        AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { AccountCode = "6004", AccountName = "Office & Admin Expenses",      AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { AccountCode = "6005", AccountName = "Utilities",                        AccountType = "Expense",   SubType = "Operating" },
+
+                // Equity
+                new ChartOfAccounts { AccountCode = "3001", AccountName = "Owner's Equity / Share Capital", AccountType = "Equity", SubType = "Capital" },
+                new ChartOfAccounts { AccountCode = "3101", AccountName = "Retained Earnings",                AccountType = "Equity",    SubType = "Retained" }
+            };
+
+            var existingCodes = await context.ChartOfAccounts
+                .Select(a => a.AccountCode)
+                .ToListAsync();
+
+            var toInsert = requiredAccounts
+                .Where(a => !existingCodes.Contains(a.AccountCode))
+                .ToList();
+
+            if (toInsert.Any())
+            {
+                foreach (var acc in toInsert)
+                {
+                    acc.CreatedAt = DateTime.Now;
+                    acc.IsActive = true;
+                    acc.OpeningBalance = 0m;
+                    acc.CurrentBalance = 0m;
+                }
+
+                await context.ChartOfAccounts.AddRangeAsync(toInsert);
+                await context.SaveChangesAsync();
+                Console.WriteLine($"Seeded {toInsert.Count} missing Chart of Accounts records.");
             }
         }
 

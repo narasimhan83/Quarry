@@ -1,4 +1,4 @@
-@model IEnumerable<QuarryManagementSystem.Models.Domain.ChartOfAccounts>
+@model QuarryManagementSystem.ViewModels.OpeningBalanceFiscalYearViewModel
 
 @{
     ViewData["Title"] = "Opening Balances";
@@ -12,46 +12,106 @@
 }
 
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Opening Balances</h3>
-        <div class="card-tools">
-            <span class="text-muted small">Read-only view of opening and current balances</span>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="card-title mb-0">Opening Balances</h3>
+            <div class="text-muted small">
+                Maintain opening balances per account for the selected fiscal year.
+            </div>
+        </div>
+        <div>
+            <form asp-action="Index" method="get" class="form-inline">
+                <label asp-for="FiscalYearId" class="mr-2 mb-0">Fiscal Year</label>
+                <select asp-for="FiscalYearId"
+                        asp-items="Model.FiscalYears"
+                        class="form-control form-control-sm"
+                        onchange="this.form.submit()">
+                </select>
+            </form>
         </div>
     </div>
-    <div class="card-body table-responsive p-0">
-        <table class="table table-hover table-striped table-sm">
-            <thead>
-                <tr>
-                    <th>Account Code</th>
-                    <th>Account Name</th>
-                    <th>Type</th>
-                    <th>Sub Type</th>
-                    <th class="text-right">Opening Balance (₦)</th>
-                    <th class="text-right">Current Balance (₦)</th>
-                </tr>
-            </thead>
-            <tbody>
-@if (Model != null && Model.Any())
-{
-    foreach (var item in Model)
-    {
-        <tr>
-            <td>@item.AccountCode</td>
-            <td>@item.AccountName</td>
-            <td>@item.AccountType</td>
-            <td>@item.SubType</td>
-            <td class="text-right">@item.OpeningBalance.ToString("N2")</td>
-            <td class="text-right">@item.CurrentBalance.ToString("N2")</td>
-        </tr>
-    }
-}
-else
-{
-    <tr>
-        <td colspan="6" class="text-center text-muted">No accounts found.</td>
-    </tr>
-}
-            </tbody>
-        </table>
+
+    <div class="card-body">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["Success"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["Error"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="mb-2">
+            <span class="badge badge-info">
+                @Model.FiscalYearName
+            </span>
+        </div>
+
+        <form asp-action="Save" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="FiscalYearId" />
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Account Code</th>
+                            <th>Account Name</th>
+                            <th>Type</th>
+                            <th>Sub Type</th>
+                            <th class="text-right" style="width: 180px;">Opening Balance (₦)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Accounts != null && Model.Accounts.Any())
+                        {
+                            for (var i = 0; i < Model.Accounts.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.Accounts[i].AccountCode</td>
+                                    <td>@Model.Accounts[i].AccountName</td>
+                                    <td>@Model.Accounts[i].AccountType</td>
+                                    <td>@Model.Accounts[i].SubType</td>
+                                    <td class="text-right">
+                                        <input type="hidden" asp-for="Accounts[i].AccountId" />
+                                        <input asp-for="Accounts[i].OpeningBalance"
+                                               class="form-control form-control-sm text-right" />
+                                        <span asp-validation-for="Accounts[i].OpeningBalance"
+                                              class="text-danger small"></span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No accounts found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Opening Balances
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

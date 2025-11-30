@@ -23,6 +23,11 @@ namespace QuarryManagementSystem.Data
         public DbSet<JournalEntry> JournalEntries { get; set; }
         public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+
+        // Accounting Fiscal Years
+        public DbSet<FiscalYear> FiscalYears { get; set; }
+        public DbSet<AccountFiscalYearBalance> AccountFiscalYearBalances { get; set; }
+
         // Quotations
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<QuotationItem> QuotationItems { get; set; }
@@ -127,17 +132,30 @@ namespace QuarryManagementSystem.Data
                 .WithMany(u => u.JournalEntries)
                 .HasForeignKey(je => je.PostedBy)
                 .OnDelete(DeleteBehavior.Restrict);
-
+ 
             modelBuilder.Entity<JournalEntryLine>()
                 .HasOne(jel => jel.JournalEntry)
                 .WithMany(je => je.JournalEntryLines)
                 .HasForeignKey(jel => jel.JournalEntryId)
                 .OnDelete(DeleteBehavior.Cascade);
-
+ 
             modelBuilder.Entity<JournalEntryLine>()
                 .HasOne(jel => jel.Account)
                 .WithMany(ca => ca.JournalEntryLines)
                 .HasForeignKey(jel => jel.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Fiscal Year / AccountFiscalYearBalance relationships
+            modelBuilder.Entity<AccountFiscalYearBalance>()
+                .HasOne(b => b.Account)
+                .WithMany()
+                .HasForeignKey(b => b.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountFiscalYearBalance>()
+                .HasOne(b => b.FiscalYear)
+                .WithMany(fy => fy.AccountBalances)
+                .HasForeignKey(b => b.FiscalYearId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure StockYard relationships
@@ -157,33 +175,41 @@ namespace QuarryManagementSystem.Data
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.Phone)
                 .IsUnique();
-
+ 
             modelBuilder.Entity<WeighmentTransaction>()
                 .HasIndex(w => w.TransactionNumber)
                 .IsUnique();
-modelBuilder.Entity<Invoice>()
-    .HasIndex(i => i.InvoiceNumber)
-    .IsUnique();
-
-modelBuilder.Entity<Quotation>()
-    .HasIndex(q => q.QuotationNumber)
-    .IsUnique();
-
-
+ modelBuilder.Entity<Invoice>()
+     .HasIndex(i => i.InvoiceNumber)
+     .IsUnique();
+ 
+ modelBuilder.Entity<Quotation>()
+     .HasIndex(q => q.QuotationNumber)
+     .IsUnique();
+ 
+ 
             modelBuilder.Entity<Employee>()
                 .HasIndex(e => e.EmployeeCode)
                 .IsUnique();
-
+ 
             modelBuilder.Entity<ChartOfAccounts>()
                 .HasIndex(c => c.AccountCode)
                 .IsUnique();
-
+ 
             modelBuilder.Entity<PayrollRun>()
                 .HasIndex(pr => pr.RunNumber)
                 .IsUnique();
-
+ 
             modelBuilder.Entity<JournalEntry>()
                 .HasIndex(je => je.EntryNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<FiscalYear>()
+                .HasIndex(f => f.YearCode)
+                .IsUnique();
+
+            modelBuilder.Entity<AccountFiscalYearBalance>()
+                .HasIndex(b => new { b.AccountId, b.FiscalYearId })
                 .IsUnique();
 
 
@@ -255,18 +281,41 @@ modelBuilder.Entity<Quotation>()
                 .IsRequired()
                 .HasMaxLength(50);
 
-            // Seed initial data
+            // Seed initial data for Chart of Accounts
+            // NOTE: Id values 1-10 are existing and used by migrations; do not change them.
             modelBuilder.Entity<ChartOfAccounts>().HasData(
-                new ChartOfAccounts { Id = 1, AccountCode = "1001", AccountName = "Cash & Bank Balances", AccountType = "Asset", SubType = "Current" },
-                new ChartOfAccounts { Id = 2, AccountCode = "1101", AccountName = "Accounts Receivable", AccountType = "Asset", SubType = "Current" },
-                new ChartOfAccounts { Id = 3, AccountCode = "1201", AccountName = "Raw Material Stock", AccountType = "Asset", SubType = "Current" },
-                new ChartOfAccounts { Id = 4, AccountCode = "1501", AccountName = "Plant & Machinery (Quarry Equipment)", AccountType = "Asset", SubType = "Fixed" },
-                new ChartOfAccounts { Id = 5, AccountCode = "2001", AccountName = "Accounts Payable", AccountType = "Liability", SubType = "Current" },
-                new ChartOfAccounts { Id = 6, AccountCode = "2101", AccountName = "VAT Output Tax", AccountType = "Liability", SubType = "Current" },
-                new ChartOfAccounts { Id = 7, AccountCode = "2102", AccountName = "VAT Input Tax", AccountType = "Asset", SubType = "Current" },
-                new ChartOfAccounts { Id = 8, AccountCode = "4001", AccountName = "Sale of Aggregates", AccountType = "Revenue", SubType = "Sales" },
-                new ChartOfAccounts { Id = 9, AccountCode = "5001", AccountName = "Cost of Materials Sold", AccountType = "Expense", SubType = "COGS" },
-                new ChartOfAccounts { Id = 10, AccountCode = "2103", AccountName = "Customer Prepayments", AccountType = "Liability", SubType = "Current" }
+                // ASSETS
+                new ChartOfAccounts { Id = 1,  AccountCode = "1001", AccountName = "Cash & Bank Balances",             AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { Id = 2,  AccountCode = "1101", AccountName = "Accounts Receivable",               AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { Id = 3,  AccountCode = "1201", AccountName = "Raw Material Stock",                AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { Id = 4,  AccountCode = "1501", AccountName = "Plant & Machinery (Quarry Equipment)", AccountType = "Asset", SubType = "Fixed" },
+
+                // LIABILITIES
+                new ChartOfAccounts { Id = 5,  AccountCode = "2001", AccountName = "Accounts Payable",                  AccountType = "Liability", SubType = "Current" },
+                new ChartOfAccounts { Id = 6,  AccountCode = "2101", AccountName = "VAT Output Tax",                    AccountType = "Liability", SubType = "Current" },
+                new ChartOfAccounts { Id = 7,  AccountCode = "2102", AccountName = "VAT Input Tax",                     AccountType = "Asset",     SubType = "Current" },
+                new ChartOfAccounts { Id = 10, AccountCode = "2103", AccountName = "Customer Prepayments",             AccountType = "Liability", SubType = "Current" },
+
+                // REVENUE
+                new ChartOfAccounts { Id = 8,  AccountCode = "4001", AccountName = "Sale of Aggregates",                AccountType = "Revenue",   SubType = "Sales" },
+                new ChartOfAccounts { Id = 11, AccountCode = "4002", AccountName = "Transport & Delivery Income",   AccountType = "Revenue",   SubType = "Service" },
+                new ChartOfAccounts { Id = 12, AccountCode = "4003", AccountName = "Other Operating Income",            AccountType = "Revenue",   SubType = "Other" },
+
+                // DIRECT COSTS / COGS
+                new ChartOfAccounts { Id = 9,  AccountCode = "5001", AccountName = "Cost of Materials Sold",            AccountType = "Expense",   SubType = "COGS" },
+                new ChartOfAccounts { Id = 13, AccountCode = "5002", AccountName = "Production & Quarrying Costs", AccountType = "Expense",   SubType = "COGS" },
+                new ChartOfAccounts { Id = 14, AccountCode = "5003", AccountName = "Transport & Loading Costs",    AccountType = "Expense",   SubType = "COGS" },
+
+                // OPERATING EXPENSES
+                new ChartOfAccounts { Id = 15, AccountCode = "6001", AccountName = "Salaries & Wages",              AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { Id = 16, AccountCode = "6002", AccountName = "Fuel & Lubricants",            AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { Id = 17, AccountCode = "6003", AccountName = "Repairs & Maintenance",        AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { Id = 18, AccountCode = "6004", AccountName = "Office & Admin Expenses",      AccountType = "Expense",   SubType = "Operating" },
+                new ChartOfAccounts { Id = 19, AccountCode = "6005", AccountName = "Utilities",                        AccountType = "Expense",   SubType = "Operating" },
+
+                // EQUITY
+                new ChartOfAccounts { Id = 20, AccountCode = "3001", AccountName = "Owner's Equity / Share Capital", AccountType = "Equity", SubType = "Capital" },
+                new ChartOfAccounts { Id = 21, AccountCode = "3101", AccountName = "Retained Earnings",                AccountType = "Equity",    SubType = "Retained" }
             );
 
             modelBuilder.Entity<Material>().HasData(
