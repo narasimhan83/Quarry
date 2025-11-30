@@ -32,6 +32,13 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "Used Amount")]
         public decimal UsedAmount { get; set; }
 
+        [Display(Name = "Material")]
+        public int? MaterialId { get; set; }
+
+        [StringLength(10)]
+        [Display(Name = "Weight Unit")]
+        public string? WeightUnit { get; set; }
+
         [StringLength(50)]
         [Display(Name = "Payment Method")]
         public string PaymentMethod { get; set; } = string.Empty;
@@ -68,6 +75,7 @@ namespace QuarryManagementSystem.Models.Domain
 
         // Navigation
         public virtual Customer? Customer { get; set; }
+        public virtual Material? Material { get; set; }
         public virtual ICollection<PrepaymentApplication> Applications { get; set; } = new List<PrepaymentApplication>();
     }
 

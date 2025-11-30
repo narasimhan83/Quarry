@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Create Customer Prepayment";
     var customers = ViewBag.Customers as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+    var materials = ViewBag.Materials as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
 }
 
 <div class="content-header">
@@ -72,6 +73,24 @@
                                 <label asp-for="PaymentMethod" class="control-label"></label>
                                 <input asp-for="PaymentMethod" class="form-control" placeholder="Cash, Transfer, POS, etc." />
                                 <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="MaterialId" class="control-label"></label>
+                                <select asp-for="MaterialId" class="form-control" asp-items="materials">
+                                    <option value="">-- Select Material --</option>
+                                </select>
+                                <span asp-validation-for="MaterialId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="WeightUnit" class="control-label"></label>
+                                <select asp-for="WeightUnit" class="form-control">
+                                    <option value="">-- Select Unit --</option>
+                                    <option value="kg">Kilograms (kg)</option>
+                                    <option value="ton">Tonnes (ton)</option>
+                                </select>
+                                <span asp-validation-for="WeightUnit" class="text-danger"></span>
                             </div>
 
                             <div class="form-group">

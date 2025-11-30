@@ -171,6 +171,16 @@ namespace QuarryManagementSystem.Controllers
                     Text = c.Name
                 })
                 .ToListAsync();
+
+            ViewBag.Materials = await _context.Materials
+                .Where(m => m.Status == "Active")
+                .OrderBy(m => m.Name)
+                .Select(m => new SelectListItem
+                {
+                    Value = m.Id.ToString(),
+                    Text = $"{m.Name} ({m.Type})"
+                })
+                .ToListAsync();
         }
 
         private async Task<string> GeneratePrepaymentNumberAsync()
