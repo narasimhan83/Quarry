@@ -28,6 +28,7 @@ namespace QuarryManagementSystem.Controllers
         {
             var query = _context.CustomerPrepayments
                 .Include(p => p.Customer)
+                .Include(p => p.Material)
                 .Include(p => p.Applications)
                 .AsQueryable();
 
@@ -159,6 +160,140 @@ namespace QuarryManagementSystem.Controllers
 
             await PopulateCustomersAsync();
             return View(model);
+        }
+
+        // GET: Prepayment/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.Customer)
+                .Include(p => p.Material)
+                .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+            if (prepayment == null)
+            {
+                return NotFound();
+            }
+
+            await PopulateCustomersAsync();
+            return View(prepayment);
+        }
+
+        // POST: Prepayment/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, CustomerPrepayment model)
+        {
+            if (id != model.Id)
+            {
+                return NotFound();
+            }
+
+            // PrepaymentNumber is system-generated, not entered by user.
+            ModelState.Remove(nameof(CustomerPrepayment.PrepaymentNumber));
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateCustomersAsync();
+                return View(model);
+            }
+
+            if (model.CustomerId <= 0)
+            {
+                ModelState.AddModelError("CustomerId", "Please select a customer.");
+                await PopulateCustomersAsync();
+                return View(model);
+            }
+
+            if (model.Amount <= 0)
+            {
+                ModelState.AddModelError("Amount", "Prepayment amount must be greater than zero.");
+                await PopulateCustomersAsync();
+                return View(model);
+            }
+
+            var prepayment = await _context.CustomerPrepayments.FindAsync(id);
+            if (prepayment == null)
+            {
+                return NotFound();
+            }
+
+            prepayment.CustomerId = model.CustomerId;
+            prepayment.PrepaymentDate = model.PrepaymentDate;
+            prepayment.Amount = model.Amount;
+            prepayment.PaymentMethod = model.PaymentMethod;
+            prepayment.MaterialId = model.MaterialId;
+            prepayment.WeightUnit = model.WeightUnit;
+            prepayment.Reference = model.Reference;
+            prepayment.Notes = model.Notes;
+            prepayment.Status = model.Status;
+            prepayment.UpdatedAt = DateTime.Now;
+            prepayment.UpdatedBy = User.Identity?.Name;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} updated successfully.";
+            _logger.LogInformation("Prepayment {PrepaymentNumber} updated by {UserName}",
+                prepayment.PrepaymentNumber, User.Identity?.Name);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Prepayment/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.Customer)
+                .Include(p => p.Material)
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+            if (prepayment == null)
+            {
+                return NotFound();
+            }
+
+            return View(prepayment);
+        }
+
+        // POST: Prepayment/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (prepayment == null)
+            {
+                return NotFound();
+            }
+
+            if (prepayment.Applications != null && prepayment.Applications.Any())
+            {
+                TempData["Error"] = "Cannot delete a prepayment that has already been applied to invoices.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.CustomerPrepayments.Remove(prepayment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} deleted successfully.";
+            _logger.LogInformation("Prepayment {PrepaymentNumber} deleted by {UserName}",
+                prepayment.PrepaymentNumber, User.Identity?.Name);
+
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task PopulateCustomersAsync()

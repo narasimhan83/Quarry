@@ -98,10 +98,14 @@
                                 <th>Prepayment #</th>
                                 <th>Date</th>
                                 <th>Customer</th>
+                                <th>Payment Method</th>
+                                <th>Material</th>
+                                <th>Weight Unit</th>
                                 <th class="text-right">Amount (₦)</th>
                                 <th class="text-right">Used (₦)</th>
                                 <th class="text-right">Remaining (₦)</th>
                                 <th>Status</th>
+                                <th class="text-right" style="width: 90px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,6 +118,9 @@
                                         <td>@p.PrepaymentNumber</td>
                                         <td>@p.PrepaymentDate.ToString("dd/MM/yyyy")</td>
                                         <td>@customerName</td>
+                                        <td>@(string.IsNullOrWhiteSpace(p.PaymentMethod) ? "-" : p.PaymentMethod)</td>
+                                        <td>@(p.Material != null ? p.Material.Name : "-")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(p.WeightUnit) ? "-" : p.WeightUnit)</td>
                                         <td class="text-right">@p.Amount.ToString("N2")</td>
                                         <td class="text-right">@p.UsedAmount.ToString("N2")</td>
                                         <td class="text-right">@p.RemainingAmount.ToString("N2")</td>
@@ -122,13 +129,23 @@
                                                 @p.Status
                                             </span>
                                         </td>
+                                        <td class="text-right">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
                                     </tr>
                                 }
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted">
+                                    <td colspan="11" class="text-center text-muted">
                                         No prepayments found for the selected criteria.
                                     </td>
                                 </tr>

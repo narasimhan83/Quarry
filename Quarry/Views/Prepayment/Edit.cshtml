@@ -1,0 +1,141 @@
+@model QuarryManagementSystem.Models.Domain.CustomerPrepayment
+@{
+    ViewData["Title"] = "Edit Customer Prepayment";
+    var customers = ViewBag.Customers as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+    var materials = ViewBag.Materials as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Edit Customer Prepayment</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Prepayment")">Prepayments</a></li>
+                    <li class="breadcrumb-item active">Edit</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Prepayment Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+
+                            <div class="form-group">
+                                <label asp-for="PrepaymentNumber" class="control-label"></label>
+                                <input asp-for="PrepaymentNumber" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="CustomerId" class="control-label"></label>
+                                <select asp-for="CustomerId" class="form-control" asp-items="customers">
+                                    <option value="">-- Select Customer --</option>
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="PrepaymentDate" class="control-label"></label>
+                                <input asp-for="PrepaymentDate" class="form-control" type="date" />
+                                <span asp-validation-for="PrepaymentDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Amount" class="control-label"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₦</span>
+                                    </div>
+                                    <input asp-for="Amount" class="form-control" />
+                                </div>
+                                <span asp-validation-for="Amount" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="PaymentMethod" class="control-label"></label>
+                                <input asp-for="PaymentMethod" class="form-control" placeholder="Cash, Transfer, POS, etc." />
+                                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="MaterialId" class="control-label"></label>
+                                <select asp-for="MaterialId" class="form-control" asp-items="materials">
+                                    <option value="">-- Select Material --</option>
+                                </select>
+                                <span asp-validation-for="MaterialId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="WeightUnit" class="control-label"></label>
+                                <select asp-for="WeightUnit" class="form-control">
+                                    <option value="">-- Select Unit --</option>
+                                    <option value="kg">Kilograms (kg)</option>
+                                    <option value="ton">Tonnes (ton)</option>
+                                </select>
+                                <span asp-validation-for="WeightUnit" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Reference" class="control-label"></label>
+                                <input asp-for="Reference" class="form-control" placeholder="Bank reference / receipt number" />
+                                <span asp-validation-for="Reference" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Notes" class="control-label"></label>
+                                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Status" class="control-label"></label>
+                                <select asp-for="Status" class="form-control">
+                                    <option value="Active">Active</option>
+                                    <option value="Exhausted">Exhausted</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Prepayment
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
