@@ -61,16 +61,11 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label asp-for="PaymentMethod" class="control-label"></label>
-                                        <select asp-for="PaymentMethod" class="form-control">
+                                        <label asp-for="PaymentMethodId" class="control-label"></label>
+                                        <select asp-for="PaymentMethodId" class="form-control" asp-items="Model.PaymentMethods">
                                             <option value="">-- Select Method --</option>
-                                            <option>Cash</option>
-                                            <option>Bank Transfer</option>
-                                            <option>POS</option>
-                                            <option>Cheque</option>
-                                            <option>Other</option>
                                         </select>
-                                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                                        <span asp-validation-for="PaymentMethodId" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -83,7 +78,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">₦</span>
                                             </div>
-                                            <input asp-for="PaymentAmount" type="number" class="form-control" inputmode="decimal" step="0.01" min="0.01" max="@Model.OutstandingAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                                            <input asp-for="PaymentAmount" type="number" class="form-control money-input" inputmode="decimal" step="0.01" min="0.01" max="@Model.OutstandingAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                                         </div>
                                         <small id="amountHelp" class="form-text text-muted">Cannot exceed Outstanding Amount (Max: ₦@Model.OutstandingAmount.ToString("N2")).</small>
                                         <span asp-validation-for="PaymentAmount" class="text-danger"></span>
@@ -118,7 +113,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input class="form-control" value="@Model.TotalAmount.ToString("N2")" readonly />
+                                    <input class="form-control money-input" value="@Model.TotalAmount.ToString("N2")" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -127,7 +122,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="OutstandingAmount" class="form-control" value="@Model.OutstandingAmount.ToString("N2")" readonly />
+                                    <input id="OutstandingAmount" class="form-control money-input" value="@Model.OutstandingAmount.ToString("N2")" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -136,7 +131,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="OutstandingAfter" class="form-control" value="@Model.OutstandingAmount.ToString("N2")" readonly />
+                                    <input id="OutstandingAfter" class="form-control money-input" value="@Model.OutstandingAmount.ToString("N2")" readonly />
                                 </div>
                             </div>
                         </div>

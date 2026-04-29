@@ -73,6 +73,27 @@
                                 </div>
                             </div>
 
+                            <div class="row" id="prepaymentRow" style="display:none;">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Prepayment (optional)</label>
+                                        <select asp-for="SelectedPrepaymentId" id="SelectedPrepaymentId" class="form-control">
+                                            <option value="">-- No Prepayment --</option>
+                                        </select>
+                                        <small class="form-text text-muted">Pick to draw this weighment against a specific prepayment on the resulting invoice.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="prepaymentLineCol" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="control-label">Prepayment Material</label>
+                                        <select asp-for="SelectedPrepaymentLineItemId" id="SelectedPrepaymentLineItemId" class="form-control">
+                                            <option value="">-- Select Material from Prepayment --</option>
+                                        </select>
+                                        <small class="form-text text-muted">Selecting pre-fills Material, Price, and VAT from the prepayment (you can still override).</small>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -141,7 +162,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">₦</span>
                                             </div>
-                                            <input asp-for="PricePerUnit" class="form-control" />
+                                            <input asp-for="PricePerUnit" class="form-control money-input" />
                                         </div>
                                         <span asp-validation-for="PricePerUnit" class="text-danger"></span>
                                     </div>
@@ -162,8 +183,8 @@
                                     <div class="form-group">
                                         <label asp-for="WeightUnit" class="control-label"></label>
                                         <select asp-for="WeightUnit" class="form-control">
+                                            <option value="Ton">Tonnes (ton)</option>
                                             <option value="kg">Kilograms (kg)</option>
-                                            <option value="ton">Tonnes (ton)</option>
                                         </select>
                                         <span asp-validation-for="WeightUnit" class="text-danger"></span>
                                     </div>
@@ -180,23 +201,25 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label asp-for="GrossWeight" class="control-label"></label>
-                                        <input asp-for="GrossWeight" class="form-control" />
-                                        <span asp-validation-for="GrossWeight" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
                                         <label asp-for="TareWeight" class="control-label"></label>
                                         <input asp-for="TareWeight" class="form-control" />
+                                        <small class="form-text text-muted">Empty vehicle weight (first weighing).</small>
                                         <span asp-validation-for="TareWeight" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label class="control-label">Net Weight</label>
-                                        <input id="NetWeight" class="form-control" readonly value="@Model.NetWeight.ToString("N2")" />
-                                        <small class="form-text text-muted">Gross - Tare</small>
+                                        <label asp-for="GrossWeight" class="control-label"></label>
+                                        <input asp-for="GrossWeight" class="form-control" />
+                                        <small class="form-text text-muted">Loaded vehicle weight (second weighing).</small>
+                                        <span asp-validation-for="GrossWeight" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Net Weight (tons)</label>
+                                        <input id="NetWeight" class="form-control" readonly value="@Model.NetWeight.ToString("N3")" />
+                                        <small class="form-text text-muted">Gross − Tare. Used for billing.</small>
                                     </div>
                                 </div>
                             </div>
@@ -237,7 +260,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="SubTotal" class="form-control" readonly />
+                                    <input id="SubTotal" class="form-control money-input" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -246,8 +269,18 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="VatAmount" class="form-control" readonly />
+                                    <input id="VatAmount" class="form-control money-input" readonly />
                                 </div>
+                            </div>
+                            <div class="form-group" id="RebateRow" style="display:none;">
+                                <label class="control-label text-warning">Rebate <small class="text-muted">(applied)</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">−₦</span>
+                                    </div>
+                                    <input id="RebateAmount" class="form-control money-input" readonly />
+                                </div>
+                                <small id="RebateHint" class="form-text text-muted"></small>
                             </div>
                             <div class="form-group">
                                 <label class="control-label"><strong>Total Amount</strong></label>
@@ -255,7 +288,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="TotalAmount" class="form-control form-control-lg font-weight-bold" readonly />
+                                    <input id="TotalAmount" class="form-control form-control-lg font-weight-bold money-input" readonly />
                                 </div>
                             </div>
                         </div>
@@ -296,73 +329,251 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         $(function () {
-            // Material selection - auto-populate price
+            // Current customer's VAT treatment ("Exclusive" | "Inclusive" | null).
+            // Populated by GetMaterialPrice; null means fall back to Exclusive math.
+            var currentVatType = null;
+
+            // Customer's per-unit rebate (₦ per ton). Cached on each GetMaterialPrice
+            // call so calculateFinancials can multiply by net tons without a new
+            // round-trip every time the operator changes the gross weight.
+            var currentRebatePerUnit = 0;
+
+            // Material selection - auto-populate price (passes customerId so the
+            // pricing service returns the customer-specific price and VAT type).
             $('#MaterialId').change(function () {
-                var materialId = $(this).val();
-                if (materialId) {
-                    $.ajax({
-                        url: '@Url.Action("GetMaterialPrice", "Weighment")',
-                        type: 'GET',
-                        data: { materialId: materialId },
-                        success: function (data) {
-                            if (data.success) {
-                                $('#PricePerUnit').val(data.unitPrice);
-                                $('#VatRate').val(data.vatRate);
-                                calculateFinancials();
-                            }
-                        },
-                        error: function () {
-                            alert('Error getting material price');
-                        }
-                    });
-                } else {
-                    $('#PricePerUnit').val('');
-                    calculateFinancials();
-                }
+                fetchMaterialPrice();
             });
 
-            // Weight calculations
-            $('#GrossWeight, #TareWeight, #WeightUnit').on('input change', function () {
-                calculateNetWeight();
+            function fetchMaterialPrice() {
+                var materialId = $('#MaterialId').val();
+                if (!materialId) {
+                    $('#PricePerUnit').val('').trigger('change');
+                    calculateFinancials();
+                    return;
+                }
+                var customerId = $('#CustomerId').val();
+                var data = { materialId: materialId };
+                if (customerId) data.customerId = customerId;
+
+                $.ajax({
+                    url: '@Url.Action("GetMaterialPrice", "Weighment")',
+                    type: 'GET',
+                    data: data,
+                    success: function (resp) {
+                        if (resp.success) {
+                            $('#PricePerUnit').val(resp.unitPrice).trigger('change');
+                            $('#VatRate').val(resp.vatRate);
+                            currentVatType = resp.vatType || null;
+                            // Cache the per-unit rebate amount for the current customer.
+                            // Stays at 0 when the customer doesn't have rebate enabled
+                            // or when no customer is selected.
+                            currentRebatePerUnit = (resp.hasRebate && resp.rebateAmount > 0) ? resp.rebateAmount : 0;
+                            calculateFinancials();
+                        }
+                    },
+                    error: function () {
+                        alert('Error getting material price');
+                    }
+                });
+            }
+
+            // Weight calculations. Tare + Gross are inputs; Net = Gross − Tare.
+            $('#TareWeight, #GrossWeight, #WeightUnit').on('input change', function () {
+                recomputeWeights();
                 calculateFinancials();
             });
 
-            // Customer credit check
+            // Auto-stamp Exit Time when Gross Weight is entered (on blur). Skip
+            // if Exit Time already has a value — Edit view usually loads with one,
+            // so this mostly matters when the original was saved without exit time.
+            $('#GrossWeight').on('blur', function () {
+                var gross = parseFloat($(this).val()) || 0;
+                if (gross > 0 && !$('#ExitTime').val()) {
+                    var now = new Date();
+                    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+                    var localStamp =
+                        now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+                        'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+                    $('#ExitTime').val(localStamp);
+                }
+            });
+
+            function recomputeWeights() {
+                var tare = parseFloat($('#TareWeight').val()) || 0;
+                var gross = parseFloat($('#GrossWeight').val()) || 0;
+                var net = gross - tare;
+                if (net < 0) net = 0;
+
+                $('#NetWeight').val(net.toFixed(3));
+
+                var weightUnit = $('#WeightUnit').val();
+                var netTons = weightUnit === 'kg' ? net / 1000 : net;
+                $('#NetWeightTons').val(netTons.toFixed(3));
+            }
+
+            // Customer credit check + prepayment load
             $('#CustomerId').change(function () {
                 var customerId = $(this).val();
+                // Reset VAT type + rebate; will be refreshed by fetchMaterialPrice below.
+                if (!customerId) {
+                    currentVatType = null;
+                    currentRebatePerUnit = 0;
+                }
+                // Re-fetch price/VAT so customer-specific pricing and VAT type are honored.
+                fetchMaterialPrice();
                 if (customerId && $('#TotalAmount').val()) {
                     checkCustomerCredit(customerId, parseFloat($('#TotalAmount').val()) || 0);
                 } else {
                     $('#customerCreditInfo').html('');
                 }
+                // Clear any stored selections when customer changes — they don't apply anymore.
+                $('#SelectedPrepaymentId').val('');
+                $('#SelectedPrepaymentLineItemId').val('');
+                loadCustomerPrepayments(customerId, null, null);
             });
 
-            function calculateNetWeight() {
-                var grossWeight = parseFloat($('#GrossWeight').val()) || 0;
-                var tareWeight = parseFloat($('#TareWeight').val()) || 0;
-                var netWeight = grossWeight - tareWeight;
+            // Preserves a desired prepayment / line selection so the Edit view
+            // can restore the stored choice when the AJAX finishes populating.
+            function loadCustomerPrepayments(customerId, preselectPrepaymentId, preselectLineId) {
+                var $prepayRow = $('#prepaymentRow');
+                var $prepaySelect = $('#SelectedPrepaymentId');
+                var $lineCol = $('#prepaymentLineCol');
+                var $lineSelect = $('#SelectedPrepaymentLineItemId');
 
-                $('#NetWeight').val(netWeight.toFixed(2));
+                $prepaySelect.empty().append('<option value="">-- No Prepayment --</option>');
+                $lineSelect.empty().append('<option value="">-- Select Material from Prepayment --</option>');
+                $lineCol.hide();
 
-                var weightUnit = $('#WeightUnit').val();
-                var netWeightTons = weightUnit === 'kg' ? netWeight / 1000 : netWeight;
-                $('#NetWeightTons').val(netWeightTons.toFixed(3));
+                if (!customerId) { $prepayRow.hide(); return; }
+
+                $.ajax({
+                    url: '@Url.Action("GetCustomerPrepayments", "Weighment")',
+                    type: 'GET',
+                    data: { customerId: customerId },
+                    success: function (resp) {
+                        if (resp && resp.success && resp.prepayments && resp.prepayments.length > 0) {
+                            $.each(resp.prepayments, function(i, p) {
+                                $prepaySelect.append('<option value="' + p.id + '">' + p.label + '</option>');
+                            });
+                            $prepayRow.show();
+                            if (preselectPrepaymentId) {
+                                $prepaySelect.val(preselectPrepaymentId).trigger('change');
+                                // When line-items AJAX completes it will respect preselectLineId below.
+                                window.__pendingLineId = preselectLineId;
+                            }
+                        } else {
+                            $prepayRow.hide();
+                        }
+                    },
+                    error: function () { $prepayRow.hide(); }
+                });
             }
+
+            $('#SelectedPrepaymentId').change(function() {
+                var prepaymentId = $(this).val();
+                var $lineCol = $('#prepaymentLineCol');
+                var $lineSelect = $('#SelectedPrepaymentLineItemId');
+                $lineSelect.empty().append('<option value="">-- Select Material from Prepayment --</option>');
+                if (!prepaymentId) { $lineCol.hide(); return; }
+
+                $.ajax({
+                    url: '@Url.Action("GetPrepaymentLineItems", "Weighment")',
+                    type: 'GET',
+                    data: { prepaymentId: prepaymentId },
+                    success: function(resp) {
+                        if (resp && resp.success && resp.lines && resp.lines.length > 0) {
+                            $.each(resp.lines, function(i, l) {
+                                var $opt = $('<option></option>')
+                                    .attr('value', l.id)
+                                    .attr('data-material-id', l.materialId)
+                                    .attr('data-unit-price', l.unitPrice)
+                                    .attr('data-unit', l.unit)
+                                    .text(l.label);
+                                $lineSelect.append($opt);
+                            });
+                            $lineCol.show();
+                            if (window.__pendingLineId) {
+                                $lineSelect.val(window.__pendingLineId);
+                                window.__pendingLineId = null;
+                            }
+                        } else {
+                            $lineCol.hide();
+                        }
+                    },
+                    error: function() { $lineCol.hide(); }
+                });
+            });
+
+            $('#SelectedPrepaymentLineItemId').change(function() {
+                var $opt = $(this).find('option:selected');
+                if (!$opt.val()) return;
+
+                var materialId = $opt.data('material-id');
+                var unitPrice = parseFloat($opt.data('unit-price')) || 0;
+
+                if (materialId) { $('#MaterialId').val(materialId); }
+                $('#PricePerUnit').val(unitPrice).trigger('change');
+
+                $('.prepayment-price-hint').remove();
+                $('#PricePerUnit').closest('.form-group').append(
+                    '<small class="form-text text-info prepayment-price-hint"><i class="fas fa-wallet"></i> Price pre-filled from selected prepayment.</small>'
+                );
+
+                calculateFinancials();
+            });
 
             function calculateFinancials() {
                 var netWeightTons = parseFloat($('#NetWeightTons').val()) || 0;
                 var pricePerUnit = parseFloat($('#PricePerUnit').val()) || 0;
                 var vatRate = parseFloat($('#VatRate').val()) || 0;
 
-                var subtotal = netWeightTons * pricePerUnit;
-                var vatAmount = subtotal * (vatRate / 100);
-                var totalAmount = subtotal + vatAmount;
+                var lineGross = netWeightTons * pricePerUnit;
+                var subtotal, vatAmount;
 
-                $('#SubTotal').val(subtotal.toFixed(2));
-                $('#VatAmount').val(vatAmount.toFixed(2));
-                $('#TotalAmount').val(totalAmount.toFixed(2));
+                if (currentVatType && currentVatType.toLowerCase() === 'inclusive') {
+                    // Inclusive: unit price already contains VAT. Back it out.
+                    vatAmount = vatRate > 0 ? lineGross * vatRate / (100 + vatRate) : 0;
+                    subtotal = lineGross - vatAmount;
+                } else {
+                    // Exclusive (default): VAT added on top.
+                    subtotal = lineGross;
+                    vatAmount = subtotal * (vatRate / 100);
+                }
 
-                // Check customer credit if customer is selected
+                // Rebate scales with net tons. Cap at Subtotal + VAT so the line
+                // can't go negative (matches server-side ApplyVatTreatmentAsync).
+                var rebateAmount = currentRebatePerUnit > 0 ? currentRebatePerUnit * netWeightTons : 0;
+                var maxRebate = subtotal + vatAmount;
+                if (rebateAmount > maxRebate) rebateAmount = maxRebate;
+
+                var totalAmount = subtotal + vatAmount - rebateAmount;
+
+                $('#SubTotal').val(subtotal.toFixed(2)).trigger('change');
+                $('#VatAmount').val(vatAmount.toFixed(2)).trigger('change');
+                $('#TotalAmount').val(totalAmount.toFixed(2)).trigger('change');
+
+                // Rebate row: only visible when there's an actual rebate to show.
+                if (rebateAmount > 0) {
+                    $('#RebateRow').show();
+                    $('#RebateAmount').val(rebateAmount.toFixed(2)).trigger('change');
+                    $('#RebateHint').text(
+                        '₦' + currentRebatePerUnit.toFixed(2) + ' per ton × ' + netWeightTons.toFixed(3) + ' tons'
+                    );
+                } else {
+                    $('#RebateRow').hide();
+                    $('#RebateAmount').val('').trigger('change');
+                    $('#RebateHint').text('');
+                }
+
+                // Show which VAT treatment is being applied.
+                $('.vat-type-hint').remove();
+                if (currentVatType) {
+                    var label = currentVatType.toLowerCase() === 'inclusive' ? 'Inclusive' : 'Exclusive';
+                    $('#VatAmount').closest('.form-group').append(
+                        '<small class="form-text text-muted vat-type-hint">VAT treatment: <strong>' + label + '</strong></small>'
+                    );
+                }
+
                 var customerId = $('#CustomerId').val();
                 if (customerId && totalAmount > 0) {
                     checkCustomerCredit(customerId, totalAmount);
@@ -376,11 +587,23 @@
                     data: { customerId: customerId, estimatedAmount: estimatedAmount },
                     success: function (data) {
                         if (data.success) {
+                            var fmt = function(n) {
+                                return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            };
                             var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
                             html += '<strong>Credit Info:</strong><br>';
-                            html += 'Available Credit: ₦' + Number(data.availableCredit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '<br>';
-                            html += 'Current Outstanding: ₦' + Number(data.currentOutstanding).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '<br>';
-                            html += 'Credit Limit: ₦' + Number(data.creditLimit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            html += 'Available Credit: ₦' + fmt(data.availableCredit) + '<br>';
+                            html += 'Current Outstanding: ₦' + fmt(data.currentOutstanding) + '<br>';
+                            // Prepayment wallet: only render when the API returned the field
+                            // (newer responses include it; older ones don't — stay backwards-compatible).
+                            if (data.prepaymentBalance !== undefined) {
+                                html += 'Prepayment Balance (Wallet): ₦' + fmt(data.prepaymentBalance) + '<br>';
+                                html += 'Effective Outstanding (after prepayment): ₦' + fmt(data.effectiveOutstanding) + '<br>';
+                            }
+                            html += 'Credit Limit: ₦' + fmt(data.creditLimit);
+                            if (data.projectedOutstanding !== undefined) {
+                                html += '<br>Projected Outstanding (this load): ₦' + fmt(data.projectedOutstanding);
+                            }
                             if (data.exceedsLimit) {
                                 html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
                             }
@@ -395,8 +618,27 @@
             }
 
             // Initial calculations
-            calculateNetWeight();
-            calculateFinancials();
+            recomputeWeights();
+
+            // If a customer was pre-selected (usual case on Edit), fetch the VAT
+            // type up-front so the very first render of the summary is already
+            // correct (Inclusive vs Exclusive). fetchMaterialPrice() triggers
+            // calculateFinancials() inside its success handler.
+            if ($('#CustomerId').val() && $('#MaterialId').val()) {
+                fetchMaterialPrice();
+            } else {
+                calculateFinancials();
+            }
+
+            // If this record has a stored prepayment selection, load the dropdowns
+            // with that pre-selected. We pass the stored IDs through so the AJAX
+            // success handlers can set the <select> values after populating options.
+            var initialCustomerId = $('#CustomerId').val();
+            var storedPrepaymentId = @(Model.SelectedPrepaymentId?.ToString() ?? "null");
+            var storedLineId       = @(Model.SelectedPrepaymentLineItemId?.ToString() ?? "null");
+            if (initialCustomerId) {
+                loadCustomerPrepayments(initialCustomerId, storedPrepaymentId, storedLineId);
+            }
         });
     </script>
 }

@@ -1,8 +1,6 @@
-@model QuarryManagementSystem.Models.Domain.CustomerPrepayment
+@model QuarryManagementSystem.ViewModels.PrepaymentCreateEditViewModel
 @{
     ViewData["Title"] = "Create Customer Prepayment";
-    var customers = ViewBag.Customers as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
-    var materials = ViewBag.Materials as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
 }
 
 <div class="content-header">
@@ -24,16 +22,12 @@
 
 <section class="content">
     <div class="container-fluid">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">@TempData["Success"]</div>
-        }
         @if (TempData["Error"] != null)
         {
             <div class="alert alert-danger">@TempData["Error"]</div>
         }
 
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" id="prepaymentForm">
             @Html.AntiForgeryToken()
             <div class="row">
                 <div class="col-md-8">
@@ -44,70 +38,166 @@
                         <div class="card-body">
                             <div asp-validation-summary="All" class="text-danger"></div>
 
-                            <div class="form-group">
-                                <label asp-for="CustomerId" class="control-label"></label>
-                                <select asp-for="CustomerId" class="form-control" asp-items="customers">
-                                    <option value="">-- Select Customer --</option>
-                                </select>
-                                <span asp-validation-for="CustomerId" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="PrepaymentDate" class="control-label"></label>
-                                <input asp-for="PrepaymentDate" class="form-control" type="date" />
-                                <span asp-validation-for="PrepaymentDate" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Amount" class="control-label"></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">₦</span>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerId" class="control-label"></label>
+                                        <select asp-for="CustomerId" class="form-control" asp-items="Model.Customers">
+                                            <option value="">-- Select Customer --</option>
+                                        </select>
+                                        <span asp-validation-for="CustomerId" class="text-danger"></span>
                                     </div>
-                                    <input asp-for="Amount" class="form-control" />
                                 </div>
-                                <span asp-validation-for="Amount" class="text-danger"></span>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="PrepaymentDate" class="control-label"></label>
+                                        <input asp-for="PrepaymentDate" class="form-control" type="date" />
+                                        <span asp-validation-for="PrepaymentDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="ExpectedPickupDate" class="control-label"></label>
+                                        <input asp-for="ExpectedPickupDate" class="form-control" type="date" placeholder="Optional" />
+                                        <small class="form-text text-muted">Optional</small>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label asp-for="PaymentMethod" class="control-label"></label>
-                                <input asp-for="PaymentMethod" class="form-control" placeholder="Cash, Transfer, POS, etc." />
-                                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="MaterialId" class="control-label"></label>
-                                <select asp-for="MaterialId" class="form-control" asp-items="materials">
-                                    <option value="">-- Select Material --</option>
-                                </select>
-                                <span asp-validation-for="MaterialId" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="WeightUnit" class="control-label"></label>
-                                <select asp-for="WeightUnit" class="form-control">
-                                    <option value="">-- Select Unit --</option>
-                                    <option value="kg">Kilograms (kg)</option>
-                                    <option value="ton">Tonnes (ton)</option>
-                                </select>
-                                <span asp-validation-for="WeightUnit" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Reference" class="control-label"></label>
-                                <input asp-for="Reference" class="form-control" placeholder="Bank reference / receipt number" />
-                                <span asp-validation-for="Reference" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Notes" class="control-label"></label>
-                                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
-                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentMethodId" class="control-label"></label>
+                                        <select asp-for="PaymentMethodId" class="form-control" asp-items="Model.PaymentMethods">
+                                            <option value="">-- Select Payment Method --</option>
+                                        </select>
+                                        <span asp-validation-for="PaymentMethodId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Reference" class="control-label"></label>
+                                        <input asp-for="Reference" class="form-control" placeholder="Bank reference / receipt number" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Notes" class="control-label"></label>
+                                        <input asp-for="Notes" class="form-control" placeholder="Notes (optional)" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Line Items -->
+                    <div class="card card-info">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Line Items</h3>
+                            <button type="button" id="addItemBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="itemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 24%;">Material</th>
+                                            <th style="width: 10%;">Qty</th>
+                                            <th style="width: 9%;">Unit</th>
+                                            <th style="width: 14%;">Unit Price (₦)</th>
+                                            <th style="width: 12%;" class="text-right">VAT (₦)</th>
+                                            <th style="width: 12%;" class="text-right">Rebate (₦)</th>
+                                            <th style="width: 14%;" class="text-right">Line Total</th>
+                                            <th style="width: 5%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsBody">
+                                        @{
+                                            var idx = 0;
+                                            foreach (var item in Model.Items)
+                                            {
+                                                <tr data-vat-per-unit="0" data-rebate-per-unit="0">
+                                                    <td>
+                                                        <select name="Items[@idx].MaterialId" class="form-control form-control-sm material-select">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var m in Model.Materials)
+                                                            {
+                                                                if (item.MaterialId?.ToString() == m.Value)
+                                                                {
+                                                                    <option value="@m.Value" selected="selected">@m.Text</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@m.Value">@m.Text</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                        <input type="hidden" name="Items[@idx].VatAmount" value="0" class="vat-amount-hidden" />
+                                                        <input type="hidden" name="Items[@idx].RebateAmount" value="0" class="rebate-amount-hidden" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.001" min="0" name="Items[@idx].Quantity" value="@item.Quantity" class="form-control form-control-sm qty-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input name="Items[@idx].Unit" value="@item.Unit" class="form-control form-control-sm unit-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" min="0" name="Items[@idx].UnitPrice" value="@item.UnitPrice" class="form-control form-control-sm price-input money-input" data-symbol="false" />
+                                                    </td>
+                                                    <td class="text-right align-middle"><span class="vat-display">0.00</span></td>
+                                                    <td class="text-right align-middle"><span class="rebate-display">0.00</span></td>
+                                                    <td class="text-right align-middle">
+                                                        <input type="hidden" name="Items[@idx].LineTotal" value="@item.LineTotal" class="line-total-hidden" />
+                                                        <span class="line-total-display">0.00</span>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                idx++;
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="6" class="text-right"><strong>Grand Total:</strong></td>
+                                            <td class="text-right"><strong id="grandTotal">0.00</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <small class="text-muted">
+                                Unit Price shows the raw customer price. VAT and Rebate are computed per line from the
+                                customer's settings. Line Total = qty × (Unit Price + per-unit VAT − per-unit Rebate).
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Prepayment Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Total Amount Prepaid</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                    <input id="TotalDisplay" class="form-control form-control-lg font-weight-bold money-input" readonly />
+                                </div>
+                            </div>
+                            <small class="text-muted">Grand total auto-calculates from the line items on the left.</small>
+                        </div>
+                    </div>
+
+                    <div class="card">
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Prepayment
+                                <i class="fas fa-save"></i> Create Prepayment
                             </button>
                             <a asp-action="Index" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
@@ -122,4 +212,205 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (function () {
+            var materialsHtml = '@Html.Raw(string.Join("", Model.Materials.Select(m => $"<option value=\\\"{m.Value}\\\">{System.Net.WebUtility.HtmlEncode(m.Text)}</option>")))';
+
+            function fmt(n) {
+                if (window.NairaFormat) return NairaFormat.format(n, { symbol: false });
+                return (n || 0).toFixed(2);
+            }
+
+            // Use NairaFormat.parse for the price because the money-input helper
+            // puts a visible formatted proxy input before the real hidden input.
+            function readPrice($tr) {
+                if (window.NairaFormat) return NairaFormat.parse($tr.find('.price-input').val());
+                return parseFloat(($tr.find('.price-input').val() + '').replace(/,/g, '')) || 0;
+            }
+
+            // New line-total model:
+            //   lineTotal = qty × (unitPrice + perUnitVat − perUnitRebate)
+            // UnitPrice is the raw customer catalog price; VAT and Rebate are
+            // shown in dedicated columns and stored alongside the line.
+            function recalcRow($tr) {
+                var qty = parseFloat($tr.find('.qty-input').val()) || 0;
+                var price = readPrice($tr);
+                var perUnitVat = parseFloat($tr.attr('data-vat-per-unit')) || 0;
+                var perUnitRebate = parseFloat($tr.attr('data-rebate-per-unit')) || 0;
+
+                if (perUnitRebate > price + perUnitVat) {
+                    perUnitRebate = price + perUnitVat;
+                }
+
+                var vatAmount = Math.round(qty * perUnitVat * 100) / 100;
+                var rebateAmount = Math.round(qty * perUnitRebate * 100) / 100;
+                var lineTotal = Math.round((qty * price + vatAmount - rebateAmount) * 100) / 100;
+
+                $tr.find('.vat-display').text(fmt(vatAmount));
+                $tr.find('.rebate-display').text(fmt(rebateAmount));
+                $tr.find('.line-total-display').text(fmt(lineTotal));
+
+                $tr.find('.vat-amount-hidden').val(vatAmount.toFixed(2));
+                $tr.find('.rebate-amount-hidden').val(rebateAmount.toFixed(2));
+                $tr.find('.line-total-hidden').val(lineTotal.toFixed(2));
+            }
+
+            function recalcGrandTotal() {
+                var total = 0;
+                $('#itemsBody tr').each(function () {
+                    total += parseFloat($(this).find('.line-total-hidden').val()) || 0;
+                });
+                total = Math.round(total * 100) / 100;
+                $('#grandTotal').text(fmt(total));
+                $('#TotalDisplay').val(total.toFixed(2)).trigger('change');
+            }
+
+            function renumberRows() {
+                $('#itemsBody tr').each(function (i) {
+                    $(this).find('input, select').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/Items\[\d+\]/, 'Items[' + i + ']'));
+                    });
+                });
+            }
+
+            function wireRowEvents($tr) {
+                $tr.on('input change', '.qty-input, .price-input', function () {
+                    recalcRow($tr);
+                    recalcGrandTotal();
+                });
+
+                $tr.find('.remove-item').on('click', function () {
+                    $tr.remove();
+                    renumberRows();
+                    recalcGrandTotal();
+                });
+
+                $tr.find('.material-select').on('change', function () {
+                    fetchPriceForRow($tr);
+                });
+            }
+
+            function fetchPriceForRow($tr) {
+                var materialId = $tr.find('.material-select').val();
+                if (!materialId) return;
+                var customerId = $('#CustomerId').val();
+                var data = { materialId: materialId };
+                if (customerId) data.customerId = customerId;
+
+                $.getJSON('@Url.Action("GetMaterialInfo", "Prepayment")', data, function (resp) {
+                    if (!resp || !resp.success) return;
+
+                    var $qty = $tr.find('.qty-input');
+                    var $unit = $tr.find('.unit-input');
+                    if (!(parseFloat($qty.val()) > 0)) { $qty.val(1); }
+                    if (!$unit.val()) { $unit.val(resp.unit || 'Ton'); }
+
+                    // Store the raw customer price. No more baking of VAT / rebate.
+                    var rawPrice = resp.unitPrice;
+                    var $priceInputs = $tr.find('.price-input');
+                    var $realPrice = $priceInputs.filter('[type=hidden]').first();
+                    if (!$realPrice.length) $realPrice = $priceInputs.first();
+                    $realPrice.val(rawPrice).trigger('change');
+
+                    // Compute per-unit VAT from the customer's VAT type.
+                    var perUnitVat = 0;
+                    if (resp.vatRate > 0) {
+                        if (resp.vatType && resp.vatType.toLowerCase() === 'inclusive') {
+                            perUnitVat = Math.round(rawPrice * resp.vatRate / (100 + resp.vatRate) * 100) / 100;
+                        } else {
+                            perUnitVat = Math.round(rawPrice * resp.vatRate / 100 * 100) / 100;
+                        }
+                    }
+
+                    var perUnitRebate = (resp.hasRebate && resp.rebateAmount > 0) ? resp.rebateAmount : 0;
+                    var maxRebate = rawPrice + perUnitVat;
+                    if (perUnitRebate > maxRebate) perUnitRebate = maxRebate;
+
+                    $tr.attr('data-vat-per-unit', perUnitVat);
+                    $tr.attr('data-rebate-per-unit', perUnitRebate);
+
+                    // Clear any legacy inline hints.
+                    $tr.find('.custom-price-hint, .vat-hint, .rebate-hint, .line-rebate-note').remove();
+                    if (resp.isCustomerSpecific) {
+                        $tr.find('.material-select').after(
+                            '<small class="form-text text-success custom-price-hint"><i class="fas fa-tag"></i> Customer price applied</small>'
+                        );
+                    }
+
+                    recalcRow($tr);
+                    recalcGrandTotal();
+                });
+            }
+
+            $('#CustomerId').on('change', function () {
+                $('#itemsBody tr').each(function () {
+                    fetchPriceForRow($(this));
+                });
+            });
+
+            function addEmptyRow() {
+                var idx = $('#itemsBody tr').length;
+                var row = `
+<tr data-vat-per-unit="0" data-rebate-per-unit="0">
+  <td>
+    <select name="Items[${idx}].MaterialId" class="form-control form-control-sm material-select">
+      <option value="">-- Select --</option>${materialsHtml}
+    </select>
+    <input type="hidden" name="Items[${idx}].VatAmount" value="0" class="vat-amount-hidden" />
+    <input type="hidden" name="Items[${idx}].RebateAmount" value="0" class="rebate-amount-hidden" />
+  </td>
+  <td><input type="number" step="0.001" min="0" name="Items[${idx}].Quantity" value="1" class="form-control form-control-sm qty-input" /></td>
+  <td><input name="Items[${idx}].Unit" value="Ton" class="form-control form-control-sm unit-input" /></td>
+  <td><input type="number" step="0.01" min="0" name="Items[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input money-input" data-symbol="false" /></td>
+  <td class="text-right align-middle"><span class="vat-display">0.00</span></td>
+  <td class="text-right align-middle"><span class="rebate-display">0.00</span></td>
+  <td class="text-right align-middle">
+    <input type="hidden" name="Items[${idx}].LineTotal" value="0" class="line-total-hidden" />
+    <span class="line-total-display">0.00</span>
+  </td>
+  <td class="text-center align-middle">
+    <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash"></i></button>
+  </td>
+</tr>`;
+                var $row = $(row);
+                $('#itemsBody').append($row);
+                if (window.NairaFormat && NairaFormat.scan) NairaFormat.scan($row);
+                wireRowEvents($row);
+                recalcRow($row);
+                recalcGrandTotal();
+            }
+
+            // Initialize
+            if ($('#itemsBody tr').length === 0) {
+                addEmptyRow();
+            } else {
+                $('#itemsBody tr').each(function () {
+                    wireRowEvents($(this));
+                    recalcRow($(this));
+                });
+                recalcGrandTotal();
+            }
+
+            $('#addItemBtn').on('click', function () {
+                addEmptyRow();
+            });
+
+            // Guard: client-side sanity check before submit
+            $('#prepaymentForm').on('submit', function (e) {
+                var hasValid = false;
+                $('#itemsBody tr').each(function () {
+                    var mat = $(this).find('.material-select').val();
+                    var qty = parseFloat($(this).find('.qty-input').val()) || 0;
+                    var price = parseFloat($(this).find('.price-input').val()) || 0;
+                    if (mat && qty > 0 && price > 0) hasValid = true;
+                });
+                if (!hasValid) {
+                    e.preventDefault();
+                    alert('Please add at least one complete line item (material + quantity + unit price).');
+                }
+            });
+        })();
+    </script>
 }

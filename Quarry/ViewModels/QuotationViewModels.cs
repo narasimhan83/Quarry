@@ -67,9 +67,13 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "Description")]
         public string? Description { get; set; }
 
+        // Default to 1 so newly-added lines have a billable qty without the
+        // operator having to touch this field. Controller still filters out
+        // empty rows (no material + no price) before saving, so a default of 1
+        // on a blank line can't accidentally produce a bad quotation item.
         [Display(Name = "Quantity")]
         [Range(typeof(decimal), "0.00", "999999999.99")]
-        public decimal Quantity { get; set; }
+        public decimal Quantity { get; set; } = 1m;
 
         [StringLength(20)]
         [Display(Name = "Unit")]
@@ -83,6 +87,13 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "VAT Rate (%)")]
         [Range(typeof(decimal), "0.00", "100.00")]
         public decimal VatRate { get; set; } = 7.5m;
+
+        /// <summary>
+        /// Per-line rebate share assigned when this line is saved. For display /
+        /// audit only — not user-editable.
+        /// </summary>
+        [Display(Name = "Rebate Amount")]
+        public decimal LineRebateAmount { get; set; }
 
         [Display(Name = "Subtotal")]
         [DataType(DataType.Currency)]
@@ -119,6 +130,28 @@ namespace QuarryManagementSystem.ViewModels
 
         [Display(Name = "Status")]
         public string Status { get; set; } = "Draft"; // Draft, Sent, Accepted, Rejected, Cancelled, Expired
+
+        /// <summary>
+        /// Header rebate stored on the quotation. Read-only in the form — computed
+        /// server-side from the customer's HasRebate / RebateAmount settings at
+        /// save time, and populated from the DB on Edit.
+        /// </summary>
+        [Display(Name = "Rebate Amount")]
+        public decimal RebateAmount { get; set; }
+
+        /// <summary>
+        /// Header transport fee stored on the quotation. Auto-applied from the
+        /// customer's TransportRequired / TransportAmount settings at save time.
+        /// </summary>
+        [Display(Name = "Transport Amount")]
+        public decimal TransportAmount { get; set; }
+
+        /// <summary>
+        /// Snapshot of the customer's VAT type (Inclusive/Exclusive) at save time.
+        /// Displayed next to the VAT line in the totals panel.
+        /// </summary>
+        [Display(Name = "VAT Type")]
+        public string? VatTypeSnapshot { get; set; }
 
         // Items
         [Display(Name = "Items")]

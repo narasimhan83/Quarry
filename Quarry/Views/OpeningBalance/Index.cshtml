@@ -86,7 +86,7 @@
                                     <td class="text-right">
                                         <input type="hidden" asp-for="Accounts[i].AccountId" />
                                         <input asp-for="Accounts[i].OpeningBalance"
-                                               class="form-control form-control-sm text-right" />
+                                               class="form-control form-control-sm text-right money-input" data-symbol="false" />
                                         <span asp-validation-for="Accounts[i].OpeningBalance"
                                               class="text-danger small"></span>
                                     </td>

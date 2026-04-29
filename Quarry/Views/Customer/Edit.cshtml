@@ -1,9 +1,8 @@
-@model QuarryManagementSystem.Models.Domain.Customer
+@model QuarryManagementSystem.ViewModels.CustomerEditViewModel
 @{
     ViewData["Title"] = "Edit Customer";
 }
 
-<!-- Content Header -->
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -21,19 +20,24 @@
     </div>
 </div>
 
-<!-- Main content -->
 <section class="content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Customer Information</h3>
-                    </div>
-                    <form asp-action="Edit" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" asp-for="Id" />
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" id="customerForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Customer Information</h3>
+                            <div class="card-tools">
+                                <span class="badge badge-info">Outstanding: ₦@Model.OutstandingBalance.ToString("N2")</span>
+                                <span class="badge badge-success">Available Credit: ₦@Model.AvailableCredit.ToString("N2")</span>
+                            </div>
+                        </div>
                         <div class="card-body">
+                            <div asp-validation-summary="All" class="alert alert-danger" role="alert" style="@(ViewData.ModelState.IsValid ? "display:none;" : "")"></div>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -52,19 +56,45 @@
                             </div>
 
                             <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerTypeId" class="control-label"></label>
+                                        <select asp-for="CustomerTypeId" asp-items="Model.CustomerTypes" class="form-control">
+                                            <option value="">-- Select Customer Type --</option>
+                                        </select>
+                                        <span asp-validation-for="CustomerTypeId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="VatTypeId" class="control-label"></label>
+                                        <select asp-for="VatTypeId" asp-items="Model.VatTypes" class="form-control">
+                                            <option value="">-- Select VAT Type --</option>
+                                        </select>
+                                        <span asp-validation-for="VatTypeId" class="text-danger"></span>
+                                        <small class="form-text text-muted">Inclusive = prices include VAT; Exclusive = VAT added on top.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Status" class="control-label"></label>
+                                        <select asp-for="Status" asp-items="Model.Statuses" class="form-control"></select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="ContactPerson" class="control-label"></label>
                                         <input asp-for="ContactPerson" class="form-control" />
-                                        <span asp-validation-for="ContactPerson" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="Phone" class="control-label"></label>
-                                        <input asp-for="Phone" class="form-control" />
+                                        <input asp-for="Phone" class="form-control" placeholder="Phone (Optional)" />
                                         <span asp-validation-for="Phone" class="text-danger"></span>
-                                        <small class="form-text text-muted">Format: +2348012345678 or 08012345678</small>
                                     </div>
                                 </div>
                             </div>
@@ -80,7 +110,10 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="CreditLimit" class="control-label"></label>
-                                        <input asp-for="CreditLimit" class="form-control" />
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                            <input asp-for="CreditLimit" class="form-control money-input" />
+                                        </div>
                                         <span asp-validation-for="CreditLimit" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -90,19 +123,13 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="State" class="control-label"></label>
-                                        <select asp-for="State" asp-items="ViewBag.States" class="form-control">
-                                            <option value="">-- Select State (Optional) --</option>
-                                        </select>
-                                        <span asp-validation-for="State" class="text-danger"></span>
+                                        <select asp-for="State" asp-items="Model.States" class="form-control"></select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="LGA" class="control-label"></label>
-                                        <select asp-for="LGA" asp-items="ViewBag.LGAs" class="form-control">
-                                            <option value="">-- Select LGA (Optional) --</option>
-                                        </select>
-                                        <span asp-validation-for="LGA" class="text-danger"></span>
+                                        <select asp-for="LGA" asp-items="Model.LGAs" class="form-control"></select>
                                     </div>
                                 </div>
                             </div>
@@ -112,14 +139,12 @@
                                     <div class="form-group">
                                         <label asp-for="Location" class="control-label"></label>
                                         <input asp-for="Location" class="form-control" placeholder="Location (Optional)" />
-                                        <span asp-validation-for="Location" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="MiningLicenseNumber" class="control-label"></label>
                                         <input asp-for="MiningLicenseNumber" class="form-control" />
-                                        <span asp-validation-for="MiningLicenseNumber" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -129,78 +154,250 @@
                                     <div class="form-group">
                                         <label asp-for="TIN" class="control-label"></label>
                                         <input asp-for="TIN" class="form-control" />
-                                        <span asp-validation-for="TIN" class="text-danger"></span>
-                                        <small class="form-text text-muted">Tax Identification Number</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="BVN" class="control-label"></label>
                                         <input asp-for="BVN" class="form-control" />
-                                        <span asp-validation-for="BVN" class="text-danger"></span>
-                                        <small class="form-text text-muted">Bank Verification Number</small>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label asp-for="BillingAddress" class="control-label"></label>
-                                        <textarea asp-for="BillingAddress" class="form-control" rows="3"></textarea>
-                                        <span asp-validation-for="BillingAddress" class="text-danger"></span>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label asp-for="BillingAddress" class="control-label"></label>
+                                <textarea asp-for="BillingAddress" class="form-control" rows="2"></textarea>
                             </div>
+                        </div>
+                    </div>
 
+                    <!-- Rebate & Transport -->
+                    <div class="card card-warning">
+                        <div class="card-header"><h3 class="card-title">Rebate &amp; Transport</h3></div>
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="Status" class="control-label"></label>
-                                        <select asp-for="Status" asp-items="ViewBag.Statuses" class="form-control">
-                                            @if (ViewBag.SelectedStatus != null)
-                                            {
-                                                <option value="@ViewBag.SelectedStatus" selected>@ViewBag.SelectedStatus</option>
-                                            }
-                                        </select>
-                                        <span asp-validation-for="Status" class="text-danger"></span>
+                                    <label class="control-label d-block">Has Rebate?</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input rebate-radio" type="radio" name="HasRebate" id="HasRebateYes" value="true" @(Model.HasRebate ? "checked" : "") />
+                                        <label class="form-check-label" for="HasRebateYes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input rebate-radio" type="radio" name="HasRebate" id="HasRebateNo" value="false" @(!Model.HasRebate ? "checked" : "") />
+                                        <label class="form-check-label" for="HasRebateNo">No</label>
+                                    </div>
+                                    <div id="rebateAmountBox" class="mt-2" style="@(Model.HasRebate ? "" : "display:none;")">
+                                        <label asp-for="RebateAmount" class="control-label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                            <input asp-for="RebateAmount" class="form-control money-input" />
+                                        </div>
+                                        <small class="form-text text-muted">Applied automatically as a discount line on every invoice.</small>
+                                        <span asp-validation-for="RebateAmount" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="control-label d-block">Transport Required?</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input transport-radio" type="radio" name="TransportRequired" id="TransportYes" value="true" @(Model.TransportRequired ? "checked" : "") />
+                                        <label class="form-check-label" for="TransportYes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input transport-radio" type="radio" name="TransportRequired" id="TransportNo" value="false" @(!Model.TransportRequired ? "checked" : "") />
+                                        <label class="form-check-label" for="TransportNo">No</label>
+                                    </div>
+                                    <div id="transportAmountBox" class="mt-2" style="@(Model.TransportRequired ? "" : "display:none;")">
+                                        <label asp-for="TransportAmount" class="control-label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                            <input asp-for="TransportAmount" class="form-control money-input" />
+                                        </div>
+                                        <small class="form-text text-muted">Added automatically as an extra line on every invoice.</small>
+                                        <span asp-validation-for="TransportAmount" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Material pricing -->
+                    <div class="card card-info">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Material Pricing</h3>
+                            <button type="button" id="addPriceBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Material
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Changing a price here creates a new history row (old prices preserved). Existing invoices are unaffected.</p>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="pricesTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 36%;">Material</th>
+                                            <th style="width: 20%;">Unit Price (₦)</th>
+                                            <th style="width: 14%;">VAT Rate (%)</th>
+                                            <th style="width: 18%;">Effective From</th>
+                                            <th style="width: 12%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pricesBody">
+                                        @{ var idx = 0; }
+                                        @foreach (var p in Model.MaterialPrices)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <select name="MaterialPrices[@idx].MaterialId" class="form-control form-control-sm material-select">
+                                                        <option value="">-- Select --</option>
+                                                        @foreach (var m in Model.Materials)
+                                                        {
+                                                            if (p.MaterialId?.ToString() == m.Value)
+                                                            {
+                                                                <option value="@m.Value" selected="selected">@m.Text</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@m.Value">@m.Text</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                    <input type="hidden" name="MaterialPrices[@idx].Id" value="@p.Id" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01" min="0" name="MaterialPrices[@idx].UnitPrice" value="@p.UnitPrice" class="form-control form-control-sm price-input money-input" data-symbol="false" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01" min="0" max="100" name="MaterialPrices[@idx].VatRate" value="@(p.VatRate?.ToString() ?? "")" class="form-control form-control-sm vat-input" placeholder="Default" />
+                                                </td>
+                                                <td>
+                                                    <input type="date" name="MaterialPrices[@idx].EffectiveFrom" value="@p.EffectiveFrom.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <button type="button" class="btn btn-sm btn-danger remove-price"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            idx++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to List
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </section>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
         $(function () {
-            // Phone number formatting helper (simple, non-destructive)
-            $('#Phone').on('input', function () {
-                var raw = $(this).val().replace(/[^0-9+]/g, '');
-                $(this).val(raw);
-            });
+            function wireToggle(radioClass, boxId, amountInputName) {
+                $(document).on('change', '.' + radioClass, function () {
+                    var isYes = $('.' + radioClass + ':checked').val() === 'true';
+                    $('#' + boxId).toggle(isYes);
+                    if (!isYes) {
+                        $('input[name="' + amountInputName + '"]').val('');
+                    }
+                });
+            }
+            wireToggle('rebate-radio', 'rebateAmountBox', 'RebateAmount');
+            wireToggle('transport-radio', 'transportAmountBox', 'TransportAmount');
 
-            // BVN validation (11 digits)
+            var materialsHtml = '@Html.Raw(string.Join("", Model.Materials.Select(m => $"<option value=\\\"{m.Value}\\\">{System.Net.WebUtility.HtmlEncode(m.Text)}</option>")))';
+            var today = new Date().toISOString().split('T')[0];
+
+            function renumberPriceRows() {
+                $('#pricesBody tr').each(function (i) {
+                    $(this).find('input, select').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/MaterialPrices\[\d+\]/, 'MaterialPrices[' + i + ']'));
+                    });
+                });
+            }
+
+            function wirePriceRowEvents($tr) {
+                $tr.find('.remove-price').on('click', function () {
+                    $tr.remove();
+                    renumberPriceRows();
+                });
+
+                $tr.find('.material-select').on('change', function () {
+                    var materialId = $(this).val();
+                    if (!materialId) return;
+                    $.getJSON('@Url.Action("GetMaterialCatalog", "Customer")', { materialId: materialId }, function (data) {
+                        if (!data || !data.success) return;
+
+                        var $priceInputs = $tr.find('.price-input');
+                        var $realPrice = $priceInputs.filter('[type=hidden]').first();
+                        if (!$realPrice.length) $realPrice = $priceInputs.first();
+
+                        if (!parseFloat($realPrice.val())) {
+                            $realPrice.val(data.unitPrice).trigger('change');
+                        }
+
+                        var $vat = $tr.find('.vat-input');
+                        if (!$vat.val()) $vat.val(data.vatRate);
+                    });
+                });
+            }
+
+            function addPriceRow() {
+                var idx = $('#pricesBody tr').length;
+                var row = `
+<tr>
+  <td>
+    <select name="MaterialPrices[${idx}].MaterialId" class="form-control form-control-sm material-select">
+      <option value="">-- Select --</option>${materialsHtml}
+    </select>
+    <input type="hidden" name="MaterialPrices[${idx}].Id" value="0" />
+  </td>
+  <td><input type="number" step="0.01" min="0" name="MaterialPrices[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input money-input" data-symbol="false" /></td>
+  <td><input type="number" step="0.01" min="0" max="100" name="MaterialPrices[${idx}].VatRate" value="" class="form-control form-control-sm vat-input" placeholder="Default" /></td>
+  <td><input type="date" name="MaterialPrices[${idx}].EffectiveFrom" value="${today}" class="form-control form-control-sm" /></td>
+  <td class="text-center align-middle">
+    <button type="button" class="btn btn-sm btn-danger remove-price"><i class="fas fa-trash"></i></button>
+  </td>
+</tr>`;
+                var $row = $(row);
+                $('#pricesBody').append($row);
+                if (window.NairaFormat && NairaFormat.scan) NairaFormat.scan($row);
+                wirePriceRowEvents($row);
+            }
+
+            $('#pricesBody tr').each(function () { wirePriceRowEvents($(this)); });
+            $('#addPriceBtn').on('click', function () { addPriceRow(); });
+
+            // Phone / BVN / TIN helpers
+            $('#Phone').on('input', function () {
+                var phone = $(this).val().replace(/\D/g, '');
+                if (phone.length >= 11) {
+                    if (phone.startsWith('234')) {
+                        phone = '+' + phone.substring(0, 3) + phone.substring(3, 6) + phone.substring(6, 10) + phone.substring(10);
+                    } else if (phone.startsWith('0')) {
+                        phone = phone.substring(0, 4) + phone.substring(4, 7) + phone.substring(7, 11);
+                    }
+                }
+                $(this).val(phone);
+            });
             $('#BVN').on('input', function () {
                 var bvn = $(this).val().replace(/\D/g, '');
                 if (bvn.length > 11) bvn = bvn.substring(0, 11);
                 $(this).val(bvn);
             });
-
-            // TIN validation (max 12 digits)
             $('#TIN').on('input', function () {
                 var tin = $(this).val().replace(/\D/g, '');
                 if (tin.length > 12) tin = tin.substring(0, 12);

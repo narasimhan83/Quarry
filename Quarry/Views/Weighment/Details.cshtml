@@ -8,6 +8,17 @@
         "Cancelled" => "badge-danger",
         _ => "badge-secondary"
     };
+
+    // Normalize weights to tons for display. Legacy records stored in kg
+    // get converted on the fly so the "(tons)" labels always match the
+    // number. Net is also recomputed here (Gross − Tare) in case the
+    // stored NetWeight column is stale — the Index view does the same.
+    var isKg     = string.Equals(Model.WeightUnit, "kg", System.StringComparison.OrdinalIgnoreCase);
+    decimal toTons(decimal? v) => isKg ? (v ?? 0m) / 1000m : (v ?? 0m);
+    var grossTons = toTons(Model.GrossWeight);
+    var tareTons  = toTons(Model.TareWeight);
+    var netTons   = grossTons - tareTons;
+    if (netTons < 0) netTons = 0;
 }
 
 <!-- Content Header -->
@@ -38,7 +49,7 @@
             <div class="col-md-3">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>@Model.NetWeight.ToString("N0") <small style="font-size:16px">kg</small></h3>
+                        <h3>@netTons.ToString("N3") <small style="font-size:16px">tons</small></h3>
                         <p>Net Weight</p>
                     </div>
                     <div class="icon"><i class="fas fa-weight"></i></div>
@@ -146,14 +157,14 @@
                             <dt class="col-sm-4">Driver Phone</dt>
                             <dd class="col-sm-8">@(!string.IsNullOrEmpty(Model.DriverPhone) ? Model.DriverPhone : "-")</dd>
 
-                            <dt class="col-sm-4">Gross (kg)</dt>
-                            <dd class="col-sm-8">@Model.GrossWeight.ToString("N0")</dd>
+                            <dt class="col-sm-4">Gross (tons)</dt>
+                            <dd class="col-sm-8">@grossTons.ToString("N3")</dd>
 
-                            <dt class="col-sm-4">Tare (kg)</dt>
-                            <dd class="col-sm-8">@((Model.TareWeight ?? 0).ToString("N0"))</dd>
+                            <dt class="col-sm-4">Tare (tons)</dt>
+                            <dd class="col-sm-8">@tareTons.ToString("N3")</dd>
 
-                            <dt class="col-sm-4">Net (kg)</dt>
-                            <dd class="col-sm-8"><strong>@Model.NetWeight.ToString("N0")</strong></dd>
+                            <dt class="col-sm-4">Net (tons)</dt>
+                            <dd class="col-sm-8"><strong>@netTons.ToString("N3")</strong></dd>
 
                             <dt class="col-sm-4">Unit</dt>
                             <dd class="col-sm-8">@Model.WeightUnit</dd>
@@ -185,6 +196,16 @@
                             <dd class="col-sm-6 text-right">@((Model.SubTotal ?? 0).ToString("C"))</dd>
                             <dt class="col-sm-6">VAT (@Model.VatRate.ToString("N2")%)</dt>
                             <dd class="col-sm-6 text-right">@((Model.VatAmount ?? 0).ToString("C"))</dd>
+                            @*
+                                Rebate row: only rendered when the weighment carries one.
+                                Mirrors the Edit / Create Financial Summary cards so
+                                operators see the same breakdown everywhere.
+                            *@
+                            @if ((Model.RebateAmount ?? 0) > 0)
+                            {
+                                <dt class="col-sm-6 text-warning">Rebate <small class="text-muted">(applied)</small></dt>
+                                <dd class="col-sm-6 text-right text-warning">− @((Model.RebateAmount ?? 0).ToString("C"))</dd>
+                            }
                             <dt class="col-sm-6">Total</dt>
                             <dd class="col-sm-6 text-right"><strong>@((Model.TotalAmount ?? 0).ToString("C"))</strong></dd>
                         </dl>
@@ -198,9 +219,12 @@
                         </a>
 
                         <div>
+                            <a asp-action="PrintSlip80" asp-route-id="@Model.Id" target="_blank" class="btn btn-success">
+                                <i class="fas fa-print"></i> Print Slip (80mm)
+                            </a>
                             @if (!(Model.IsInvoiced || Model.Status == "Completed"))
                             {
-                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary ml-2">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                                 <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger ml-2">
@@ -209,7 +233,7 @@
                             }
                             else
                             {
-                                <span class="badge badge-info">Locked (Completed/Invoiced)</span>
+                                <span class="badge badge-info ml-2">Locked (Completed/Invoiced)</span>
                             }
                         </div>
                     </div>

@@ -40,29 +40,57 @@
                     <dd class="col-sm-9">@Model.PrepaymentDate.ToString("dd/MM/yyyy")</dd>
 
                     <dt class="col-sm-3">Customer</dt>
-                    <dd class="col-sm-9">@Model.Customer?.Name ?? $"ID {Model.CustomerId}"</dd>
+                    <dd class="col-sm-9">@(Model.Customer?.Name ?? $"ID {Model.CustomerId}")</dd>
+
+                    <dt class="col-sm-3">Expected Pickup</dt>
+                    <dd class="col-sm-9">@(Model.ExpectedPickupDate?.ToString("dd/MM/yyyy") ?? "-")</dd>
 
                     <dt class="col-sm-3">Payment Method</dt>
                     <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.PaymentMethod) ? Model.PaymentMethod : "-")</dd>
 
-                    <dt class="col-sm-3">Material</dt>
-                    <dd class="col-sm-9">@((Model.Material != null) ? Model.Material.Name : "-")</dd>
-
-                    <dt class="col-sm-3">Weight Unit</dt>
-                    <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.WeightUnit) ? Model.WeightUnit : "-")</dd>
+                    <dt class="col-sm-3">Reference</dt>
+                    <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Reference) ? Model.Reference : "-")</dd>
 
                     <dt class="col-sm-3">Amount</dt>
-                    <dd class="col-sm-9">@Model.Amount.ToString("N2")</dd>
+                    <dd class="col-sm-9"><strong>₦@Model.Amount.ToString("N2")</strong></dd>
 
                     <dt class="col-sm-3">Used Amount</dt>
-                    <dd class="col-sm-9">@Model.UsedAmount.ToString("N2")</dd>
+                    <dd class="col-sm-9">₦@Model.UsedAmount.ToString("N2")</dd>
 
                     <dt class="col-sm-3">Remaining</dt>
-                    <dd class="col-sm-9">@Model.RemainingAmount.ToString("N2")</dd>
+                    <dd class="col-sm-9">₦@Model.RemainingAmount.ToString("N2")</dd>
 
                     <dt class="col-sm-3">Status</dt>
                     <dd class="col-sm-9">@Model.Status</dd>
                 </dl>
+
+                @if (Model.LineItems != null && Model.LineItems.Any())
+                {
+                    <h5 class="mt-3">Line Items</h5>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th class="text-right">Qty</th>
+                                <th>Unit</th>
+                                <th class="text-right">Unit Price (₦)</th>
+                                <th class="text-right">Line Total (₦)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var li in Model.LineItems)
+                            {
+                                <tr>
+                                    <td>@li.Material?.Name</td>
+                                    <td class="text-right">@li.Quantity.ToString("N3")</td>
+                                    <td>@li.Unit</td>
+                                    <td class="text-right">@li.UnitPrice.ToString("N2")</td>
+                                    <td class="text-right">@li.LineTotal.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
             </div>
             <div class="card-footer">
                 <form asp-action="Delete" method="post">

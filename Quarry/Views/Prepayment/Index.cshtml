@@ -97,15 +97,15 @@
                             <tr>
                                 <th>Prepayment #</th>
                                 <th>Date</th>
+                                <th>Expected Pickup</th>
                                 <th>Customer</th>
                                 <th>Payment Method</th>
-                                <th>Material</th>
-                                <th>Weight Unit</th>
+                                <th>Materials</th>
                                 <th class="text-right">Amount (₦)</th>
                                 <th class="text-right">Used (₦)</th>
                                 <th class="text-right">Remaining (₦)</th>
                                 <th>Status</th>
-                                <th class="text-right" style="width: 90px;">Actions</th>
+                                <th class="text-right" style="width: 130px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,13 +114,25 @@
                                 foreach (var p in Model)
                                 {
                                     var customerName = p.Customer?.Name ?? $"ID {p.CustomerId}";
+                                    var materialSummary = p.LineItems != null && p.LineItems.Any()
+                                        ? (p.LineItems.Count == 1
+                                            ? (p.LineItems.First().Material?.Name ?? "-")
+                                            : $"{p.LineItems.Count} items")
+                                        : (p.Material?.Name ?? "-");
+
                                     <tr>
                                         <td>@p.PrepaymentNumber</td>
                                         <td>@p.PrepaymentDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@(p.ExpectedPickupDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                                         <td>@customerName</td>
                                         <td>@(string.IsNullOrWhiteSpace(p.PaymentMethod) ? "-" : p.PaymentMethod)</td>
-                                        <td>@(p.Material != null ? p.Material.Name : "-")</td>
-                                        <td>@(string.IsNullOrWhiteSpace(p.WeightUnit) ? "-" : p.WeightUnit)</td>
+                                        <td>
+                                            @materialSummary
+                                            @if (p.LineItems != null && p.LineItems.Count > 1)
+                                            {
+                                                <br /><small class="text-muted">@string.Join(", ", p.LineItems.Select(li => li.Material?.Name).Where(n => !string.IsNullOrEmpty(n)))</small>
+                                            }
+                                        </td>
                                         <td class="text-right">@p.Amount.ToString("N2")</td>
                                         <td class="text-right">@p.UsedAmount.ToString("N2")</td>
                                         <td class="text-right">@p.RemainingAmount.ToString("N2")</td>
@@ -131,12 +143,21 @@
                                         </td>
                                         <td class="text-right">
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-outline-primary" title="Edit">
-                                                    <i class="fas fa-edit"></i>
+                                                <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-outline-info" title="Details">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-outline-danger" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
+                                                @{
+                                                    var hasApplications = p.Applications != null && p.Applications.Any();
+                                                }
+                                                @if (!hasApplications)
+                                                {
+                                                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-outline-primary" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-outline-danger" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                }
                                             </div>
                                         </td>
                                     </tr>

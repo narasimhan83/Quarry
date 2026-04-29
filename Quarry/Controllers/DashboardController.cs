@@ -34,21 +34,29 @@ namespace QuarryManagementSystem.Controllers
                 // Dashboard statistics
                 var dashboardData = new DashboardViewModel
                 {
-                    // Today's statistics
-                    TodayWeighments = await _context.WeighmentTransactions
-                        .CountAsync(w => w.TransactionDate.Date == today),
-                    
-                    TodayRevenue = await _context.WeighmentTransactions
-                        .Where(w => w.TransactionDate.Date == today && w.TotalAmount.HasValue)
-                        .SumAsync(w => w.TotalAmount.Value),
+                // Today's statistics
+                //
+                // These are based on CreatedAt (when the record was saved), NOT
+                // TransactionDate (the operator-visible "date of the weighment").
+                // Rationale: TransactionDate is editable on the Create form —
+                // an operator who saves a backdated slip to cover yesterday's
+                // unrecorded delivery would otherwise see their KPI stay at 0
+                // even though they just did work today. "Today's Weighments"
+                // should reflect activity, not document-dating.
+                TodayWeighments = await _context.WeighmentTransactions
+                    .CountAsync(w => w.CreatedAt >= today && w.CreatedAt < today.AddDays(1)),
 
-                    // Monthly statistics
-                    MonthlyWeighments = await _context.WeighmentTransactions
-                        .CountAsync(w => w.TransactionDate >= thisMonth),
-                    
-                    MonthlyRevenue = await _context.WeighmentTransactions
-                        .Where(w => w.TransactionDate >= thisMonth && w.TotalAmount.HasValue)
-                        .SumAsync(w => w.TotalAmount.Value),
+                TodayRevenue = await _context.WeighmentTransactions
+                    .Where(w => w.CreatedAt >= today && w.CreatedAt < today.AddDays(1) && w.TotalAmount.HasValue)
+                    .SumAsync(w => w.TotalAmount.Value),
+
+                // Monthly statistics (same rationale: CreatedAt, not TransactionDate).
+                MonthlyWeighments = await _context.WeighmentTransactions
+                    .CountAsync(w => w.CreatedAt >= thisMonth),
+
+                MonthlyRevenue = await _context.WeighmentTransactions
+                    .Where(w => w.CreatedAt >= thisMonth && w.TotalAmount.HasValue)
+                    .SumAsync(w => w.TotalAmount.Value),
 
                     // Customer statistics
                     TotalCustomers = await _context.Customers
@@ -196,10 +204,12 @@ namespace QuarryManagementSystem.Controllers
                 
                 var stats = new
                 {
+                    // Same rule as DashboardViewModel above: count by CreatedAt
+                    // so activity today shows up even for backdated slips.
                     weighments = await _context.WeighmentTransactions
-                        .CountAsync(w => w.TransactionDate.Date == today),
+                        .CountAsync(w => w.CreatedAt >= today && w.CreatedAt < today.AddDays(1)),
                     revenue = await _context.WeighmentTransactions
-                        .Where(w => w.TransactionDate.Date == today && w.TotalAmount.HasValue)
+                        .Where(w => w.CreatedAt >= today && w.CreatedAt < today.AddDays(1) && w.TotalAmount.HasValue)
                         .SumAsync(w => w.TotalAmount.Value),
                     pendingInvoices = await _context.Invoices
                         .CountAsync(i => i.Status == "Unpaid"),

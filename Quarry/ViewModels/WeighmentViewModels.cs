@@ -75,6 +75,15 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "Material")]
         public int? MaterialId { get; set; }
 
+        // Prepayment allocation hint (optional). When set, the operator picked a
+        // specific active prepayment for this weighment and the later invoice
+        // should drain that prepayment first before falling back to FIFO.
+        [Display(Name = "Prepayment")]
+        public int? SelectedPrepaymentId { get; set; }
+
+        [Display(Name = "Prepayment Line Item")]
+        public int? SelectedPrepaymentLineItemId { get; set; }
+
         // Pricing
         [Display(Name = "Price Per Unit")]
         [Range(0.01, 999999.99, ErrorMessage = "Price per unit must be between 0.01 and 999,999.99")]
@@ -85,23 +94,36 @@ namespace QuarryManagementSystem.ViewModels
         public decimal VatRate { get; set; } = 7.5m;
 
         // Weight Information
-        [Required(ErrorMessage = "Gross weight is required")]
-        [Display(Name = "Gross Weight (kg)")]
-        [Range(0.01, 999999.99, ErrorMessage = "Gross weight must be between 0.01 and 999,999.99")]
-        public decimal GrossWeight { get; set; }
-
-        [Display(Name = "Tare Weight (kg)")]
-        [Range(0, 999999.99, ErrorMessage = "Tare weight must be between 0 and 999,999.99")]
+        //
+        // Real quarry dispatch flow:
+        //   1. Empty truck enters → weighed = Tare weight
+        //   2. Truck loaded with material → weighed again = Gross (total) weight
+        //   3. Net weight = Gross − Tare (the material actually loaded, what we bill)
+        //
+        // Both Tare and Gross come from the weighbridge. Net is derived and is
+        // the billable quantity used in CalculateFinancials.
+        [Display(Name = "Tare Weight (tons)")]
+        [Range(0, 9999.999, ErrorMessage = "Tare weight must be between 0 and 9,999.999 tons")]
         public decimal? TareWeight { get; set; }
 
+        // Gross weight is captured later — typically only after the truck is
+        // loaded and returns to the weighbridge for the second weighing. The
+        // form may be saved at first weighing with only Tare filled in, so
+        // GrossWeight has no Required / Range validation. The Status field
+        // ('InProgress' vs 'Completed') is what gates whether a weighment is
+        // billable; downstream code already treats GrossWeight = 0 as
+        // "not yet weighed" and skips financial calculations.
+        [Display(Name = "Gross Weight (tons)")]
+        public decimal GrossWeight { get; set; }
+
         [NotMapped]
-        [Display(Name = "Net Weight (kg)")]
+        [Display(Name = "Net Weight (tons)")]
         public decimal NetWeight => GrossWeight - (TareWeight ?? 0);
 
         [Required]
         [StringLength(10)]
         [Display(Name = "Weight Unit")]
-        public string WeightUnit { get; set; } = "kg";
+        public string WeightUnit { get; set; } = "Ton";
 
         // Timing
         [Display(Name = "Entry Time")]
@@ -140,15 +162,28 @@ namespace QuarryManagementSystem.ViewModels
         [DataType(DataType.Currency)]
         public decimal? VatAmount { get; set; }
 
+        /// <summary>
+        /// Per-line rebate (customer's per-unit rebate × net tons), surfaced on
+        /// the form so the operator can see how much the customer is being
+        /// discounted. Filled by the controller from <see cref="WeighmentTransaction.RebateAmount"/>
+        /// on Edit, recomputed on POST so it always matches current customer settings.
+        /// </summary>
+        [Display(Name = "Rebate Amount")]
+        [DataType(DataType.Currency)]
+        public decimal? RebateAmount { get; set; }
+
         [Display(Name = "Total Amount")]
         [DataType(DataType.Currency)]
         public decimal? TotalAmount { get; set; }
 
-        // Helper method to calculate financials
+        // Helper method to calculate financials.
+        // NetWeight = Gross − Tare is the material loaded and is what we bill.
         public void CalculateFinancials()
         {
             if (NetWeight > 0 && PricePerUnit.HasValue)
             {
+                // NetWeight is already in the chosen WeightUnit. Only convert
+                // when the unit is kg (legacy / mixed-unit scenarios).
                 decimal quantityInTons = WeightUnit == "kg" ? NetWeight / 1000 : NetWeight;
                 SubTotal = quantityInTons * PricePerUnit.Value;
                 VatAmount = SubTotal * (VatRate / 100);
@@ -214,8 +249,8 @@ namespace QuarryManagementSystem.ViewModels
         [Display(Name = "Total Transactions")]
         public int TotalTransactions { get; set; }
         
-        [Display(Name = "Total Weight (kg)")]
-        [DisplayFormat(DataFormatString = "{0:N0}")]
+        [Display(Name = "Total Weight (tons)")]
+        [DisplayFormat(DataFormatString = "{0:N3}")]
         public decimal TotalWeight { get; set; }
         
         [Display(Name = "Total Revenue")]

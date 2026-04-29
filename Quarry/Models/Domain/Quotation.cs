@@ -27,6 +27,35 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "Subtotal")]
         public decimal SubTotal { get; set; }
 
+        /// <summary>
+        /// Flat customer rebate auto-applied when the quotation is created, taken
+        /// from Customer.RebateAmount if HasRebate is true. Stored so future edits
+        /// and the print view can show "Rebate: −₦X" even if the customer's
+        /// rebate settings change later. Treated as a discount before VAT.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Rebate Amount")]
+        public decimal RebateAmount { get; set; } = 0m;
+
+        /// <summary>
+        /// Flat transport fee auto-applied when the quotation is created, taken
+        /// from Customer.TransportAmount if TransportRequired is true. Added
+        /// after the subtotal (and after the rebate), before VAT.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Transport Amount")]
+        public decimal TransportAmount { get; set; } = 0m;
+
+        /// <summary>
+        /// Snapshot of the customer's VAT type (Exclusive or Inclusive) at the time
+        /// the quotation was created. Exclusive = VAT added on top of net; Inclusive
+        /// = VAT already embedded in line prices. Stored so the print and edit views
+        /// can label VAT correctly even if the customer's VAT type is later changed.
+        /// </summary>
+        [StringLength(20)]
+        [Display(Name = "VAT Type")]
+        public string? VatTypeSnapshot { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "VAT Amount")]
         public decimal VatAmount { get; set; }

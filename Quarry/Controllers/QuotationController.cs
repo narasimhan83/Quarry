@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuarryManagementSystem.Data;
 using QuarryManagementSystem.Models.Domain;
+using QuarryManagementSystem.Services;
 using QuarryManagementSystem.ViewModels;
 
 namespace QuarryManagementSystem.Controllers
@@ -13,11 +14,16 @@ namespace QuarryManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<QuotationController> _logger;
+        private readonly ICustomerPricingService _pricingService;
 
-        public QuotationController(ApplicationDbContext context, ILogger<QuotationController> logger)
+        public QuotationController(
+            ApplicationDbContext context,
+            ILogger<QuotationController> logger,
+            ICustomerPricingService pricingService)
         {
             _context = context;
             _logger = logger;
+            _pricingService = pricingService;
         }
 
         // GET: Quotation
@@ -128,37 +134,27 @@ namespace QuarryManagementSystem.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    decimal subTotal = 0, vatAmount = 0, totalAmount = 0;
-                    foreach (var it in model.Items)
+                    // Load the customer once for rebate / transport / VAT type.
+                    var customer = await _context.Customers
+                        .Include(c => c.VatType)
+                        .FirstOrDefaultAsync(c => c.Id == model.CustomerId!.Value);
+                    if (customer == null)
                     {
-                        var lineSub = Math.Round(it.Quantity * it.UnitPrice, 2);
-                        var lineVat = Math.Round(lineSub * (it.VatRate / 100m), 2);
-                        subTotal += lineSub;
-                        vatAmount += lineVat;
-                        totalAmount += lineSub + lineVat;
+                        ModelState.AddModelError("CustomerId", "Customer not found.");
+                        await PopulateDropdowns(model);
+                        return View(model);
                     }
 
-                    var quotationNumber = await GenerateQuotationNumber();
+                    // Only include rows that actually have data
+                    var validItems = model.Items
+                        .Where(i => !(i.Quantity <= 0 && i.UnitPrice <= 0 && !i.MaterialId.HasValue))
+                        .ToList();
 
-                    var quotation = new Quotation
+                    // Build line items first so we have their subtotals for rebate distribution.
+                    var lineItems = new List<QuotationItem>();
+                    decimal subTotal = 0m;
+                    foreach (var it in validItems)
                     {
-                        QuotationNumber = quotationNumber,
-                        CustomerId = model.CustomerId.Value,
-                        QuotationDate = model.QuotationDate,
-                        ExpiryDate = model.ExpiryDate,
-                        SubTotal = subTotal,
-                        VatAmount = vatAmount,
-                        TotalAmount = totalAmount,
-                        Status = model.Status ?? "Draft",
-                        Notes = model.Notes,
-                        CreatedBy = User.Identity?.Name,
-                        CreatedAt = DateTime.Now
-                    };
-
-                    // Items
-                    foreach (var it in model.Items)
-                    {
-                        if (it.Quantity <= 0 && it.UnitPrice <= 0 && !it.MaterialId.HasValue) continue;
                         var qi = new QuotationItem
                         {
                             MaterialId = it.MaterialId,
@@ -169,6 +165,69 @@ namespace QuarryManagementSystem.Controllers
                             VatRate = it.VatRate
                         };
                         qi.Recalculate();
+                        subTotal += qi.LineSubTotal;
+                        lineItems.Add(qi);
+                    }
+
+                    // Mirror InvoiceController.Create: auto-apply customer rebate/transport,
+                    // branch on VAT type. Rebate is flat at the header level; distribute it
+                    // across lines proportionally to each line's LineSubTotal for audit.
+                    decimal rebateAmount = customer.HasRebate ? (customer.RebateAmount ?? 0m) : 0m;
+                    decimal transportAmount = customer.TransportRequired ? (customer.TransportAmount ?? 0m) : 0m;
+                    if (rebateAmount > subTotal) rebateAmount = subTotal;
+
+                    DistributeRebateAcrossLines(lineItems, subTotal, rebateAmount);
+
+                    string vatType = customer.VatType?.Name ?? "Exclusive";
+                    decimal netBeforeVat = subTotal - rebateAmount + transportAmount;
+                    decimal vatAmount;
+                    decimal totalAmount;
+                    if (string.Equals(vatType, "Inclusive", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Lines already include VAT; back out the VAT share for display.
+                        // Use a blended effective rate: total line VAT / total line subtotal.
+                        // Falls back to 0 if no VAT-bearing lines.
+                        var lineVatTotal = lineItems.Sum(li => li.LineVatAmount);
+                        var effectiveRate = subTotal > 0 ? Math.Round(lineVatTotal / subTotal * 100m, 2) : 0m;
+                        vatAmount = effectiveRate > 0
+                            ? Math.Round(netBeforeVat * effectiveRate / (100m + effectiveRate), 2)
+                            : 0m;
+                        totalAmount = netBeforeVat; // gross already
+                    }
+                    else
+                    {
+                        // Exclusive: VAT on top of the discounted subtotal (+ transport).
+                        vatAmount = Math.Round(lineItems.Sum(li => li.LineVatAmount), 2);
+                        // If rebate reduces the base, scale VAT proportionally so VAT matches netBeforeVat.
+                        if (subTotal > 0 && rebateAmount > 0)
+                        {
+                            var scale = (subTotal - rebateAmount) / subTotal;
+                            vatAmount = Math.Round(vatAmount * scale, 2);
+                        }
+                        totalAmount = netBeforeVat + vatAmount;
+                    }
+
+                    var quotationNumber = await GenerateQuotationNumber();
+
+                    var quotation = new Quotation
+                    {
+                        QuotationNumber = quotationNumber,
+                        CustomerId = model.CustomerId!.Value,
+                        QuotationDate = model.QuotationDate,
+                        ExpiryDate = model.ExpiryDate,
+                        SubTotal = subTotal,
+                        RebateAmount = rebateAmount,
+                        TransportAmount = transportAmount,
+                        VatTypeSnapshot = vatType,
+                        VatAmount = vatAmount,
+                        TotalAmount = totalAmount,
+                        Status = model.Status ?? "Draft",
+                        Notes = model.Notes,
+                        CreatedBy = User.Identity?.Name,
+                        CreatedAt = DateTime.Now
+                    };
+                    foreach (var qi in lineItems)
+                    {
                         quotation.Items.Add(qi);
                     }
 
@@ -216,6 +275,9 @@ namespace QuarryManagementSystem.Controllers
                 CustomerId = quotation.CustomerId,
                 Notes = quotation.Notes,
                 Status = quotation.Status,
+                RebateAmount = quotation.RebateAmount,
+                TransportAmount = quotation.TransportAmount,
+                VatTypeSnapshot = quotation.VatTypeSnapshot,
                 Items = quotation.Items.Select(i => new QuotationItemEditViewModel
                 {
                     Id = i.Id,
@@ -224,7 +286,8 @@ namespace QuarryManagementSystem.Controllers
                     Quantity = i.Quantity,
                     Unit = i.Unit,
                     UnitPrice = i.UnitPrice,
-                    VatRate = i.VatRate
+                    VatRate = i.VatRate,
+                    LineRebateAmount = i.LineRebateAmount
                 }).ToList()
             };
 
@@ -265,9 +328,20 @@ namespace QuarryManagementSystem.Controllers
                         return NotFound();
                     }
 
+                    // Load the (possibly changed) customer for fresh rebate/transport/VAT type.
+                    var customer = await _context.Customers
+                        .Include(c => c.VatType)
+                        .FirstOrDefaultAsync(c => c.Id == model.CustomerId!.Value);
+                    if (customer == null)
+                    {
+                        ModelState.AddModelError("CustomerId", "Customer not found.");
+                        await PopulateDropdowns(model);
+                        return View(model);
+                    }
+
                     quotation.QuotationDate = model.QuotationDate;
                     quotation.ExpiryDate = model.ExpiryDate;
-                    quotation.CustomerId = model.CustomerId.Value;
+                    quotation.CustomerId = model.CustomerId!.Value;
                     quotation.Notes = model.Notes;
                     quotation.Status = model.Status ?? quotation.Status;
                     quotation.UpdatedAt = DateTime.Now;
@@ -276,10 +350,15 @@ namespace QuarryManagementSystem.Controllers
                     _context.QuotationItems.RemoveRange(quotation.Items);
                     quotation.Items.Clear();
 
-                    decimal subTotal = 0, vatAmount = 0, totalAmount = 0;
-                    foreach (var it in model.Items)
+                    // Build the new lines and compute subtotal first (so we can distribute rebate).
+                    var validItems = model.Items
+                        .Where(i => !(i.Quantity <= 0 && i.UnitPrice <= 0 && !i.MaterialId.HasValue))
+                        .ToList();
+
+                    var lineItems = new List<QuotationItem>();
+                    decimal subTotal = 0m;
+                    foreach (var it in validItems)
                     {
-                        if (it.Quantity <= 0 && it.UnitPrice <= 0 && !it.MaterialId.HasValue) continue;
                         var qi = new QuotationItem
                         {
                             MaterialId = it.MaterialId,
@@ -291,12 +370,49 @@ namespace QuarryManagementSystem.Controllers
                         };
                         qi.Recalculate();
                         subTotal += qi.LineSubTotal;
-                        vatAmount += qi.LineVatAmount;
-                        totalAmount += qi.LineTotal;
+                        lineItems.Add(qi);
+                    }
+
+                    // Apply rebate / transport / VAT branching with the current customer settings.
+                    decimal rebateAmount = customer.HasRebate ? (customer.RebateAmount ?? 0m) : 0m;
+                    decimal transportAmount = customer.TransportRequired ? (customer.TransportAmount ?? 0m) : 0m;
+                    if (rebateAmount > subTotal) rebateAmount = subTotal;
+
+                    DistributeRebateAcrossLines(lineItems, subTotal, rebateAmount);
+
+                    string vatType = customer.VatType?.Name ?? "Exclusive";
+                    decimal netBeforeVat = subTotal - rebateAmount + transportAmount;
+                    decimal vatAmount;
+                    decimal totalAmount;
+                    if (string.Equals(vatType, "Inclusive", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var lineVatTotal = lineItems.Sum(li => li.LineVatAmount);
+                        var effectiveRate = subTotal > 0 ? Math.Round(lineVatTotal / subTotal * 100m, 2) : 0m;
+                        vatAmount = effectiveRate > 0
+                            ? Math.Round(netBeforeVat * effectiveRate / (100m + effectiveRate), 2)
+                            : 0m;
+                        totalAmount = netBeforeVat;
+                    }
+                    else
+                    {
+                        vatAmount = Math.Round(lineItems.Sum(li => li.LineVatAmount), 2);
+                        if (subTotal > 0 && rebateAmount > 0)
+                        {
+                            var scale = (subTotal - rebateAmount) / subTotal;
+                            vatAmount = Math.Round(vatAmount * scale, 2);
+                        }
+                        totalAmount = netBeforeVat + vatAmount;
+                    }
+
+                    foreach (var qi in lineItems)
+                    {
                         quotation.Items.Add(qi);
                     }
 
                     quotation.SubTotal = subTotal;
+                    quotation.RebateAmount = rebateAmount;
+                    quotation.TransportAmount = transportAmount;
+                    quotation.VatTypeSnapshot = vatType;
                     quotation.VatAmount = vatAmount;
                     quotation.TotalAmount = totalAmount;
 
@@ -422,6 +538,119 @@ namespace QuarryManagementSystem.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // AJAX: Return the customer-level context a quotation needs to render
+        // its summary panel correctly: flat rebate, transport fee, and VAT type.
+        // Called when the customer dropdown changes so the client can show
+        // "Rebate −₦X" / "Transport +₦Y" rows alongside VAT type label.
+        [HttpGet]
+        public async Task<JsonResult> GetCustomerContext(int customerId)
+        {
+            try
+            {
+                var customer = await _context.Customers
+                    .Include(c => c.VatType)
+                    .FirstOrDefaultAsync(c => c.Id == customerId);
+
+                if (customer == null)
+                {
+                    return Json(new { success = false, message = "Customer not found" });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    hasRebate = customer.HasRebate,
+                    rebateAmount = customer.HasRebate ? (customer.RebateAmount ?? 0m) : 0m,
+                    transportRequired = customer.TransportRequired,
+                    transportAmount = customer.TransportRequired ? (customer.TransportAmount ?? 0m) : 0m,
+                    vatType = customer.VatType?.Name ?? "Exclusive"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer context for {CustomerId}", customerId);
+                return Json(new { success = false, message = "Error retrieving customer context" });
+            }
+        }
+
+        // AJAX: Get material price, preferring a customer-specific price when a
+        // customer is selected. Called by the Quotation Create/Edit page.
+        [HttpGet]
+        public async Task<JsonResult> GetMaterialPrice(int materialId, int? customerId = null)
+        {
+            try
+            {
+                if (customerId.HasValue && customerId.Value > 0)
+                {
+                    var pricing = await _pricingService.GetPricingAsync(customerId.Value, materialId);
+                    return Json(new
+                    {
+                        success = true,
+                        unitPrice = pricing.UnitPrice,
+                        vatRate = pricing.VatRate,
+                        isCustomerSpecific = pricing.IsCustomerSpecific,
+                        vatType = pricing.VatType
+                    });
+                }
+
+                var material = await _context.Materials.FindAsync(materialId);
+                if (material == null) return Json(new { success = false, message = "Material not found" });
+                return Json(new
+                {
+                    success = true,
+                    unitPrice = material.UnitPrice,
+                    vatRate = material.VatRate,
+                    unit = material.Unit,
+                    isCustomerSpecific = false,
+                    vatType = (string?)null
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting material price for material {MaterialId}", materialId);
+                return Json(new { success = false, message = "Error retrieving material price" });
+            }
+        }
+
+        /// <summary>
+        /// Distributes the flat header rebate across line items proportionally
+        /// to each line's LineSubTotal. Ensures rounding residual lands on the
+        /// last rebated line so the line totals still sum to the header rebate.
+        /// <para/>
+        /// After this runs, each line's LineRebateAmount is set but LineTotal
+        /// remains untouched — the rebate is a header-level discount on the
+        /// final total, not a line-level price adjustment.
+        /// </summary>
+        private static void DistributeRebateAcrossLines(
+            List<QuotationItem> lines,
+            decimal subTotal,
+            decimal totalRebate)
+        {
+            if (lines == null || lines.Count == 0) return;
+            if (totalRebate <= 0 || subTotal <= 0)
+            {
+                foreach (var li in lines) li.LineRebateAmount = 0m;
+                return;
+            }
+
+            decimal assigned = 0m;
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var li = lines[i];
+                if (i == lines.Count - 1)
+                {
+                    // Last line absorbs the rounding residual so sum(LineRebateAmount) == totalRebate.
+                    li.LineRebateAmount = Math.Round(totalRebate - assigned, 2);
+                }
+                else
+                {
+                    var share = Math.Round(totalRebate * (li.LineSubTotal / subTotal), 2);
+                    li.LineRebateAmount = share;
+                    assigned += share;
+                }
+            }
         }
 
         // Helpers

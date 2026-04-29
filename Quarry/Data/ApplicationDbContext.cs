@@ -35,7 +35,16 @@ namespace QuarryManagementSystem.Data
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
         public DbSet<StockYard> StockYards { get; set; }
         public DbSet<CustomerPrepayment> CustomerPrepayments { get; set; }
+        public DbSet<PrepaymentLineItem> PrepaymentLineItems { get; set; }
         public DbSet<PrepaymentApplication> PrepaymentApplications { get; set; }
+
+        // Customer classification + per-customer pricing
+        public DbSet<CustomerType> CustomerTypes { get; set; }
+        public DbSet<VatType> VatTypes { get; set; }
+        public DbSet<CustomerMaterialPrice> CustomerMaterialPrices { get; set; }
+
+        // Payment methods lookup (Cash, Bank Transfer, Online Payment, Cheque, ...)
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,6 +75,22 @@ namespace QuarryManagementSystem.Data
                 .HasOne(w => w.Weighbridge)
                 .WithMany(wb => wb.WeighmentTransactions)
                 .HasForeignKey(w => w.WeighbridgeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Weighment → optional Prepayment allocation hint. Nullable because
+            // most weighments aren't tied to a prepayment. Restrict on delete so
+            // a prepayment with weighments pointing at it can't be deleted out
+            // from under them.
+            modelBuilder.Entity<WeighmentTransaction>()
+                .HasOne(w => w.SelectedPrepayment)
+                .WithMany()
+                .HasForeignKey(w => w.SelectedPrepaymentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<WeighmentTransaction>()
+                .HasOne(w => w.SelectedPrepaymentLineItem)
+                .WithMany()
+                .HasForeignKey(w => w.SelectedPrepaymentLineItemId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure Invoice relationships
@@ -99,6 +124,71 @@ namespace QuarryManagementSystem.Data
                 .WithMany()
                 .HasForeignKey(qi => qi.MaterialId)
                 .OnDelete(DeleteBehavior.Restrict);
+ 
+            // Configure Prepayment line-item relationships
+            modelBuilder.Entity<PrepaymentLineItem>()
+                .HasOne(pli => pli.CustomerPrepayment)
+                .WithMany(p => p.LineItems)
+                .HasForeignKey(pli => pli.CustomerPrepaymentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PrepaymentLineItem>()
+                .HasOne(pli => pli.Material)
+                .WithMany()
+                .HasForeignKey(pli => pli.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // When an application references a specific line item, cascade is
+            // undesirable because it would delete history. Restrict is fine
+            // because line items are cascade-deleted with the parent prepayment
+            // only when there are no applications (enforced at controller level).
+            modelBuilder.Entity<PrepaymentApplication>()
+                .HasOne(pa => pa.PrepaymentLineItem)
+                .WithMany()
+                .HasForeignKey(pa => pa.PrepaymentLineItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+ 
+            // Prepayment → PaymentMethod lookup. Nullable FK so legacy rows
+            // (which only carried the denormalized string) keep loading. Restrict
+            // on delete so we never orphan a prepayment if an admin removes a
+            // method — IsActive = false is the correct way to retire one.
+            modelBuilder.Entity<CustomerPrepayment>()
+                .HasOne(p => p.PaymentMethodRef)
+                .WithMany(pm => pm.Prepayments)
+                .HasForeignKey(p => p.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Customer classification FKs
+            modelBuilder.Entity<Customer>()
+                .HasOne(c => c.CustomerType)
+                .WithMany(ct => ct.Customers)
+                .HasForeignKey(c => c.CustomerTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Customer>()
+                .HasOne(c => c.VatType)
+                .WithMany(vt => vt.Customers)
+                .HasForeignKey(c => c.VatTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Per-customer material pricing history
+            modelBuilder.Entity<CustomerMaterialPrice>()
+                .HasOne(cmp => cmp.Customer)
+                .WithMany(c => c.MaterialPrices)
+                .HasForeignKey(cmp => cmp.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CustomerMaterialPrice>()
+                .HasOne(cmp => cmp.Material)
+                .WithMany()
+                .HasForeignKey(cmp => cmp.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index supports the hot-path lookup: "current price for this customer+material".
+            // Non-unique because history keeps many rows per pair; the IsCurrent flag
+            // is managed at service level (only one row per pair has IsCurrent = true).
+            modelBuilder.Entity<CustomerMaterialPrice>()
+                .HasIndex(cmp => new { cmp.CustomerId, cmp.MaterialId, cmp.EffectiveFrom });
  
             // Configure Employee relationships
             modelBuilder.Entity<Employee>()
@@ -174,7 +264,8 @@ namespace QuarryManagementSystem.Data
             // Add unique constraints
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.Phone)
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("[Phone] IS NOT NULL");
  
             modelBuilder.Entity<WeighmentTransaction>()
                 .HasIndex(w => w.TransactionNumber)
@@ -225,7 +316,7 @@ namespace QuarryManagementSystem.Data
 
             modelBuilder.Entity<WeighmentTransaction>()
                 .Property(w => w.WeightUnit)
-                .HasDefaultValue("kg");
+                .HasDefaultValue("Ton");
 
             modelBuilder.Entity<Material>()
                 .Property(m => m.VatRate)
@@ -243,7 +334,6 @@ namespace QuarryManagementSystem.Data
 
             modelBuilder.Entity<Customer>()
                 .Property(c => c.Phone)
-                .IsRequired()
                 .HasMaxLength(20);
 
             modelBuilder.Entity<Material>()
@@ -301,6 +391,14 @@ namespace QuarryManagementSystem.Data
                 new ChartOfAccounts { Id = 11, AccountCode = "4002", AccountName = "Transport & Delivery Income",   AccountType = "Revenue",   SubType = "Service" },
                 new ChartOfAccounts { Id = 12, AccountCode = "4003", AccountName = "Other Operating Income",            AccountType = "Revenue",   SubType = "Other" },
 
+                // CONTRA-REVENUE
+                // 4010 is a contra-revenue account: its balance reduces total
+                // revenue when reported, so it's classified as Revenue with
+                // SubType = "Contra" to distinguish it in the P&L. The
+                // CreateInvoiceJournalEntryAsync helper Dr's this account with
+                // the rebate amount on every invoice that has a rebate.
+                new ChartOfAccounts { Id = 23, AccountCode = "4010", AccountName = "Sales Rebates & Discounts",         AccountType = "Revenue",   SubType = "Contra" },
+
                 // DIRECT COSTS / COGS
                 new ChartOfAccounts { Id = 9,  AccountCode = "5001", AccountName = "Cost of Materials Sold",            AccountType = "Expense",   SubType = "COGS" },
                 new ChartOfAccounts { Id = 13, AccountCode = "5002", AccountName = "Production & Quarrying Costs", AccountType = "Expense",   SubType = "COGS" },
@@ -315,7 +413,8 @@ namespace QuarryManagementSystem.Data
 
                 // EQUITY
                 new ChartOfAccounts { Id = 20, AccountCode = "3001", AccountName = "Owner's Equity / Share Capital", AccountType = "Equity", SubType = "Capital" },
-                new ChartOfAccounts { Id = 21, AccountCode = "3101", AccountName = "Retained Earnings",                AccountType = "Equity",    SubType = "Retained" }
+                new ChartOfAccounts { Id = 21, AccountCode = "3101", AccountName = "Retained Earnings",                AccountType = "Equity",    SubType = "Retained" },
+                new ChartOfAccounts { Id = 22, AccountCode = "3102", AccountName = "Opening Balance Equity",           AccountType = "Equity",    SubType = "Capital" }
             );
 
             modelBuilder.Entity<Material>().HasData(
@@ -325,6 +424,28 @@ namespace QuarryManagementSystem.Data
                 new Material { Id = 4, Name = "Plaster Sand", Type = "Sand", UnitPrice = 38000.00m, VatRate = 7.5m, Unit = "Ton" },
                 new Material { Id = 5, Name = "Quarry Dust", Type = "Dust", UnitPrice = 25000.00m, VatRate = 7.5m, Unit = "Ton" },
                 new Material { Id = 6, Name = "Laterite", Type = "Laterite", UnitPrice = 15000.00m, VatRate = 7.5m, Unit = "Ton" }
+            );
+
+            // Seed classification lookup tables
+            modelBuilder.Entity<CustomerType>().HasData(
+                new CustomerType { Id = 1, Name = "Dealer",   IsActive = true, CreatedAt = new DateTime(2024, 1, 1) },
+                new CustomerType { Id = 2, Name = "Supplier", IsActive = true, CreatedAt = new DateTime(2024, 1, 1) }
+            );
+
+            modelBuilder.Entity<VatType>().HasData(
+                new VatType { Id = 1, Name = "Inclusive", IsActive = true, CreatedAt = new DateTime(2024, 1, 1) },
+                new VatType { Id = 2, Name = "Exclusive", IsActive = true, CreatedAt = new DateTime(2024, 1, 1) }
+            );
+
+            // Seed payment methods. DisplayOrder follows real-world frequency so
+            // Cash comes first and Cheque last; admins can rearrange later by
+            // editing the PaymentMethods rows directly. The Ids here must match
+            // what the SQL migration inserts so the two seeding paths agree.
+            modelBuilder.Entity<PaymentMethod>().HasData(
+                new PaymentMethod { Id = 1, Name = "Cash",           DisplayOrder = 1, IsActive = true, CreatedAt = new DateTime(2024, 1, 1) },
+                new PaymentMethod { Id = 2, Name = "Bank Transfer",  DisplayOrder = 2, IsActive = true, CreatedAt = new DateTime(2024, 1, 1) },
+                new PaymentMethod { Id = 3, Name = "Online Payment", DisplayOrder = 3, IsActive = true, CreatedAt = new DateTime(2024, 1, 1) },
+                new PaymentMethod { Id = 4, Name = "Cheque",         DisplayOrder = 4, IsActive = true, CreatedAt = new DateTime(2024, 1, 1) }
             );
         }
     }

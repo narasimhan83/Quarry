@@ -130,9 +130,9 @@
                                 <th>Customer</th>
                                 <th>Vehicle</th>
                                 <th>Material</th>
-                                <th>Gross (kg)</th>
-                                <th>Tare (kg)</th>
-                                <th>Net (kg)</th>
+                                <th>Gross (tons)</th>
+                                <th>Tare (tons)</th>
+                                <th>Net (tons)</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -179,13 +179,52 @@
                                                 <span class="text-muted">Unknown</span>
                                             }
                                         </td>
-                                        <td>@weighment.GrossWeight.ToString("N0")</td>
-                                        <td>@(weighment.TareWeight?.ToString("N0") ?? "0")</td>
-                                        <td><strong>@weighment.NetWeight.ToString("N0")</strong></td>
+                                        @*
+                                            Weight columns: render with 3 decimals (ton precision is
+                                            kg-level, e.g. 6.410 tons = 6,410 kg). Legacy records stored
+                                            in kg are converted here on the fly so the column header
+                                            "(tons)" matches the displayed number regardless of how the
+                                            underlying row was saved.
+                                            <para/>
+                                            Net is ALWAYS recomputed as Gross − Tare at display time.
+                                            Rationale: older records (saved before the controller was
+                                            fixed to persist NetWeight) still carry a stale 0 in the DB.
+                                            Computing here rather than trusting the stored value means
+                                            the list is correct even before the backfill SQL is run.
+                                        *@
+                                        @{
+                                            var isKg = string.Equals(weighment.WeightUnit, "kg", StringComparison.OrdinalIgnoreCase);
+                                            decimal toTons(decimal? v) => isKg ? (v ?? 0m) / 1000m : (v ?? 0m);
+                                            var grossTons = toTons(weighment.GrossWeight);
+                                            var tareTons  = toTons(weighment.TareWeight);
+                                            var netTonsComputed = grossTons - tareTons;
+                                            if (netTonsComputed < 0) netTonsComputed = 0;
+                                        }
+                                        <td>@grossTons.ToString("N3")</td>
+                                        <td>@tareTons.ToString("N3")</td>
+                                        <td><strong>@netTonsComputed.ToString("N3")</strong></td>
                                         <td>
-                                            @if (weighment.TotalAmount.HasValue)
+                                            @*
+                                                Amount: prefer the stored TotalAmount (authoritative —
+                                                honors VAT treatment and rebate from save time), but fall
+                                                back to a simple Exclusive-VAT estimate when it's missing
+                                                or zero. The estimate uses the freshly computed Net so
+                                                operators see a meaningful number for stale rows too.
+                                            *@
+                                            @{
+                                                decimal? displayAmount = weighment.TotalAmount;
+                                                if ((displayAmount ?? 0m) <= 0m
+                                                    && netTonsComputed > 0m
+                                                    && (weighment.PricePerUnit ?? 0m) > 0m)
+                                                {
+                                                    var sub = netTonsComputed * weighment.PricePerUnit!.Value;
+                                                    var vat = sub * (weighment.VatRate / 100m);
+                                                    displayAmount = sub + vat;
+                                                }
+                                            }
+                                            @if (displayAmount.HasValue && displayAmount.Value > 0m)
                                             {
-                                                <span class="text-success">@weighment.TotalAmount.Value.ToString("C")</span>
+                                                <span class="text-success">@displayAmount.Value.ToString("C")</span>
                                             }
                                             else
                                             {
@@ -245,8 +284,38 @@
                         <tfoot>
                             <tr>
                                 <th colspan="7" class="text-right">Total:</th>
-                                <th>@Model.Weighments.Sum(w => w.NetWeight).ToString("N0") kg</th>
-                                <th class="text-success">@Model.Weighments.Sum(w => w.TotalAmount ?? 0).ToString("C")</th>
+                                @*
+                                    Totals in tons. Mirror the per-row Gross−Tare recompute so a
+                                    mixed-unit page (some rows Ton, some rows kg) still produces
+                                    a consistent footer number — and so the footer matches the
+                                    rows even when the stored NetWeight column is stale.
+                                *@
+                                <th>
+                                    @{
+                                        decimal footerNetTons = 0m;
+                                        decimal footerAmount = 0m;
+                                        foreach (var w in Model.Weighments)
+                                        {
+                                            var rowIsKg = string.Equals(w.WeightUnit, "kg", StringComparison.OrdinalIgnoreCase);
+                                            var rowGross = rowIsKg ? w.GrossWeight / 1000m : w.GrossWeight;
+                                            var rowTare  = rowIsKg ? (w.TareWeight ?? 0m) / 1000m : (w.TareWeight ?? 0m);
+                                            var rowNet   = rowGross - rowTare;
+                                            if (rowNet < 0) rowNet = 0;
+                                            footerNetTons += rowNet;
+
+                                            // Same prefer-stored-else-estimate rule used per row.
+                                            var rowAmount = w.TotalAmount ?? 0m;
+                                            if (rowAmount <= 0m && rowNet > 0m && (w.PricePerUnit ?? 0m) > 0m)
+                                            {
+                                                var sub = rowNet * w.PricePerUnit!.Value;
+                                                rowAmount = sub + sub * (w.VatRate / 100m);
+                                            }
+                                            footerAmount += rowAmount;
+                                        }
+                                    }
+                                    @footerNetTons.ToString("N3") tons
+                                </th>
+                                <th class="text-success">@footerAmount.ToString("C")</th>
                                 <th colspan="2"></th>
                             </tr>
                         </tfoot>

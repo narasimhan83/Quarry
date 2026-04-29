@@ -116,6 +116,7 @@
                         <thead>
                             <tr>
                                 <th>Company Name</th>
+                                <th>Type</th>
                                 <th>Contact Person</th>
                                 <th>Phone</th>
                                 <th>Email</th>
@@ -139,6 +140,24 @@
                                             @if (!string.IsNullOrEmpty(customer.RCNumber))
                                             {
                                                 <br><small class="text-muted">RC: @customer.RCNumber</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (customer.CustomerType != null)
+                                            {
+                                                <span class="badge badge-info">@customer.CustomerType.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                            @if (customer.HasRebate)
+                                            {
+                                                <br><small class="text-success"><i class="fas fa-percent"></i> Rebate</small>
+                                            }
+                                            @if (customer.TransportRequired)
+                                            {
+                                                <br><small class="text-info"><i class="fas fa-truck"></i> Transport</small>
                                             }
                                         </td>
                                         <td>@customer.ContactPerson</td>
@@ -186,7 +205,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="11" class="text-center text-muted">
+                                    <td colspan="12" class="text-center text-muted">
                                         <i class="fas fa-info-circle"></i> No customers found matching your criteria.
                                     </td>
                                 </tr>

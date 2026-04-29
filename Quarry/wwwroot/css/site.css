@@ -360,3 +360,17 @@ html, body {
   margin-left: 6px;
   font-size: 0.95rem;
 }
+
+/* ---------------------------------------------
+   MONEY INPUT (Naira formatting)
+---------------------------------------------- */
+/* Visible proxy field created by site.js for .money-input */
+.money-input-display {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  letter-spacing: 0.2px;
+}
+/* Read-only Naira displays rendered via JS */
+.money-display {
+  font-variant-numeric: tabular-nums;
+}

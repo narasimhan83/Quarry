@@ -1,0 +1,286 @@
+@model QuarryManagementSystem.ViewModels.PrepaymentDetailsViewModel
+@{
+    ViewData["Title"] = "Prepayment Details";
+    var p = Model.Prepayment;
+    var customer = p.Customer;
+    var customerEmail = customer?.Email ?? "";
+    var customerPhone = customer?.Phone ?? "";
+    var canEdit = !(Model.Applications?.Any() ?? false);
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    Prepayment Details
+                    <small class="ml-2 text-muted">(@p.PrepaymentNumber)</small>
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Prepayment")">Prepayments</a></li>
+                    <li class="breadcrumb-item active">@p.PrepaymentNumber</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Prepayment Information</h3>
+                        <span class="badge badge-@(p.Status == "Active" ? "success" : p.Status == "Exhausted" ? "secondary" : "warning")">
+                            @p.Status
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Prepayment #</dt>
+                            <dd class="col-sm-8">@p.PrepaymentNumber</dd>
+
+                            <dt class="col-sm-4">Prepayment Date</dt>
+                            <dd class="col-sm-8">@p.PrepaymentDate.ToString("dd/MM/yyyy")</dd>
+
+                            <dt class="col-sm-4">Expected Pickup</dt>
+                            <dd class="col-sm-8">@(p.ExpectedPickupDate?.ToString("dd/MM/yyyy") ?? "-")</dd>
+
+                            <dt class="col-sm-4">Customer</dt>
+                            <dd class="col-sm-8">@(customer?.Name ?? "-")</dd>
+
+                            <dt class="col-sm-4">Contact</dt>
+                            <dd class="col-sm-8">
+                                @if (!string.IsNullOrWhiteSpace(customerPhone))
+                                {
+                                    <span><i class="fas fa-phone"></i> @customerPhone</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(customerEmail))
+                                {
+                                    <span class="ml-3"><i class="fas fa-envelope"></i> @customerEmail</span>
+                                }
+                                @if (string.IsNullOrWhiteSpace(customerPhone) && string.IsNullOrWhiteSpace(customerEmail))
+                                {
+                                    <span class="text-muted">No contact info</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">Payment Method</dt>
+                            <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(p.PaymentMethod) ? "-" : p.PaymentMethod)</dd>
+
+                            <dt class="col-sm-4">Reference</dt>
+                            <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(p.Reference) ? "-" : p.Reference)</dd>
+
+                            <dt class="col-sm-4">Notes</dt>
+                            <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(p.Notes) ? "-" : p.Notes)</dd>
+
+                            <dt class="col-sm-4">Created</dt>
+                            <dd class="col-sm-8">
+                                @p.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                @if (!string.IsNullOrEmpty(p.CreatedBy))
+                                {
+                                    <span class="text-muted">by @p.CreatedBy</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Line Items</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Material</th>
+                                        <th class="text-right">Qty</th>
+                                        <th>Unit</th>
+                                        <th class="text-right">Unit Price (₦)</th>
+                                        <th class="text-right">Line Total (₦)</th>
+                                        <th class="text-right">Used (₦)</th>
+                                        <th class="text-right">Remaining (₦)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @if (Model.LineItems.Any())
+                                {
+                                    foreach (var li in Model.LineItems)
+                                    {
+                                        <tr>
+                                            <td>@li.Material?.Name</td>
+                                            <td class="text-right">@li.Quantity.ToString("N3")</td>
+                                            <td>@li.Unit</td>
+                                            <td class="text-right">@li.UnitPrice.ToString("N2")</td>
+                                            <td class="text-right">@li.LineTotal.ToString("N2")</td>
+                                            <td class="text-right">@li.UsedAmount.ToString("N2")</td>
+                                            <td class="text-right">
+                                                <strong>@li.RemainingAmount.ToString("N2")</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="7" class="text-center text-muted">No line items.</td></tr>
+                                }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="font-weight-bold">
+                                        <td colspan="4" class="text-right">Totals:</td>
+                                        <td class="text-right">₦@p.Amount.ToString("N2")</td>
+                                        <td class="text-right">₦@Model.TotalApplied.ToString("N2")</td>
+                                        <td class="text-right">₦@Model.TotalRemaining.ToString("N2")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Applications.Any())
+                {
+                    <div class="card card-warning">
+                        <div class="card-header">
+                            <h3 class="card-title">Applications (invoices paid using this prepayment)</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Invoice #</th>
+                                            <th>Line Drained</th>
+                                            <th class="text-right">Applied (₦)</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var app in Model.Applications)
+                                        {
+                                            <tr>
+                                                <td>@app.AppliedDate.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    @if (app.Invoice != null)
+                                                    {
+                                                        <a asp-controller="Invoice" asp-action="Details" asp-route-id="@app.InvoiceId">@app.Invoice.InvoiceNumber</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (app.PrepaymentLineItem?.Material != null)
+                                                    {
+                                                        @app.PrepaymentLineItem.Material.Name
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">- (pooled)</span>
+                                                    }
+                                                </td>
+                                                <td class="text-right">@app.AppliedAmount.ToString("N2")</td>
+                                                <td>@app.Description</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-success">
+                    <div class="card-header"><h3 class="card-title">Totals</h3></div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-6">Amount Prepaid</dt>
+                            <dd class="col-sm-6 text-right"><strong>₦@p.Amount.ToString("N2")</strong></dd>
+
+                            <dt class="col-sm-6">Total Applied</dt>
+                            <dd class="col-sm-6 text-right">₦@Model.TotalApplied.ToString("N2")</dd>
+
+                            <dt class="col-sm-6">Remaining Balance</dt>
+                            <dd class="col-sm-6 text-right"><strong class="text-success">₦@Model.TotalRemaining.ToString("N2")</strong></dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Actions</h3></div>
+                    <div class="card-body">
+                        <a asp-action="Receipt" asp-route-id="@p.Id" class="btn btn-info btn-block" target="_blank">
+                            <i class="fas fa-print"></i> Print PDF Receipt
+                        </a>
+
+                        @{
+                            var subject = $"Prepayment Receipt — {p.PrepaymentNumber}";
+                            var body = $"Dear {customer?.Name ?? "Customer"},\n\nThis is to confirm receipt of your prepayment ({p.PrepaymentNumber}) of NGN {p.Amount:N2} dated {p.PrepaymentDate:dd/MM/yyyy}. A detailed receipt is attached.\n\nThank you for your business.";
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(customerEmail))
+                        {
+                            <a href="mailto:@customerEmail?subject=@Uri.EscapeDataString(subject)&body=@Uri.EscapeDataString(body)" class="btn btn-primary btn-block">
+                                <i class="fas fa-envelope"></i> Email Receipt
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary btn-block" disabled title="No email on customer profile">
+                                <i class="fas fa-envelope"></i> Email Receipt
+                            </button>
+                        }
+
+                        @* Stubs — to be wired when SMS/WhatsApp provider is configured *@
+                        <button class="btn btn-success btn-block" disabled title="SMS integration pending configuration">
+                            <i class="fas fa-sms"></i> Send via SMS (coming soon)
+                        </button>
+                        <button class="btn btn-success btn-block" disabled title="WhatsApp integration pending configuration">
+                            <i class="fab fa-whatsapp"></i> Send via WhatsApp (coming soon)
+                        </button>
+
+                        <hr />
+
+                        @if (canEdit)
+                        {
+                            <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-warning btn-block">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-danger btn-block">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0 small">This prepayment has been applied to one or more invoices and can no longer be edited or deleted.</p>
+                        }
+
+                        <a asp-action="Index" class="btn btn-secondary btn-block mt-2">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

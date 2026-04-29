@@ -44,6 +44,16 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "VAT Amount")]
         public decimal LineVatAmount { get; set; }
 
+        /// <summary>
+        /// Per-line share of the quotation's flat rebate. Header rebate is
+        /// distributed across lines proportionally to each line's subtotal. Stored
+        /// for audit / display so the Edit view can show "Rebate ₦X applied" per
+        /// line, mirroring the prepayment line-item storage pattern.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Rebate Amount")]
+        public decimal LineRebateAmount { get; set; } = 0m;
+
         [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "Total")]
         public decimal LineTotal { get; set; }

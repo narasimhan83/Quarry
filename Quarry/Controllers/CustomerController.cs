@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuarryManagementSystem.Data;
 using QuarryManagementSystem.Models.Domain;
+using QuarryManagementSystem.Services;
 using QuarryManagementSystem.ViewModels;
-using System.Linq.Expressions;
 
 namespace QuarryManagementSystem.Controllers
 {
@@ -14,11 +14,16 @@ namespace QuarryManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CustomerController> _logger;
+        private readonly ICustomerPricingService _pricingService;
 
-        public CustomerController(ApplicationDbContext context, ILogger<CustomerController> logger)
+        public CustomerController(
+            ApplicationDbContext context,
+            ILogger<CustomerController> logger,
+            ICustomerPricingService pricingService)
         {
             _context = context;
             _logger = logger;
+            _pricingService = pricingService;
         }
 
         // GET: Customer
@@ -27,33 +32,31 @@ namespace QuarryManagementSystem.Controllers
             try
             {
                 int pageSize = 20;
-                var query = _context.Customers.AsQueryable();
+                var query = _context.Customers
+                    .Include(c => c.CustomerType)
+                    .Include(c => c.VatType)
+                    .AsQueryable();
 
-                // Apply filters
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
-                    query = query.Where(c => 
-                        c.Name.Contains(searchTerm) || 
-                        c.ContactPerson.Contains(searchTerm) ||
-                        c.Phone.Contains(searchTerm) ||
-                        c.Email.Contains(searchTerm));
+                    query = query.Where(c =>
+                        c.Name.Contains(searchTerm) ||
+                        (c.ContactPerson != null && c.ContactPerson.Contains(searchTerm)) ||
+                        (c.Phone != null && c.Phone.Contains(searchTerm)) ||
+                        (c.Email != null && c.Email.Contains(searchTerm)));
                 }
-
                 if (!string.IsNullOrEmpty(state))
                 {
                     query = query.Where(c => c.State == state);
                 }
-
                 if (!string.IsNullOrEmpty(status))
                 {
                     query = query.Where(c => c.Status == status);
                 }
 
-                // Get total count for pagination
                 var totalCount = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-                // Apply pagination
                 var customers = await query
                     .OrderByDescending(c => c.CreatedAt)
                     .Skip((page - 1) * pageSize)
@@ -88,204 +91,366 @@ namespace QuarryManagementSystem.Controllers
         // GET: Customer/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var customer = await _context.Customers
-                .Include(c => c.WeighmentTransactions)
-                .ThenInclude(w => w.Material)
+                .Include(c => c.CustomerType)
+                .Include(c => c.VatType)
+                .Include(c => c.WeighmentTransactions).ThenInclude(w => w.Material)
                 .Include(c => c.Invoices)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (customer == null)
+            if (customer == null) return NotFound();
+
+            // Current prices (one per material — the most recent effective row).
+            var currentPricesRaw = await _context.CustomerMaterialPrices
+                .Include(cmp => cmp.Material)
+                .Where(cmp => cmp.CustomerId == customer.Id)
+                .ToListAsync();
+
+            var currentPrices = currentPricesRaw
+                .GroupBy(cmp => cmp.MaterialId)
+                .Select(g =>
+                {
+                    var latest = g.OrderByDescending(cmp => cmp.EffectiveFrom).ThenByDescending(cmp => cmp.Id).First();
+                    return new CustomerMaterialPriceDisplay
+                    {
+                        MaterialId = latest.MaterialId,
+                        MaterialName = latest.Material?.Name ?? $"#{latest.MaterialId}",
+                        UnitPrice = latest.UnitPrice,
+                        VatRate = latest.VatRate,
+                        EffectiveFrom = latest.EffectiveFrom,
+                        HistoryCount = g.Count()
+                    };
+                })
+                .OrderBy(p => p.MaterialName)
+                .ToList();
+
+            var vm = new CustomerDetailsViewModel
             {
-                return NotFound();
+                Customer = customer,
+                CurrentPrices = currentPrices,
+                TotalTransactions = customer.WeighmentTransactions?.Count ?? 0,
+                TotalInvoiceAmount = customer.Invoices?.Sum(i => i.TotalAmount) ?? 0m,
+                LastTransactionDate = customer.WeighmentTransactions?
+                    .OrderByDescending(w => w.TransactionDate)
+                    .FirstOrDefault()?.TransactionDate
+            };
+            if (vm.TotalTransactions > 0)
+            {
+                vm.AverageTransactionValue = (customer.WeighmentTransactions?.Sum(w => w.TotalAmount ?? 0m) ?? 0m) / vm.TotalTransactions;
             }
 
-            return View(customer);
+            return View(vm);
         }
 
         // GET: Customer/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var customer = new Customer { Status = "Active" };
-            
-            ViewBag.States = GetNigerianStates();
-            ViewBag.LGAs = GetNigerianLGAs();
-            ViewBag.Statuses = GetCustomerStatuses();
-            ViewBag.SelectedStatus = "Active"; // Pre-select Active status
-            return View(customer);
+            var model = new CustomerCreateViewModel
+            {
+                Status = "Active"
+            };
+            await PopulateDropdownsAsync(model);
+            return View(model);
         }
 
         // POST: Customer/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Customer customer)
+        public async Task<IActionResult> Create(CustomerCreateViewModel model)
         {
+            // Conditional validation: if HasRebate is on, RebateAmount is required; same for transport.
+            if (model.HasRebate && (!model.RebateAmount.HasValue || model.RebateAmount <= 0))
+            {
+                ModelState.AddModelError(nameof(model.RebateAmount), "Rebate amount is required when Rebate is enabled.");
+            }
+            if (model.TransportRequired && (!model.TransportAmount.HasValue || model.TransportAmount <= 0))
+            {
+                ModelState.AddModelError(nameof(model.TransportAmount), "Transport amount is required when Transport is enabled.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.Phone) &&
+                await _context.Customers.AnyAsync(c => c.Phone == model.Phone))
+            {
+                ModelState.AddModelError(nameof(model.Phone), "A customer with this phone number already exists.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Check if phone number already exists
-                if (await _context.Customers.AnyAsync(c => c.Phone == customer.Phone))
+                var customer = new Customer
                 {
-                    ModelState.AddModelError("Phone", "A customer with this phone number already exists.");
+                    Name = model.Name.Trim(),
+                    RCNumber = model.RCNumber?.Trim(),
+                    Location = model.Location?.Trim() ?? string.Empty,
+                    LGA = model.LGA?.Trim() ?? string.Empty,
+                    State = model.State?.Trim() ?? string.Empty,
+                    MiningLicenseNumber = model.MiningLicenseNumber?.Trim(),
+                    ContactPerson = model.ContactPerson?.Trim(),
+                    Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim(),
+                    Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim(),
+                    TIN = model.TIN?.Trim(),
+                    BVN = model.BVN?.Trim(),
+                    BillingAddress = model.BillingAddress?.Trim(),
+                    CreditLimit = model.CreditLimit,
+                    Status = string.IsNullOrWhiteSpace(model.Status) ? "Active" : model.Status,
+                    CustomerTypeId = model.CustomerTypeId,
+                    VatTypeId = model.VatTypeId,
+                    HasRebate = model.HasRebate,
+                    RebateAmount = model.HasRebate ? model.RebateAmount : null,
+                    TransportRequired = model.TransportRequired,
+                    TransportAmount = model.TransportRequired ? model.TransportAmount : null,
+                    OutstandingBalance = 0,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
+
+                // Save per-customer material pricing as history rows (IsCurrent = true).
+                var validPrices = (model.MaterialPrices ?? new())
+                    .Where(p => p.MaterialId.HasValue && p.MaterialId > 0 && p.UnitPrice > 0)
+                    .ToList();
+
+                foreach (var price in validPrices)
+                {
+                    await _pricingService.AddOrUpdatePriceAsync(
+                        customer.Id,
+                        price.MaterialId!.Value,
+                        price.UnitPrice,
+                        price.VatRate,
+                        price.EffectiveFrom == default ? DateTime.Today : price.EffectiveFrom,
+                        User.Identity?.Name,
+                        price.Notes);
                 }
-
-                if (ModelState.IsValid)
+                if (validPrices.Any())
                 {
-                    customer.CreatedAt = DateTime.Now;
-                    customer.OutstandingBalance = 0;
-                    customer.Status = "Active";
-                    
-                    // Handle optional location fields - store trimmed value or empty string (avoid DB errors on NOT NULL columns)
-                    if (!string.IsNullOrWhiteSpace(customer.Location))
-                        customer.Location = customer.Location.Trim();
-                    else
-                        customer.Location = string.Empty;
-
-                    if (!string.IsNullOrWhiteSpace(customer.LGA))
-                        customer.LGA = customer.LGA.Trim();
-                    else
-                        customer.LGA = string.Empty;
-
-                    if (!string.IsNullOrWhiteSpace(customer.State))
-                        customer.State = customer.State.Trim();
-                    else
-                        customer.State = string.Empty;
-
-                    _context.Add(customer);
                     await _context.SaveChangesAsync();
-
-                    // Create a dedicated ledger account for this customer in Chart of Accounts
-                    await EnsureCustomerLedgerAccountAsync(customer);
-
-                    TempData["Success"] = "Customer created successfully.";
-                    _logger.LogInformation("Customer {CustomerName} created by user {UserName}",
-                        customer.Name, User.Identity?.Name);
-                    
-                    return RedirectToAction(nameof(Index));
                 }
+
+                await EnsureCustomerLedgerAccountAsync(customer);
+
+                await transaction.CommitAsync();
+
+                TempData["Success"] = $"Customer '{customer.Name}' created successfully"
+                    + (validPrices.Any() ? $" with {validPrices.Count} custom price(s)." : ".");
+                _logger.LogInformation("Customer {CustomerName} created by user {UserName}", customer.Name, User.Identity?.Name);
+
+                return RedirectToAction(nameof(Details), new { id = customer.Id });
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 _logger.LogError(ex, "Error creating customer");
-                ModelState.AddModelError("", "An error occurred while creating the customer. Please try again.");
+                ModelState.AddModelError(string.Empty, "An error occurred while creating the customer. Please try again.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
             }
-
-            ViewBag.States = GetNigerianStates();
-            ViewBag.LGAs = GetNigerianLGAs();
-            ViewBag.Statuses = GetCustomerStatuses();
-            return View(customer);
         }
 
         // GET: Customer/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
+            var customer = await _context.Customers
+                .Include(c => c.MaterialPrices)
+                    .ThenInclude(cmp => cmp.Material)
+                .FirstOrDefaultAsync(c => c.Id == id.Value);
 
-            ViewBag.States = GetNigerianStates();
-            ViewBag.LGAs = GetNigerianLGAs();
-            ViewBag.Statuses = GetCustomerStatuses();
-            ViewBag.SelectedStatus = customer.Status;
-            return View(customer);
+            if (customer == null) return NotFound();
+
+            var model = new CustomerEditViewModel
+            {
+                Id = customer.Id,
+                Name = customer.Name,
+                RCNumber = customer.RCNumber,
+                Location = customer.Location,
+                LGA = customer.LGA,
+                State = customer.State,
+                MiningLicenseNumber = customer.MiningLicenseNumber,
+                ContactPerson = customer.ContactPerson,
+                Phone = customer.Phone,
+                Email = customer.Email,
+                TIN = customer.TIN,
+                BVN = customer.BVN,
+                BillingAddress = customer.BillingAddress,
+                CreditLimit = customer.CreditLimit,
+                OutstandingBalance = customer.OutstandingBalance,
+                AvailableCredit = customer.AvailableCredit,
+                Status = customer.Status ?? "Active",
+                CustomerTypeId = customer.CustomerTypeId,
+                VatTypeId = customer.VatTypeId,
+                HasRebate = customer.HasRebate,
+                RebateAmount = customer.RebateAmount,
+                TransportRequired = customer.TransportRequired,
+                TransportAmount = customer.TransportAmount
+            };
+
+            // Bring the latest effective price per material into the form so the
+            // operator can review / update. New rows (Id = 0) are detected on submit.
+            model.MaterialPrices = customer.MaterialPrices
+                .GroupBy(cmp => cmp.MaterialId)
+                .Select(g =>
+                {
+                    var latest = g.OrderByDescending(cmp => cmp.EffectiveFrom).ThenByDescending(cmp => cmp.Id).First();
+                    return new CustomerMaterialPriceInput
+                    {
+                        Id = latest.Id,
+                        MaterialId = latest.MaterialId,
+                        UnitPrice = latest.UnitPrice,
+                        VatRate = latest.VatRate,
+                        EffectiveFrom = latest.EffectiveFrom,
+                        Notes = latest.Notes
+                    };
+                })
+                .OrderBy(p => p.MaterialId)
+                .ToList();
+
+            await PopulateDropdownsAsync(model);
+            return View(model);
         }
 
         // POST: Customer/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Customer customer)
+        public async Task<IActionResult> Edit(int id, CustomerEditViewModel model)
         {
-            if (id != customer.Id)
+            if (id != model.Id) return NotFound();
+
+            if (model.HasRebate && (!model.RebateAmount.HasValue || model.RebateAmount <= 0))
             {
-                return NotFound();
+                ModelState.AddModelError(nameof(model.RebateAmount), "Rebate amount is required when Rebate is enabled.");
+            }
+            if (model.TransportRequired && (!model.TransportAmount.HasValue || model.TransportAmount <= 0))
+            {
+                ModelState.AddModelError(nameof(model.TransportAmount), "Transport amount is required when Transport is enabled.");
             }
 
+            if (!string.IsNullOrWhiteSpace(model.Phone) &&
+                await _context.Customers.AnyAsync(c => c.Phone == model.Phone && c.Id != model.Id))
+            {
+                ModelState.AddModelError(nameof(model.Phone), "Another customer with this phone number already exists.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            var customer = await _context.Customers
+                .Include(c => c.MaterialPrices)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (customer == null) return NotFound();
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Check if phone number already exists for another customer
-                if (await _context.Customers.AnyAsync(c => c.Phone == customer.Phone && c.Id != customer.Id))
+                customer.Name = model.Name.Trim();
+                customer.RCNumber = model.RCNumber?.Trim();
+                customer.Location = model.Location?.Trim() ?? string.Empty;
+                customer.LGA = model.LGA?.Trim() ?? string.Empty;
+                customer.State = model.State?.Trim() ?? string.Empty;
+                customer.MiningLicenseNumber = model.MiningLicenseNumber?.Trim();
+                customer.ContactPerson = model.ContactPerson?.Trim();
+                customer.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
+                customer.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim();
+                customer.TIN = model.TIN?.Trim();
+                customer.BVN = model.BVN?.Trim();
+                customer.BillingAddress = model.BillingAddress?.Trim();
+                customer.CreditLimit = model.CreditLimit;
+                customer.Status = string.IsNullOrWhiteSpace(model.Status) ? customer.Status : model.Status;
+                customer.CustomerTypeId = model.CustomerTypeId;
+                customer.VatTypeId = model.VatTypeId;
+                customer.HasRebate = model.HasRebate;
+                customer.RebateAmount = model.HasRebate ? model.RebateAmount : null;
+                customer.TransportRequired = model.TransportRequired;
+                customer.TransportAmount = model.TransportRequired ? model.TransportAmount : null;
+                customer.UpdatedAt = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+
+                // Reconcile per-customer prices. For each submitted row:
+                //  - If price/VAT changed from the latest effective, add a new history row.
+                //  - If unchanged, do nothing (history stays clean).
+                // Rows the operator removed from the form have already been dropped
+                // because only posted rows arrive here; we do NOT delete history.
+                var submittedPrices = (model.MaterialPrices ?? new())
+                    .Where(p => p.MaterialId.HasValue && p.MaterialId > 0 && p.UnitPrice > 0)
+                    .ToList();
+
+                foreach (var submitted in submittedPrices)
                 {
-                    ModelState.AddModelError("Phone", "Another customer with this phone number already exists.");
-                }
+                    var materialId = submitted.MaterialId!.Value;
 
-                if (ModelState.IsValid)
-                {
-                    try
+                    var latestExisting = customer.MaterialPrices
+                        .Where(cmp => cmp.MaterialId == materialId)
+                        .OrderByDescending(cmp => cmp.EffectiveFrom)
+                        .ThenByDescending(cmp => cmp.Id)
+                        .FirstOrDefault();
+
+                    var priceChanged = latestExisting == null
+                        || latestExisting.UnitPrice != submitted.UnitPrice
+                        || latestExisting.VatRate != submitted.VatRate;
+
+                    if (priceChanged)
                     {
-                        // Normalize optional address fields before saving
-                        if (!string.IsNullOrWhiteSpace(customer.Location))
-                            customer.Location = customer.Location.Trim();
-                        else
-                            customer.Location = string.Empty;
-
-                        if (!string.IsNullOrWhiteSpace(customer.LGA))
-                            customer.LGA = customer.LGA.Trim();
-                        else
-                            customer.LGA = string.Empty;
-
-                        if (!string.IsNullOrWhiteSpace(customer.State))
-                            customer.State = customer.State.Trim();
-                        else
-                            customer.State = string.Empty;
-
-                        customer.UpdatedAt = DateTime.Now;
-                        _context.Update(customer);
-                        await _context.SaveChangesAsync();
-
-                        TempData["Success"] = "Customer updated successfully.";
-                        _logger.LogInformation("Customer {CustomerName} updated by user {UserName}", 
-                            customer.Name, User.Identity?.Name);
+                        await _pricingService.AddOrUpdatePriceAsync(
+                            customer.Id,
+                            materialId,
+                            submitted.UnitPrice,
+                            submitted.VatRate,
+                            submitted.EffectiveFrom == default ? DateTime.Today : submitted.EffectiveFrom,
+                            User.Identity?.Name,
+                            submitted.Notes);
                     }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!CustomerExists(customer.Id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    return RedirectToAction(nameof(Index));
                 }
+                await _context.SaveChangesAsync();
+
+                await EnsureCustomerLedgerAccountAsync(customer);
+
+                await transaction.CommitAsync();
+
+                TempData["Success"] = $"Customer '{customer.Name}' updated successfully.";
+                _logger.LogInformation("Customer {CustomerName} updated by user {UserName}", customer.Name, User.Identity?.Name);
+
+                return RedirectToAction(nameof(Details), new { id = customer.Id });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
+                if (!CustomerExists(customer.Id)) return NotFound();
+                throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating customer");
-                ModelState.AddModelError("", "An error occurred while updating the customer. Please try again.");
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error updating customer {CustomerId}", id);
+                ModelState.AddModelError(string.Empty, "An error occurred while updating the customer. Please try again.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
             }
-
-            ViewBag.States = GetNigerianStates();
-            ViewBag.LGAs = GetNigerianLGAs();
-            ViewBag.Statuses = GetCustomerStatuses();
-            return View(customer);
         }
 
         // GET: Customer/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var customer = await _context.Customers
+                .Include(c => c.CustomerType)
+                .Include(c => c.VatType)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
+            if (customer == null) return NotFound();
 
             return View(customer);
         }
@@ -300,10 +465,7 @@ namespace QuarryManagementSystem.Controllers
                 var customer = await _context.Customers.FindAsync(id);
                 if (customer != null)
                 {
-                    // Check if customer has any transactions
-                    var hasTransactions = await _context.WeighmentTransactions
-                        .AnyAsync(w => w.CustomerId == id);
-                    
+                    var hasTransactions = await _context.WeighmentTransactions.AnyAsync(w => w.CustomerId == id);
                     if (hasTransactions)
                     {
                         TempData["Error"] = "Cannot delete customer with existing transactions.";
@@ -314,8 +476,7 @@ namespace QuarryManagementSystem.Controllers
                     await _context.SaveChangesAsync();
 
                     TempData["Success"] = "Customer deleted successfully.";
-                    _logger.LogInformation("Customer {CustomerName} deleted by user {UserName}", 
-                        customer.Name, User.Identity?.Name);
+                    _logger.LogInformation("Customer {CustomerName} deleted by user {UserName}", customer.Name, User.Identity?.Name);
                 }
             }
             catch (Exception ex)
@@ -326,35 +487,53 @@ namespace QuarryManagementSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Customer/CheckCreditLimit/5
+        // ----------------------------------------------------------------------
+        // AJAX endpoints
+        // ----------------------------------------------------------------------
+
+        // Used by Create/Edit to fetch a material's catalog price as a starting point.
+        [HttpGet]
+        public async Task<JsonResult> GetMaterialCatalog(int materialId)
+        {
+            var m = await _context.Materials.FirstOrDefaultAsync(x => x.Id == materialId);
+            if (m == null) return Json(new { success = false });
+            return Json(new { success = true, unitPrice = m.UnitPrice, vatRate = m.VatRate, unit = m.Unit });
+        }
+
+        // Used by Weighment/Quotation/Invoice screens to look up the effective
+        // price for a (customer, material) pair. Single source of truth.
+        [HttpGet]
+        public async Task<JsonResult> GetEffectivePrice(int customerId, int materialId)
+        {
+            var result = await _pricingService.GetPricingAsync(customerId, materialId);
+            return Json(new
+            {
+                success = true,
+                unitPrice = result.UnitPrice,
+                vatRate = result.VatRate,
+                isCustomerSpecific = result.IsCustomerSpecific,
+                vatType = result.VatType
+            });
+        }
+
+        // Credit-limit check used by invoice/weighment flows.
         public async Task<JsonResult> CheckCreditLimit(int customerId, decimal additionalAmount)
         {
             try
             {
                 var customer = await _context.Customers.FindAsync(customerId);
-                if (customer == null)
-                {
-                    return Json(new { success = false, message = "Customer not found" });
-                }
+                if (customer == null) return Json(new { success = false, message = "Customer not found" });
 
-                // Include prepayment wallet when evaluating credit limit
                 var prepaymentBalance = await GetAvailablePrepaymentAsync(customerId);
-
-                var effectiveOutstanding = customer.OutstandingBalance - prepaymentBalance;
-                if (effectiveOutstanding < 0)
-                {
-                    effectiveOutstanding = 0;
-                }
-
+                var effectiveOutstanding = Math.Max(0, customer.OutstandingBalance - prepaymentBalance);
                 var projectedOutstanding = effectiveOutstanding + additionalAmount;
                 var exceedsLimit = projectedOutstanding > customer.CreditLimit;
-                var availableCredit = customer.AvailableCredit;
 
                 return Json(new
                 {
                     success = true,
                     exceedsLimit,
-                    availableCredit,
+                    availableCredit = customer.AvailableCredit,
                     currentOutstanding = customer.OutstandingBalance,
                     creditLimit = customer.CreditLimit,
                     prepaymentBalance,
@@ -368,64 +547,87 @@ namespace QuarryManagementSystem.Controllers
                 return Json(new { success = false, message = "Error checking credit limit" });
             }
         }
- 
-        // Helper methods
-        private bool CustomerExists(int id)
-        {
-            return _context.Customers.Any(e => e.Id == id);
-        }
+
+        // ----------------------------------------------------------------------
+        // Helpers
+        // ----------------------------------------------------------------------
+        private bool CustomerExists(int id) => _context.Customers.Any(e => e.Id == id);
 
         private async Task<decimal> GetAvailablePrepaymentAsync(int customerId)
         {
             var prepayments = await _context.CustomerPrepayments
                 .Where(p => p.CustomerId == customerId && p.Status == "Active")
                 .ToListAsync();
-
             return prepayments.Sum(p => p.Amount - p.UsedAmount);
+        }
+
+        private async Task PopulateDropdownsAsync(CustomerCreateViewModel model)
+        {
+            model.States = GetNigerianStates();
+            model.LGAs = GetNigerianLGAs();
+            model.Statuses = GetCustomerStatuses();
+
+            model.CustomerTypes = await _context.CustomerTypes
+                .Where(t => t.IsActive)
+                .OrderBy(t => t.Id)
+                .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name })
+                .ToListAsync();
+
+            model.VatTypes = await _context.VatTypes
+                .Where(t => t.IsActive)
+                .OrderBy(t => t.Id)
+                .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name })
+                .ToListAsync();
+
+            model.Materials = await _context.Materials
+                .Where(m => m.Status == "Active")
+                .OrderBy(m => m.Name)
+                .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = $"{m.Name} ({m.Type})" })
+                .ToListAsync();
         }
 
         private List<SelectListItem> GetNigerianStates()
         {
             return new List<SelectListItem>
             {
-                new SelectListItem { Value = "", Text = "-- Select State --" },
-                new SelectListItem { Value = "Abia", Text = "Abia" },
-                new SelectListItem { Value = "Adamawa", Text = "Adamawa" },
-                new SelectListItem { Value = "Akwa Ibom", Text = "Akwa Ibom" },
-                new SelectListItem { Value = "Anambra", Text = "Anambra" },
-                new SelectListItem { Value = "Bauchi", Text = "Bauchi" },
-                new SelectListItem { Value = "Bayelsa", Text = "Bayelsa" },
-                new SelectListItem { Value = "Benue", Text = "Benue" },
-                new SelectListItem { Value = "Borno", Text = "Borno" },
-                new SelectListItem { Value = "Cross River", Text = "Cross River" },
-                new SelectListItem { Value = "Delta", Text = "Delta" },
-                new SelectListItem { Value = "Ebonyi", Text = "Ebonyi" },
-                new SelectListItem { Value = "Edo", Text = "Edo" },
-                new SelectListItem { Value = "Ekiti", Text = "Ekiti" },
-                new SelectListItem { Value = "Enugu", Text = "Enugu" },
-                new SelectListItem { Value = "FCT", Text = "Federal Capital Territory" },
-                new SelectListItem { Value = "Gombe", Text = "Gombe" },
-                new SelectListItem { Value = "Imo", Text = "Imo" },
-                new SelectListItem { Value = "Jigawa", Text = "Jigawa" },
-                new SelectListItem { Value = "Kaduna", Text = "Kaduna" },
-                new SelectListItem { Value = "Kano", Text = "Kano" },
-                new SelectListItem { Value = "Katsina", Text = "Katsina" },
-                new SelectListItem { Value = "Kebbi", Text = "Kebbi" },
-                new SelectListItem { Value = "Kogi", Text = "Kogi" },
-                new SelectListItem { Value = "Kwara", Text = "Kwara" },
-                new SelectListItem { Value = "Lagos", Text = "Lagos" },
-                new SelectListItem { Value = "Nasarawa", Text = "Nasarawa" },
-                new SelectListItem { Value = "Niger", Text = "Niger" },
-                new SelectListItem { Value = "Ogun", Text = "Ogun" },
-                new SelectListItem { Value = "Ondo", Text = "Ondo" },
-                new SelectListItem { Value = "Osun", Text = "Osun" },
-                new SelectListItem { Value = "Oyo", Text = "Oyo" },
-                new SelectListItem { Value = "Plateau", Text = "Plateau" },
-                new SelectListItem { Value = "Rivers", Text = "Rivers" },
-                new SelectListItem { Value = "Sokoto", Text = "Sokoto" },
-                new SelectListItem { Value = "Taraba", Text = "Taraba" },
-                new SelectListItem { Value = "Yobe", Text = "Yobe" },
-                new SelectListItem { Value = "Zamfara", Text = "Zamfara" }
+                new() { Value = "", Text = "-- Select State --" },
+                new() { Value = "Abia", Text = "Abia" },
+                new() { Value = "Adamawa", Text = "Adamawa" },
+                new() { Value = "Akwa Ibom", Text = "Akwa Ibom" },
+                new() { Value = "Anambra", Text = "Anambra" },
+                new() { Value = "Bauchi", Text = "Bauchi" },
+                new() { Value = "Bayelsa", Text = "Bayelsa" },
+                new() { Value = "Benue", Text = "Benue" },
+                new() { Value = "Borno", Text = "Borno" },
+                new() { Value = "Cross River", Text = "Cross River" },
+                new() { Value = "Delta", Text = "Delta" },
+                new() { Value = "Ebonyi", Text = "Ebonyi" },
+                new() { Value = "Edo", Text = "Edo" },
+                new() { Value = "Ekiti", Text = "Ekiti" },
+                new() { Value = "Enugu", Text = "Enugu" },
+                new() { Value = "FCT", Text = "Federal Capital Territory" },
+                new() { Value = "Gombe", Text = "Gombe" },
+                new() { Value = "Imo", Text = "Imo" },
+                new() { Value = "Jigawa", Text = "Jigawa" },
+                new() { Value = "Kaduna", Text = "Kaduna" },
+                new() { Value = "Kano", Text = "Kano" },
+                new() { Value = "Katsina", Text = "Katsina" },
+                new() { Value = "Kebbi", Text = "Kebbi" },
+                new() { Value = "Kogi", Text = "Kogi" },
+                new() { Value = "Kwara", Text = "Kwara" },
+                new() { Value = "Lagos", Text = "Lagos" },
+                new() { Value = "Nasarawa", Text = "Nasarawa" },
+                new() { Value = "Niger", Text = "Niger" },
+                new() { Value = "Ogun", Text = "Ogun" },
+                new() { Value = "Ondo", Text = "Ondo" },
+                new() { Value = "Osun", Text = "Osun" },
+                new() { Value = "Oyo", Text = "Oyo" },
+                new() { Value = "Plateau", Text = "Plateau" },
+                new() { Value = "Rivers", Text = "Rivers" },
+                new() { Value = "Sokoto", Text = "Sokoto" },
+                new() { Value = "Taraba", Text = "Taraba" },
+                new() { Value = "Yobe", Text = "Yobe" },
+                new() { Value = "Zamfara", Text = "Zamfara" }
             };
         }
 
@@ -433,19 +635,17 @@ namespace QuarryManagementSystem.Controllers
         {
             return new List<SelectListItem>
             {
-                new SelectListItem { Value = "", Text = "-- Select LGA --" },
-                // Add major LGAs for each state
-                new SelectListItem { Value = "Ikeja", Text = "Ikeja" },
-                new SelectListItem { Value = "Eti-Osa", Text = "Eti-Osa" },
-                new SelectListItem { Value = "Alimosho", Text = "Alimosho" },
-                new SelectListItem { Value = "Kosofe", Text = "Kosofe" },
-                new SelectListItem { Value = "Mushin", Text = "Mushin" },
-                new SelectListItem { Value = "Oshodi-Isolo", Text = "Oshodi-Isolo" },
-                new SelectListItem { Value = "Shomolu", Text = "Shomolu" },
-                new SelectListItem { Value = "Apapa", Text = "Apapa" },
-                new SelectListItem { Value = "Lagos Island", Text = "Lagos Island" },
-                new SelectListItem { Value = "Lagos Mainland", Text = "Lagos Mainland" }
-                // Add more LGAs as needed
+                new() { Value = "", Text = "-- Select LGA --" },
+                new() { Value = "Ikeja", Text = "Ikeja" },
+                new() { Value = "Eti-Osa", Text = "Eti-Osa" },
+                new() { Value = "Alimosho", Text = "Alimosho" },
+                new() { Value = "Kosofe", Text = "Kosofe" },
+                new() { Value = "Mushin", Text = "Mushin" },
+                new() { Value = "Oshodi-Isolo", Text = "Oshodi-Isolo" },
+                new() { Value = "Shomolu", Text = "Shomolu" },
+                new() { Value = "Apapa", Text = "Apapa" },
+                new() { Value = "Lagos Island", Text = "Lagos Island" },
+                new() { Value = "Lagos Mainland", Text = "Lagos Mainland" }
             };
         }
 
@@ -453,19 +653,14 @@ namespace QuarryManagementSystem.Controllers
         {
             return new List<SelectListItem>
             {
-                new SelectListItem { Value = "", Text = "-- Select Status --" },
-                new SelectListItem { Value = "Active", Text = "Active" },
-                new SelectListItem { Value = "Inactive", Text = "Inactive" },
-                new SelectListItem { Value = "Blacklisted", Text = "Blacklisted" }
+                new() { Value = "", Text = "-- Select Status --" },
+                new() { Value = "Active", Text = "Active" },
+                new() { Value = "Inactive", Text = "Inactive" },
+                new() { Value = "Blacklisted", Text = "Blacklisted" }
             };
         }
 
-        // Ledger helpers: create/sync a Chart of Accounts entry for each customer
-        private string GenerateCustomerAccountCode(int customerId)
-        {
-            // Accounts Receivable base account is 1101; append zero-padded customer id
-            return $"1101-{customerId:D6}";
-        }
+        private string GenerateCustomerAccountCode(int customerId) => $"1101-{customerId:D6}";
 
         private async Task EnsureCustomerLedgerAccountAsync(Customer customer)
         {
@@ -473,12 +668,9 @@ namespace QuarryManagementSystem.Controllers
             {
                 var accountCode = GenerateCustomerAccountCode(customer.Id);
 
-                var existing = await _context.ChartOfAccounts
-                    .FirstOrDefaultAsync(a => a.AccountCode == accountCode);
-
+                var existing = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountCode == accountCode);
                 if (existing != null)
                 {
-                    // Keep in sync with latest customer info
                     var desiredName = $"Accounts Receivable - {customer.Name}";
                     var desiredActive = customer.Status == "Active";
                     if (!string.Equals(existing.AccountName, desiredName, StringComparison.Ordinal) ||
@@ -507,13 +699,11 @@ namespace QuarryManagementSystem.Controllers
 
                 _context.ChartOfAccounts.Add(account);
                 await _context.SaveChangesAsync();
-
                 _logger.LogInformation("Created ledger account {AccountCode} for customer {CustomerId}", accountCode, customer.Id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating or syncing ledger account for customer {CustomerId}", customer.Id);
-                // Do not block customer creation if ledger fails; can be addressed later by admins
             }
         }
     }

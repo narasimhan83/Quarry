@@ -131,7 +131,7 @@
                                                 <th>Date</th>
                                                 <th>Vehicle</th>
                                                 <th>Material</th>
-                                                <th>Net Weight (kg)</th>
+                                                <th>Net Weight (tons)</th>
                                                 <th>Amount</th>
                                             </tr>
                                         </thead>
@@ -165,16 +165,32 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="SubTotal" asp-for="SubTotal" class="form-control" readonly />
+                                    <input id="SubTotal" asp-for="SubTotal" class="form-control money-input" readonly />
                                 </div>
                             </div>
+                            <div class="form-group" id="rebateRow" style="display:none;">
+                                <label class="control-label">Rebate (discount)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">− ₦</span></div>
+                                    <input id="RebateAmount" class="form-control money-input" readonly />
+                                </div>
+                                <small class="form-text text-muted">Auto-applied from customer profile.</small>
+                            </div>
+                            <div class="form-group" id="transportRow" style="display:none;">
+                                <label class="control-label">Transport</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">+ ₦</span></div>
+                                    <input id="TransportAmount" class="form-control money-input" readonly />
+                                </div>
+                                <small class="form-text text-muted">Auto-applied from customer profile.</small>
+                            </div>
                             <div class="form-group">
-                                <label class="control-label">VAT Amount (7.5%)</label>
+                                <label class="control-label">VAT Amount (<span id="VatRateLabel">7.5%</span>) <small id="VatTypeLabel" class="text-muted"></small></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="VatAmount" asp-for="VatAmount" class="form-control" readonly />
+                                    <input id="VatAmount" asp-for="VatAmount" class="form-control money-input" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -183,7 +199,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="TotalAmount" asp-for="TotalAmount" class="form-control form-control-lg font-weight-bold" readonly />
+                                    <input id="TotalAmount" asp-for="TotalAmount" class="form-control form-control-lg font-weight-bold money-input" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -192,7 +208,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₦</span>
                                     </div>
-                                    <input id="AvailablePrepayment" asp-for="AvailablePrepayment" class="form-control" readonly />
+                                    <input id="AvailablePrepayment" asp-for="AvailablePrepayment" class="form-control money-input" readonly />
                                 </div>
                                 <small class="form-text text-muted">If you choose "Use Prepayment (Wallet)", this balance will be used to pay this invoice first.</small>
                             </div>
@@ -259,6 +275,15 @@
                     data: { customerId: customerId },
                     success: function(data) {
                         if (data.success) {
+                            // Shared formatter for tons (3 decimals) and money (2 decimals
+                            // with thousands separators). Keeps the table tidy regardless
+                            // of whether the weighment was stored in Ton or legacy kg.
+                            var fmtTons = function(n) {
+                                return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+                            };
+                            var fmtMoney = function(n) {
+                                return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            };
                             var html = '';
                             $.each(data.data, function(index, weighment) {
                                 html += '<tr>';
@@ -267,8 +292,8 @@
                                 html += '<td>' + weighment.transactionDate + '</td>';
                                 html += '<td>' + weighment.vehicleRegNumber + '</td>';
                                 html += '<td>' + weighment.materialName + '</td>';
-                                html += '<td>' + weighment.netWeight.toLocaleString() + '</td>';
-                                html += '<td>₦' + weighment.totalAmount.toFixed(2).toLocaleString() + '</td>';
+                                html += '<td>' + fmtTons(weighment.netWeight) + '</td>';
+                                html += '<td>₦' + fmtMoney(weighment.totalAmount) + '</td>';
                                 html += '</tr>';
                             });
                             $('#weighmentsTableBody').html(html);
@@ -282,6 +307,48 @@
                 });
             }
 
+            // Centralized currency formatter reused by both credit-panel paths.
+            // Kept at function scope so callbacks can use it without re-declaring.
+            function fmt(n) {
+                return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // Renders the Customer Credit Info panel. Single implementation used by
+            // both the on-customer-change path (no invoice total yet) and the
+            // after-totals-computed path (invoice total available). Shows the
+            // prepayment wallet and effective / projected outstanding when the API
+            // returns those fields so the operator sees the full picture.
+            function renderCreditPanel(data, invoiceTotal) {
+                var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
+                html += '<strong>Credit Info:</strong><br>';
+                html += 'Available Credit: ₦' + fmt(data.availableCredit) + '<br>';
+                html += 'Current Outstanding: ₦' + fmt(data.currentOutstanding) + '<br>';
+                if (data.prepaymentBalance !== undefined) {
+                    html += 'Prepayment Balance (Wallet): ₦' + fmt(data.prepaymentBalance) + '<br>';
+                    html += 'Effective Outstanding (after prepayment): ₦' + fmt(data.effectiveOutstanding) + '<br>';
+                }
+                html += 'Credit Limit: ₦' + fmt(data.creditLimit);
+                if (invoiceTotal && invoiceTotal > 0) {
+                    html += '<br>Invoice Total: ₦' + fmt(invoiceTotal);
+                }
+                if (data.projectedOutstanding !== undefined) {
+                    html += '<br>Projected Outstanding (after this invoice): ₦' + fmt(data.projectedOutstanding);
+                }
+                if (data.exceedsLimit) {
+                    html += '<br><strong class="text-danger">Credit limit exceeded! (Invoice can still be created; this is a warning only.)</strong>';
+                }
+                html += '</div>';
+                $('#customerCreditInfo').html(html);
+
+                // Mirror the prepayment wallet balance into the Available Prepayment
+                // field so "Use Prepayment (Wallet)" mode shows the correct amount.
+                if (typeof data.prepaymentBalance === 'number') {
+                    $('#AvailablePrepayment').val(data.prepaymentBalance.toFixed(2));
+                } else {
+                    $('#AvailablePrepayment').val('0.00');
+                }
+            }
+
             function checkCustomerCredit(customerId) {
                 $.ajax({
                     url: '@Url.Action("CheckCustomerCredit", "Invoice")',
@@ -289,23 +356,7 @@
                     data: { customerId: customerId, estimatedAmount: 0 },
                     success: function (data) {
                         if (data.success) {
-                            var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
-                            html += '<strong>Credit Info:</strong><br>';
-                            html += 'Available Credit: ₦' + data.availableCredit.toFixed(2).toLocaleString() + '<br>';
-                            html += 'Current Outstanding: ₦' + data.currentOutstanding.toFixed(2).toLocaleString() + '<br>';
-                            html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString();
-                            if (data.exceedsLimit) {
-                                html += '<br><strong class="text-danger">Credit limit exceeded!</strong>';
-                            }
-                            html += '</div>';
-                            $('#customerCreditInfo').html(html);
-
-                            // Update Available Prepayment field from wallet balance
-                            if (typeof data.prepaymentBalance === 'number') {
-                                $('#AvailablePrepayment').val(data.prepaymentBalance.toFixed(2));
-                            } else {
-                                $('#AvailablePrepayment').val('0.00');
-                            }
+                            renderCreditPanel(data, 0);
                         }
                     },
                     error: function () {
@@ -324,20 +375,40 @@
                 $('#selectedCount').val(selectedIds.length);
 
                 if (selectedIds.length > 0) {
+                    var customerId = parseInt($('#CustomerId').val()) || 0;
                     $.ajax({
                         url: '@Url.Action("CalculateInvoiceTotals", "Invoice")',
                         type: 'POST',
                         contentType: 'application/json',
-                        data: JSON.stringify(selectedIds),
+                        data: JSON.stringify({ weighmentIds: selectedIds, customerId: customerId }),
                         success: function(data) {
                             if (data.success) {
-                                $('#SubTotal').val(data.subTotal.toFixed(2));
-                                $('#VatAmount').val(data.vatAmount.toFixed(2));
-                                $('#TotalAmount').val(data.totalAmount.toFixed(2));
+                                $('#SubTotal').val(data.subTotal.toFixed(2)).trigger('change');
+                                $('#VatAmount').val(data.vatAmount.toFixed(2)).trigger('change');
+                                $('#TotalAmount').val(data.totalAmount.toFixed(2)).trigger('change');
+
+                                // Rebate / Transport visibility and values
+                                if (data.rebateAmount && data.rebateAmount > 0) {
+                                    $('#rebateRow').show();
+                                    $('#RebateAmount').val(data.rebateAmount.toFixed(2)).trigger('change');
+                                } else {
+                                    $('#rebateRow').hide();
+                                    $('#RebateAmount').val('0.00');
+                                }
+                                if (data.transportAmount && data.transportAmount > 0) {
+                                    $('#transportRow').show();
+                                    $('#TransportAmount').val(data.transportAmount.toFixed(2)).trigger('change');
+                                } else {
+                                    $('#transportRow').hide();
+                                    $('#TransportAmount').val('0.00');
+                                }
+
+                                if (data.vatType) {
+                                    $('#VatTypeLabel').text('(' + data.vatType + ')');
+                                }
+
                                 $('#createInvoiceBtn').prop('disabled', false);
-                                
-                                // Check customer credit with new total
-                                var customerId = $('#CustomerId').val();
+
                                 if (customerId && data.totalAmount > 0) {
                                     checkCustomerCreditWithAmount(customerId, data.totalAmount);
                                 }
@@ -359,6 +430,8 @@
                     $('#SubTotal').val('0.00');
                     $('#VatAmount').val('0.00');
                     $('#TotalAmount').val('0.00');
+                    $('#rebateRow').hide();
+                    $('#transportRow').hide();
                     $('#createInvoiceBtn').prop('disabled', true);
                 }
             }
@@ -370,25 +443,7 @@
                     data: { customerId: customerId, estimatedAmount: totalAmount },
                     success: function (data) {
                         if (data.success) {
-                            var html = '<div class="alert alert-' + (data.exceedsLimit ? 'danger' : 'info') + ' alert-sm">';
-                            html += '<strong>Credit Info:</strong><br>';
-                            html += 'Available Credit: ₦' + data.availableCredit.toFixed(2).toLocaleString() + '<br>';
-                            html += 'Current Outstanding: ₦' + data.currentOutstanding.toFixed(2).toLocaleString() + '<br>';
-                            html += 'Credit Limit: ₦' + data.creditLimit.toFixed(2).toLocaleString() + '<br>';
-                            html += 'Invoice Total: ₦' + totalAmount.toFixed(2).toLocaleString();
-                            if (data.exceedsLimit) {
-                                html += '<br><strong class="text-danger">Credit limit exceeded! (Invoice can still be created; this is a warning only.)</strong>';
-                                // Do NOT disable the Create Invoice button here; just warn
-                            }
-                            html += '</div>';
-                            $('#customerCreditInfo').html(html);
-
-                            // Update Available Prepayment field from wallet balance
-                            if (typeof data.prepaymentBalance === 'number') {
-                                $('#AvailablePrepayment').val(data.prepaymentBalance.toFixed(2));
-                            } else {
-                                $('#AvailablePrepayment').val('0.00');
-                            }
+                            renderCreditPanel(data, totalAmount);
                         }
                     },
                     error: function () {

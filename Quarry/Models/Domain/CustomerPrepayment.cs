@@ -23,6 +23,14 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "Prepayment Date")]
         public DateTime PrepaymentDate { get; set; } = DateTime.Now;
 
+        [DataType(DataType.Date)]
+        [Display(Name = "Expected Pickup Date")]
+        public DateTime? ExpectedPickupDate { get; set; }
+
+        /// <summary>
+        /// Total prepaid amount. For multi-line prepayments this equals the sum of
+        /// LineTotal across all LineItems. Kept denormalized for fast listing.
+        /// </summary>
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.01, 999999999.99)]
         [Display(Name = "Amount")]
@@ -32,6 +40,11 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "Used Amount")]
         public decimal UsedAmount { get; set; }
 
+        /// <summary>
+        /// Legacy single-material column. Retained for back-compat with prepayments
+        /// created before multi-material line items existed. New prepayments should
+        /// use LineItems instead. Optional for both.
+        /// </summary>
         [Display(Name = "Material")]
         public int? MaterialId { get; set; }
 
@@ -40,8 +53,18 @@ namespace QuarryManagementSystem.Models.Domain
         public string? WeightUnit { get; set; }
 
         [StringLength(50)]
-        [Display(Name = "Payment Method")]
+        [Display(Name = "Payment Method (legacy)")]
         public string PaymentMethod { get; set; } = string.Empty;
+
+        /// <summary>
+        /// FK to the PaymentMethods lookup table. Nullable for back-compat with
+        /// prepayments created before the lookup existed — those rows carry only
+        /// the legacy <see cref="PaymentMethod"/> string. New prepayments save
+        /// both (FK for clean joins, string for a denormalized label that
+        /// survives even if a method is later renamed).
+        /// </summary>
+        [Display(Name = "Payment Method")]
+        public int? PaymentMethodId { get; set; }
 
         [StringLength(100)]
         [Display(Name = "Reference")]
@@ -76,6 +99,8 @@ namespace QuarryManagementSystem.Models.Domain
         // Navigation
         public virtual Customer? Customer { get; set; }
         public virtual Material? Material { get; set; }
+        public virtual PaymentMethod? PaymentMethodRef { get; set; }
+        public virtual ICollection<PrepaymentLineItem> LineItems { get; set; } = new List<PrepaymentLineItem>();
         public virtual ICollection<PrepaymentApplication> Applications { get; set; } = new List<PrepaymentApplication>();
     }
 
@@ -86,6 +111,14 @@ namespace QuarryManagementSystem.Models.Domain
         [Required]
         [Display(Name = "Prepayment")]
         public int CustomerPrepaymentId { get; set; }
+
+        /// <summary>
+        /// Optional: when the application drains a specific line item (for FIFO
+        /// across materials), this records which line was used. For legacy
+        /// applications created before line items existed, this is null.
+        /// </summary>
+        [Display(Name = "Prepayment Line")]
+        public int? PrepaymentLineItemId { get; set; }
 
         [Required]
         [Display(Name = "Invoice")]
@@ -106,6 +139,7 @@ namespace QuarryManagementSystem.Models.Domain
 
         // Navigation
         public virtual CustomerPrepayment? CustomerPrepayment { get; set; }
+        public virtual PrepaymentLineItem? PrepaymentLineItem { get; set; }
         public virtual Invoice? Invoice { get; set; }
     }
 }

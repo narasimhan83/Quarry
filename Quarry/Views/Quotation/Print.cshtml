@@ -173,6 +173,10 @@
                 <div class="meta-line"><span>Quotation #</span><strong>@q.QuotationNumber</strong></div>
                 <div class="meta-line"><span>Quotation Date</span><span>@q.QuotationDate.ToString("dd/MM/yyyy")</span></div>
                 <div class="meta-line"><span>Expiry Date</span><span>@(q.ExpiryDate?.ToString("dd/MM/yyyy") ?? "-")</span></div>
+                @if (!string.IsNullOrEmpty(q.VatTypeSnapshot))
+                {
+                    <div class="meta-line"><span>VAT Type</span><span>@q.VatTypeSnapshot</span></div>
+                }
                 <div class="meta-line">
                     <span>Status</span>
                     <span>
@@ -255,8 +259,22 @@
                 <div>Subtotal</div>
                 <div class="text-right">₦@q.SubTotal.ToString("N2")</div>
             </div>
+            @if (q.RebateAmount > 0)
+            {
+                <div class="row">
+                    <div>Rebate</div>
+                    <div class="text-right">− ₦@q.RebateAmount.ToString("N2")</div>
+                </div>
+            }
+            @if (q.TransportAmount > 0)
+            {
+                <div class="row">
+                    <div>Transport</div>
+                    <div class="text-right">+ ₦@q.TransportAmount.ToString("N2")</div>
+                </div>
+            }
             <div class="row">
-                <div>VAT</div>
+                <div>VAT@(string.IsNullOrEmpty(q.VatTypeSnapshot) ? "" : $" ({q.VatTypeSnapshot})")</div>
                 <div class="text-right">₦@q.VatAmount.ToString("N2")</div>
             </div>
             <div class="row grand">

@@ -36,10 +36,9 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "Contact Person")]
         public string? ContactPerson { get; set; }
 
-        [Required(ErrorMessage = "Phone number is required")]
         [RegularExpression(@"^(?:\+234|0)[7-9]\d{9}$", ErrorMessage = "Invalid Nigerian phone number format. Use +234XXXXXXXXXX or 0XXXXXXXXXX")]
         [StringLength(20)]
-        public string Phone { get; set; } = string.Empty;
+        public string? Phone { get; set; }
 
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [StringLength(100)]
@@ -70,7 +69,32 @@ namespace QuarryManagementSystem.Models.Domain
         public decimal AvailableCredit { get; set; }
 
         [StringLength(20)]
-        public string Status { get; set; } = "Active";
+        public string? Status { get; set; } = "Active";
+
+        // ---------- New: classification ----------
+        [Display(Name = "Customer Type")]
+        public int? CustomerTypeId { get; set; }
+
+        [Display(Name = "VAT Type")]
+        public int? VatTypeId { get; set; }
+
+        // ---------- New: rebate ----------
+        [Display(Name = "Has Rebate")]
+        public bool HasRebate { get; set; } = false;
+
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Rebate Amount")]
+        [Range(0, 999999999.99)]
+        public decimal? RebateAmount { get; set; }
+
+        // ---------- New: transport ----------
+        [Display(Name = "Transport Required")]
+        public bool TransportRequired { get; set; } = false;
+
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Transport Amount")]
+        [Range(0, 999999999.99)]
+        public decimal? TransportAmount { get; set; }
 
         [Display(Name = "Created Date")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
@@ -79,6 +103,9 @@ namespace QuarryManagementSystem.Models.Domain
         public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties
+        public virtual CustomerType? CustomerType { get; set; }
+        public virtual VatType? VatType { get; set; }
+        public virtual ICollection<CustomerMaterialPrice> MaterialPrices { get; set; } = new List<CustomerMaterialPrice>();
         public virtual ICollection<WeighmentTransaction> WeighmentTransactions { get; set; } = new List<WeighmentTransaction>();
         public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
         public virtual ICollection<Quotation> Quotations { get; set; } = new List<Quotation>();
@@ -97,14 +124,14 @@ namespace QuarryManagementSystem.Models.Domain
         public string GetFullAddress()
         {
             var addressParts = new List<string>();
-            
+
             if (!string.IsNullOrWhiteSpace(Location))
                 addressParts.Add(Location);
             if (!string.IsNullOrWhiteSpace(LGA))
                 addressParts.Add(LGA);
             if (!string.IsNullOrWhiteSpace(State))
                 addressParts.Add(State);
-                
+
             return string.Join(", ", addressParts);
         }
 

@@ -1,0 +1,374 @@
+@model QuarryManagementSystem.Models.Domain.WeighmentTransaction
+@{
+    Layout = null;
+    ViewData["Title"] = "Print Slip - " + Model.TransactionNumber;
+    var autoPrint = (bool)(ViewData["AutoPrint"] ?? false);
+
+    // Company header — kept as local constants rather than pulling from a
+    // shared GetCompanyDetails() helper because this view is standalone and
+    // we want zero dependencies if the layout / partials change.
+    var companyName = "TRACO MINING • NG";
+    var companyAddr = "Quarry Road, Industrial Estate, Lagos";
+    var companyPhone = "+234-1-2345678";
+
+    // Net weight in tons for the slip body. The Excel template shows Ton,
+    // and the operator flow saves weights in tons now, so use the domain
+    // NetWeight directly without kg conversion unless the record is legacy kg.
+    decimal netTons = Model.WeightUnit == "kg"
+        ? Math.Round(Model.NetWeight / 1000m, 3)
+        : Math.Round(Model.NetWeight, 3);
+    decimal tareTons = Model.WeightUnit == "kg"
+        ? Math.Round((Model.TareWeight ?? 0) / 1000m, 3)
+        : Math.Round(Model.TareWeight ?? 0, 3);
+    decimal grossTons = Model.WeightUnit == "kg"
+        ? Math.Round(Model.GrossWeight / 1000m, 3)
+        : Math.Round(Model.GrossWeight, 3);
+
+    // Each copy is rendered by a common inline helper below. This pattern
+    // keeps the three copies visually identical apart from the label and
+    // the footer (signature block), which is what the user asked for.
+    string SlipFooter(string copyType)
+    {
+        return copyType switch
+        {
+            "Customer" => "<div class=\"sig\">Customer Signature</div><div class=\"sig-line\">____________________</div>",
+            "Driver"   => "<div class=\"sig\">Driver: Received the above material</div><div class=\"sig-line\">____________________</div>",
+            "Quarry"   => "<div class=\"sig\">Operator Signature</div><div class=\"sig-line\">____________________</div>",
+            _ => ""
+        };
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        /*
+         * 80mm thermal receipt stylesheet.
+         *
+         * The effective print width is usually ~72mm after the printer's own
+         * margins; we size the slip-body at that and rely on @@page to match.
+         * Each .slip block is a full receipt; page-break-after: always forces
+         * the printer to advance / cut between copies, which is what the
+         * operator asked for (3 separate slips, one per role).
+         */
+        @@page {
+            size: 80mm auto;
+            margin: 2mm;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            font-family: "Courier New", Consolas, monospace;
+            font-size: 11px;
+            color: #000;
+        }
+
+        /* On-screen preview: give the page a bit of breathing room and
+           imitate a paper-ish look so the operator knows it'll print narrow. */
+        .screen-wrap {
+            max-width: 80mm;
+            margin: 12px auto;
+        }
+
+        .slip {
+            background: #fff;
+            padding: 4mm 3mm;
+            margin: 0 0 8px 0;
+            border: 1px dashed #999;
+        }
+
+        /* Print-only tweaks: kill the on-screen chrome and force a hard
+           page break after each copy. The last slip uses page-break-after:
+           auto (via :last-child) so we don't print a trailing blank slip. */
+        @@media print {
+            html, body {
+                background: #fff;
+            }
+            .screen-wrap {
+                margin: 0;
+                max-width: none;
+            }
+            .slip {
+                border: none;
+                padding: 0 2mm;
+                margin: 0;
+                page-break-after: always;
+            }
+            .slip:last-child {
+                page-break-after: auto;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .center { text-align: center; }
+        .right  { text-align: right; }
+        .bold   { font-weight: bold; }
+        .hr {
+            border: none;
+            border-top: 1px dashed #000;
+            margin: 4px 0;
+        }
+        .hr-solid {
+            border: none;
+            border-top: 1px solid #000;
+            margin: 4px 0;
+        }
+
+        .company {
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+        .company-sub {
+            font-size: 10px;
+            line-height: 1.3;
+        }
+
+        .copy-label {
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            background: #000;
+            color: #fff;
+            padding: 2px 0;
+            margin: 4px 0;
+            letter-spacing: 1px;
+        }
+
+        /* Compact two-column row for key/value pairs. Using a flexbox rather
+           than a table because tables on very narrow widths tend to balance
+           cells in ways we don't want (long labels get stolen by values). */
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 4px;
+            margin: 1px 0;
+        }
+        .row .k { color: #000; white-space: nowrap; }
+        .row .v { text-align: right; word-break: break-word; }
+
+        .weights {
+            margin: 4px 0;
+        }
+        .weights .row .v { font-variant-numeric: tabular-nums; }
+
+        .totals {
+            font-size: 12px;
+        }
+        .totals .row .k { font-weight: bold; }
+        .totals .grand .k,
+        .totals .grand .v {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .sig {
+            margin-top: 8mm;
+            font-size: 10px;
+        }
+        .sig-line {
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .footer-note {
+            margin-top: 4px;
+            text-align: center;
+            font-size: 9px;
+            font-style: italic;
+        }
+
+        .actions {
+            max-width: 80mm;
+            margin: 12px auto;
+            text-align: center;
+        }
+        .actions button, .actions a {
+            display: inline-block;
+            padding: 8px 14px;
+            margin: 0 4px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: sans-serif;
+        }
+        .actions .primary {
+            background: #28a745;
+            color: #fff;
+            border-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    @{
+        // Render the slip three times with different copy labels.
+        // Keeping it in a local helper avoids 3x duplication of the heavy body.
+        void RenderSlip(string copyType)
+        {
+            <div class="slip">
+                <div class="center company">@companyName</div>
+                <div class="center company-sub">@companyAddr</div>
+                <div class="center company-sub">Tel: @companyPhone</div>
+
+                <div class="copy-label">@copyType.ToUpper() COPY</div>
+
+                <div class="row">
+                    <span class="k">Bill No.</span>
+                    <span class="v bold">@Model.TransactionNumber</span>
+                </div>
+                <div class="row">
+                    <span class="k">Date</span>
+                    <span class="v">@Model.TransactionDate.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ChallanNumber))
+                {
+                    <div class="row">
+                        <span class="k">Challan</span>
+                        <span class="v">@Model.ChallanNumber</span>
+                    </div>
+                }
+
+                <hr class="hr" />
+
+                <div class="row">
+                    <span class="k">Buyer</span>
+                    <span class="v">@(Model.Customer?.Name ?? "Walk-in")</span>
+                </div>
+                <div class="row">
+                    <span class="k">Item</span>
+                    <span class="v">@(Model.Material?.Name ?? "-")</span>
+                </div>
+                <div class="row">
+                    <span class="k">Vehicle No.</span>
+                    <span class="v bold">@Model.VehicleRegNumber</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.DriverName))
+                {
+                    <div class="row">
+                        <span class="k">Driver</span>
+                        <span class="v">@Model.DriverName</span>
+                    </div>
+                }
+
+                <hr class="hr" />
+
+                <div class="weights">
+                    <div class="row">
+                        <span class="k">Tare Wt.</span>
+                        <span class="v">@tareTons.ToString("N3") Ton</span>
+                    </div>
+                    @if (Model.EntryTime.HasValue)
+                    {
+                        <div class="row">
+                            <span class="k">&nbsp;&nbsp;Time</span>
+                            <span class="v">@Model.EntryTime.Value.ToString("dd/MM HH:mm")</span>
+                        </div>
+                    }
+                    <div class="row">
+                        <span class="k">Gross Wt.</span>
+                        <span class="v">@grossTons.ToString("N3") Ton</span>
+                    </div>
+                    @if (Model.ExitTime.HasValue)
+                    {
+                        <div class="row">
+                            <span class="k">&nbsp;&nbsp;Time</span>
+                            <span class="v">@Model.ExitTime.Value.ToString("dd/MM HH:mm")</span>
+                        </div>
+                    }
+                    <hr class="hr-solid" />
+                    <div class="row">
+                        <span class="k bold">Net Wt.</span>
+                        <span class="v bold">@netTons.ToString("N3") Ton</span>
+                    </div>
+                </div>
+
+                @*
+                    Financials block: Rate, Subtotal, VAT, Rebate, TOTAL.
+                    Deliberately SUPPRESSED on the Driver Copy. The driver only needs
+                    weights + vehicle + signature to acknowledge receipt of the goods;
+                    pricing is between the quarry and the buyer. This matches the
+                    physical bill-book template where only Customer and Quarry copies
+                    carry Rate and Amount rows.
+                *@
+                @if (copyType != "Driver")
+                {
+                    <hr class="hr" />
+
+                    <div class="totals">
+                        <div class="row">
+                            <span class="k">Rate</span>
+                            <span class="v">₦@((Model.PricePerUnit ?? 0).ToString("N2"))/Ton</span>
+                        </div>
+                        <div class="row">
+                            <span class="k">Subtotal</span>
+                            <span class="v">₦@((Model.SubTotal ?? 0).ToString("N2"))</span>
+                        </div>
+                        <div class="row">
+                            <span class="k">VAT (@Model.VatRate.ToString("N1")%)</span>
+                            <span class="v">₦@((Model.VatAmount ?? 0).ToString("N2"))</span>
+                        </div>
+                        @* Rebate line: only printed when the saved record actually carries a
+                           rebate. Legacy weighments (RebateAmount = NULL) skip the row entirely
+                           so the slip looks identical to before. The minus sign reinforces that
+                           the value is being subtracted from Subtotal + VAT to reach TOTAL. *@
+                        @if ((Model.RebateAmount ?? 0) > 0)
+                        {
+                            <div class="row">
+                                <span class="k">Rebate</span>
+                                <span class="v">−₦@((Model.RebateAmount ?? 0).ToString("N2"))</span>
+                            </div>
+                        }
+                        <hr class="hr-solid" />
+                        <div class="row grand">
+                            <span class="k">TOTAL</span>
+                            <span class="v">₦@((Model.TotalAmount ?? 0).ToString("N2"))</span>
+                        </div>
+                    </div>
+                }
+
+                @Html.Raw(SlipFooter(copyType))
+
+                <div class="footer-note">Goods once sold will not be taken back.</div>
+                <div class="footer-note">Thank you!</div>
+            </div>
+        }
+    }
+
+    <div class="screen-wrap">
+        @{ RenderSlip("Customer"); }
+        @{ RenderSlip("Driver"); }
+        @{ RenderSlip("Quarry"); }
+    </div>
+
+    <div class="actions no-print">
+        <button type="button" class="primary" onclick="window.print()">
+            🖨 Print
+        </button>
+        <a href="@Url.Action("Details", new { id = Model.Id })">View Details</a>
+        <a href="@Url.Action("Index")">Back to List</a>
+    </div>
+
+    @if (autoPrint)
+    {
+        <script>
+            // Auto-open the print dialog after the layout has settled. A small
+            // timeout gives the browser a beat to finish rendering the 3 slips
+            // so the print preview shows all three pages rather than a blank.
+            window.addEventListener('load', function () {
+                setTimeout(function () { window.print(); }, 250);
+            });
+        </script>
+    }
+</body>
+</html>

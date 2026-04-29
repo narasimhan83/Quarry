@@ -275,9 +275,17 @@ namespace QuarryManagementSystem.ViewModels
         public DateTime PaymentDate { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Payment method is required")]
+        [Display(Name = "Payment Method")]
+        public int? PaymentMethodId { get; set; }
+
+        /// <summary>
+        /// Resolved name of the selected <see cref="PaymentMethodId"/>. Set by
+        /// the controller after a successful POST and used for the journal
+        /// entry description / receipt so we don't re-query the DB downstream.
+        /// </summary>
         [StringLength(50)]
         [Display(Name = "Payment Method")]
-        public string PaymentMethod { get; set; } = string.Empty;
+        public string PaymentMethodName { get; set; } = string.Empty;
 
         [StringLength(500)]
         [Display(Name = "Payment Notes")]

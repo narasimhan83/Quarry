@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuarryManagementSystem.Data;
 using QuarryManagementSystem.Models.Domain;
+using QuarryManagementSystem.Services;
 using QuarryManagementSystem.ViewModels;
 using System.Linq.Expressions;
 
@@ -14,11 +15,16 @@ namespace QuarryManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<WeighmentController> _logger;
+        private readonly ICustomerPricingService _pricingService;
 
-        public WeighmentController(ApplicationDbContext context, ILogger<WeighmentController> logger)
+        public WeighmentController(
+            ApplicationDbContext context,
+            ILogger<WeighmentController> logger,
+            ICustomerPricingService pricingService)
         {
             _context = context;
             _logger = logger;
+            _pricingService = pricingService;
         }
 
         // GET: Weighment
@@ -103,7 +109,7 @@ namespace QuarryManagementSystem.Controllers
                 {
                     TransactionDate = DateTime.Now,
                     VatRate = 7.5m, // Nigerian VAT rate
-                    WeightUnit = "kg",
+                    WeightUnit = "Ton",
                     Status = "InProgress"
                 };
 
@@ -169,6 +175,8 @@ namespace QuarryManagementSystem.Controllers
                         MaterialId = model.MaterialId,
                         PricePerUnit = model.PricePerUnit,
                         VatRate = model.VatRate,
+                        // Quarry flow: Tare + Gross come from the weighbridge.
+                        // Net = Gross − Tare is derived in CalculateFinancials.
                         GrossWeight = model.GrossWeight,
                         TareWeight = model.TareWeight,
                         WeightUnit = model.WeightUnit,
@@ -177,12 +185,19 @@ namespace QuarryManagementSystem.Controllers
                         TransactionType = model.TransactionType,
                         Status = model.Status,
                         ChallanNumber = model.ChallanNumber,
+                        SelectedPrepaymentId = model.SelectedPrepaymentId,
+                        SelectedPrepaymentLineItemId = model.SelectedPrepaymentLineItemId,
                         CreatedBy = User.Identity?.Name,
                         CreatedAt = DateTime.Now
                     };
 
-                    // Calculate financials
-                    weighment.CalculateFinancials();
+                    // Compute financials honoring the customer's VAT treatment.
+                    // Must happen BEFORE Add/SaveChanges so the stored Subtotal,
+                    // VAT, and Total reflect Inclusive vs Exclusive math. We can't
+                    // rely on weighment.CalculateFinancials() because the domain
+                    // model doesn't know the customer's VAT type — only this
+                    // controller does.
+                    await ApplyVatTreatmentAsync(weighment, model.CustomerId);
 
                     _context.Add(weighment);
                     await _context.SaveChangesAsync();
@@ -196,8 +211,13 @@ namespace QuarryManagementSystem.Controllers
                     TempData["Success"] = $"Weighment {transactionNumber} created successfully.";
                     _logger.LogInformation("Weighment {TransactionNumber} created by user {UserName}", 
                         transactionNumber, User.Identity?.Name);
-                    
-                    return RedirectToAction(nameof(Index));
+
+                    // Redirect to the thermal-printer-friendly slip view with
+                    // autoprint=true so the browser's print dialog opens
+                    // automatically. User can dismiss to stay on the slip page
+                    // or print to their 80mm printer. From there they can
+                    // navigate back to Index via the back button.
+                    return RedirectToAction(nameof(PrintSlip80), new { id = weighment.Id, autoprint = true });
                 }
             }
             catch (Exception ex)
@@ -242,12 +262,15 @@ namespace QuarryManagementSystem.Controllers
                 WeightUnit = weighment.WeightUnit,
                 SubTotal = weighment.SubTotal,
                 VatAmount = weighment.VatAmount,
+                RebateAmount = weighment.RebateAmount,
                 TotalAmount = weighment.TotalAmount,
                 EntryTime = weighment.EntryTime,
                 ExitTime = weighment.ExitTime,
                 TransactionType = weighment.TransactionType,
                 Status = weighment.Status,
-                ChallanNumber = weighment.ChallanNumber
+                ChallanNumber = weighment.ChallanNumber,
+                SelectedPrepaymentId = weighment.SelectedPrepaymentId,
+                SelectedPrepaymentLineItemId = weighment.SelectedPrepaymentLineItemId
             };
 
             await PopulateDropdowns(model);
@@ -310,9 +333,11 @@ namespace QuarryManagementSystem.Controllers
                     weighment.ChallanNumber = model.ChallanNumber;
                     weighment.ModifiedBy = User.Identity?.Name;
                     weighment.ModifiedAt = DateTime.Now;
+                    weighment.SelectedPrepaymentId = model.SelectedPrepaymentId;
+                    weighment.SelectedPrepaymentLineItemId = model.SelectedPrepaymentLineItemId;
 
-                    // Recalculate financials
-                    weighment.CalculateFinancials();
+                    // Recalculate financials honoring the customer's VAT treatment.
+                    await ApplyVatTreatmentAsync(weighment, model.CustomerId);
 
                     await _context.SaveChangesAsync();
 
@@ -371,6 +396,39 @@ namespace QuarryManagementSystem.Controllers
             return View(weighment);
         }
 
+        // GET: Weighment/PrintSlip80/5
+        //
+        // Renders a 3-copy dispatch slip sized for 80mm thermal printers:
+        //   1. Customer Copy   — with signature line
+        //   2. Driver Copy     — with 'Received' acknowledgement
+        //   3. Quarry Copy     — full operator record
+        //
+        // Each copy prints on its own page (page-break-after: always) so a roll
+        // printer cuts between them. Query string ?autoprint=1 triggers window.print()
+        // on load — used by the Create redirect so the operator gets the print
+        // dialog immediately after saving a new weighment.
+        public async Task<IActionResult> PrintSlip80(int? id, bool autoprint = false)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var weighment = await _context.WeighmentTransactions
+                .Include(w => w.Customer)
+                .Include(w => w.Material)
+                .Include(w => w.Weighbridge)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (weighment == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["AutoPrint"] = autoprint;
+            return View(weighment);
+        }
+
         // GET: Weighment/Operations (Real-time weighbridge operations)
         public async Task<IActionResult> Operations()
         {
@@ -414,22 +472,57 @@ namespace QuarryManagementSystem.Controllers
         }
 
         // AJAX: Get material price
+        //
+        // When a customerId is supplied, defer to the pricing service which will
+        // honor per-customer price history and fall back to the catalog when no
+        // custom price is on file. Without a customer, return the raw material
+        // catalog price (legacy behavior).
         [HttpGet]
-        public async Task<JsonResult> GetMaterialPrice(int materialId)
+        public async Task<JsonResult> GetMaterialPrice(int materialId, int? customerId = null)
         {
             try
             {
+                if (customerId.HasValue && customerId.Value > 0)
+                {
+                    var pricing = await _pricingService.GetPricingAsync(customerId.Value, materialId);
+
+                    // Pull the customer's rebate setting too — the weighment form
+                    // multiplies it by net tons and shows it as a separate row in
+                    // the Financial Summary so the operator can see the discount
+                    // before saving. Server-side ApplyVatTreatmentAsync re-derives
+                    // these values from the same source on POST.
+                    var customerRebate = await _context.Customers
+                        .Where(c => c.Id == customerId.Value)
+                        .Select(c => new { c.HasRebate, c.RebateAmount })
+                        .FirstOrDefaultAsync();
+
+                    return Json(new
+                    {
+                        success = true,
+                        unitPrice = pricing.UnitPrice,
+                        vatRate = pricing.VatRate,
+                        isCustomerSpecific = pricing.IsCustomerSpecific,
+                        vatType = pricing.VatType,
+                        hasRebate = customerRebate?.HasRebate ?? false,
+                        rebateAmount = customerRebate?.RebateAmount ?? 0m
+                    });
+                }
+
                 var material = await _context.Materials.FindAsync(materialId);
                 if (material == null)
                 {
                     return Json(new { success = false, message = "Material not found" });
                 }
 
-                return Json(new 
-                { 
-                    success = true, 
+                return Json(new
+                {
+                    success = true,
                     unitPrice = material.UnitPrice,
-                    vatRate = material.VatRate
+                    vatRate = material.VatRate,
+                    isCustomerSpecific = false,
+                    vatType = (string?)null,
+                    hasRebate = false,
+                    rebateAmount = 0m
                 });
             }
             catch (Exception ex)
@@ -439,7 +532,118 @@ namespace QuarryManagementSystem.Controllers
             }
         }
 
+        // AJAX: List active prepayments with remaining balance for a customer.
+        // Populates the Prepayment dropdown on the Weighment Create / Edit form.
+        // Returns only prepayments that still have funds left (Amount > UsedAmount);
+        // exhausted / cancelled prepayments are filtered out.
+        [HttpGet]
+        public async Task<JsonResult> GetCustomerPrepayments(int customerId)
+        {
+            try
+            {
+                var prepayments = await _context.CustomerPrepayments
+                    .Where(p => p.CustomerId == customerId && p.Status == "Active")
+                    .OrderBy(p => p.PrepaymentDate)
+                    .Select(p => new
+                    {
+                        id = p.Id,
+                        number = p.PrepaymentNumber,
+                        date = p.PrepaymentDate,
+                        amount = p.Amount,
+                        used = p.UsedAmount,
+                        remaining = p.Amount - p.UsedAmount
+                    })
+                    .ToListAsync();
+
+                // Shape for the dropdown: show number + remaining balance for easy selection.
+                var shaped = prepayments
+                    .Where(p => p.remaining > 0)
+                    .Select(p => new
+                    {
+                        id = p.id,
+                        number = p.number,
+                        date = p.date.ToString("dd/MM/yyyy"),
+                        amount = p.amount,
+                        remaining = p.remaining,
+                        label = $"{p.number} \u2014 \u20a6{p.remaining:N2} remaining (of \u20a6{p.amount:N2})"
+                    })
+                    .ToList();
+
+                return Json(new { success = true, prepayments = shaped });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error listing prepayments for customer {CustomerId}", customerId);
+                return Json(new { success = false, message = "Error loading prepayments" });
+            }
+        }
+
+        // AJAX: Get the line items of a specific prepayment, with per-line remaining
+        // quantity / amount. The weighment form uses this to populate a secondary
+        // material dropdown once a prepayment is picked — so the operator sees
+        // exactly which materials were prepaid and how much is left on each.
+        [HttpGet]
+        public async Task<JsonResult> GetPrepaymentLineItems(int prepaymentId)
+        {
+            try
+            {
+                var prepayment = await _context.CustomerPrepayments
+                    .Include(p => p.LineItems)
+                        .ThenInclude(li => li.Material)
+                    .FirstOrDefaultAsync(p => p.Id == prepaymentId);
+
+                if (prepayment == null)
+                {
+                    return Json(new { success = false, message = "Prepayment not found" });
+                }
+
+                // Build in memory (not via IQueryable) because the label format
+                // uses interpolation that won't translate cleanly to SQL.
+                var lines = prepayment.LineItems
+                    .Where(li => (li.LineTotal - li.UsedAmount) > 0)
+                    .OrderBy(li => li.Id)
+                    .Select(li =>
+                    {
+                        var matName = li.Material != null ? li.Material.Name : "(material)";
+                        var remainingQty = li.Quantity - li.UsedQuantity;
+                        return new
+                        {
+                            id = li.Id,
+                            materialId = li.MaterialId,
+                            materialName = matName,
+                            unit = li.Unit,
+                            unitPrice = li.UnitPrice,
+                            remainingQty = remainingQty,
+                            remainingAmount = li.LineTotal - li.UsedAmount,
+                            // Note: VatAmount on line is audit-only; the catalog / customer
+                            // VAT rate still drives the weighment's VAT rate. Exposed here
+                            // in case the UI wants to show the effective rate baked in.
+                            vatAmount = li.VatAmount,
+                            rebateAmount = li.RebateAmount,
+                            label = string.Format(
+                                "{0} \u2014 {1:N2} {2} remaining @ \u20a6{3:N2}/{2}",
+                                matName, remainingQty, li.Unit, li.UnitPrice)
+                        };
+                    })
+                    .ToList();
+
+                return Json(new { success = true, prepaymentNumber = prepayment.PrepaymentNumber, lines });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting line items for prepayment {PrepaymentId}", prepaymentId);
+                return Json(new { success = false, message = "Error loading prepayment line items" });
+            }
+        }
+
         // AJAX: Check customer credit
+        //
+        // Mirrors InvoiceController.CheckCustomerCredit so both the weighment
+        // and invoice screens show the same numbers. Key rules:
+        //   • currentOutstanding is floored at 0 — negatives are corruption
+        //     or overpayment, not "customer owes us negative money".
+        //   • projectedOutstanding drains the prepayment wallet first, then
+        //     only the shortfall lands on AR.
         [HttpGet]
         public async Task<JsonResult> CheckCustomerCredit(int customerId, decimal estimatedAmount)
         {
@@ -451,16 +655,27 @@ namespace QuarryManagementSystem.Controllers
                     return Json(new { success = false, message = "Customer not found" });
                 }
 
+                // Floor raw outstanding at 0 for display. See InvoiceController
+                // for the full rationale — same logic lives there.
+                var rawOutstanding = customer.OutstandingBalance;
+                var currentOutstanding = rawOutstanding < 0 ? 0m : rawOutstanding;
+
                 // Include prepayment wallet in effective exposure
                 var prepaymentBalance = await GetAvailablePrepaymentAsync(customerId);
 
-                var effectiveOutstanding = customer.OutstandingBalance - prepaymentBalance;
+                var effectiveOutstanding = currentOutstanding - prepaymentBalance;
                 if (effectiveOutstanding < 0)
                 {
                     effectiveOutstanding = 0;
                 }
 
-                var projectedOutstanding = effectiveOutstanding + estimatedAmount;
+                // Projected: wallet covers current outstanding first, then the
+                // new estimated amount; only the shortfall adds to AR.
+                var walletUsedForCurrent = Math.Min(currentOutstanding, prepaymentBalance);
+                var walletAfterCurrent  = prepaymentBalance - walletUsedForCurrent;
+                var shortfall           = Math.Max(0m, estimatedAmount - walletAfterCurrent);
+                var projectedOutstanding = effectiveOutstanding + shortfall;
+
                 var exceedsLimit = projectedOutstanding > customer.CreditLimit;
                 var availableCredit = customer.AvailableCredit;
 
@@ -469,7 +684,8 @@ namespace QuarryManagementSystem.Controllers
                     success = true,
                     exceedsLimit,
                     availableCredit,
-                    currentOutstanding = customer.OutstandingBalance,
+                    currentOutstanding,
+                    rawOutstanding,
                     creditLimit = customer.CreditLimit,
                     prepaymentBalance,
                     effectiveOutstanding,
@@ -585,12 +801,116 @@ namespace QuarryManagementSystem.Controllers
             return 0;
         }
 
+        /// <summary>
+        /// Populates SubTotal / VatAmount / RebateAmount / TotalAmount on the
+        /// weighment using the customer's VAT treatment and rebate settings.
+        /// Mirrors the Invoice / Quotation logic so the saved numbers match the
+        /// UI (Financial Summary panel) and downstream documents (PrintSlip80).
+        /// <para/>
+        /// Exclusive (default): Subtotal = NetTons × Price; VAT = Subtotal × rate;
+        /// Total = Subtotal + VAT − Rebate.
+        /// <para/>
+        /// Inclusive: Price already embeds VAT. LineGross = NetTons × Price;
+        /// VAT = LineGross × rate / (100 + rate); Subtotal = LineGross − VAT;
+        /// Total = LineGross − Rebate (VAT is not added again, but rebate still reduces).
+        /// <para/>
+        /// Rebate = customer.RebateAmount (per-unit) × NetTons. Capped at
+        /// Subtotal + VAT so a line never goes negative.
+        /// </summary>
+        private async Task ApplyVatTreatmentAsync(WeighmentTransaction weighment, int? customerId)
+        {
+            // Recompute NetWeight = Gross − Tare and PERSIST it to the entity.
+            // Critical: NetWeight is a stored column on WeighmentTransaction, not
+            // a computed property. If we don't assign it here, the list view and
+            // any downstream consumer will see 0 even when Gross and Tare are
+            // populated — which is exactly what caused the "Net (kg) = 0" bug.
+            // Floor at 0 so a Tare-only first-weighing record doesn't go negative.
+            var net = weighment.GrossWeight - (weighment.TareWeight ?? 0m);
+            if (net < 0) net = 0;
+            weighment.NetWeight = net;
+
+            // Derive billable quantity (Net in tons). The weighment stores Gross /
+            // Tare / Net in whatever WeightUnit the operator picked — typically
+            // "Ton" on new records, "kg" on legacy. Convert only for kg.
+            var quantityInTons = weighment.WeightUnit == "kg" ? net / 1000m : net;
+
+            if (quantityInTons <= 0 || !weighment.PricePerUnit.HasValue)
+            {
+                weighment.SubTotal = 0;
+                weighment.VatAmount = 0;
+                weighment.RebateAmount = 0;
+                weighment.TotalAmount = 0;
+                return;
+            }
+
+            var lineGross = quantityInTons * weighment.PricePerUnit.Value;
+            var rate = weighment.VatRate;
+
+            // Look up VAT type + rebate from the customer (if any). No customer →
+            // Exclusive + no rebate (conservative: the old behavior).
+            string vatType = "Exclusive";
+            decimal perUnitRebate = 0m;
+            if (customerId.HasValue)
+            {
+                var customer = await _context.Customers
+                    .Include(c => c.VatType)
+                    .FirstOrDefaultAsync(c => c.Id == customerId.Value);
+                if (customer?.VatType?.Name != null)
+                {
+                    vatType = customer.VatType.Name;
+                }
+                if (customer != null && customer.HasRebate)
+                {
+                    perUnitRebate = customer.RebateAmount ?? 0m;
+                }
+            }
+
+            decimal subtotal;
+            decimal vat;
+            if (string.Equals(vatType, "Inclusive", StringComparison.OrdinalIgnoreCase))
+            {
+                vat = rate > 0
+                    ? Math.Round(lineGross * rate / (100m + rate), 2)
+                    : 0m;
+                subtotal = Math.Round(lineGross - vat, 2);
+            }
+            else
+            {
+                subtotal = Math.Round(lineGross, 2);
+                vat = Math.Round(subtotal * (rate / 100m), 2);
+            }
+
+            // Rebate scales with quantity. Cap at Subtotal + VAT so the line
+            // can't go negative even if the customer's per-unit rebate happens
+            // to exceed the unit price for some material.
+            var rebate = Math.Round(perUnitRebate * quantityInTons, 2);
+            var maxRebate = subtotal + vat;
+            if (rebate > maxRebate) rebate = maxRebate;
+
+            weighment.SubTotal = subtotal;
+            weighment.VatAmount = vat;
+            weighment.RebateAmount = rebate;
+            weighment.TotalAmount = Math.Round(subtotal + vat - rebate, 2);
+        }
+
         private async Task UpdateCustomerOutstandingBalance(int customerId, decimal amount)
         {
             var customer = await _context.Customers.FindAsync(customerId);
             if (customer != null)
             {
                 customer.OutstandingBalance += amount;
+                // Safety floor: a customer's outstanding balance should never be
+                // negative. If the revert-and-reapply pair in the caller ends up
+                // below zero (typically because the old TotalAmount being reverted
+                // is stale — e.g. the original record had NetWeight = 0 and so
+                // TotalAmount = 0 didn't really get added, but we now revert a
+                // non-zero value), clamp to zero rather than propagate corruption.
+                // The authoritative figure is recomputable from invoices; see
+                // SQL/Reconcile_CustomerOutstandingBalance.sql for the full rebuild.
+                if (customer.OutstandingBalance < 0)
+                {
+                    customer.OutstandingBalance = 0;
+                }
                 await _context.SaveChangesAsync();
             }
         }

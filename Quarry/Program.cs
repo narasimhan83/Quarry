@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
 using QuarryManagementSystem.Data;
 using QuarryManagementSystem.Models;
+using QuarryManagementSystem.Services;
 using Serilog;
 using System.Globalization;
 
@@ -56,6 +57,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
+
+// Domain services
+builder.Services.AddScoped<ICustomerPricingService, CustomerPricingService>();
 
 // Remove repository and service registrations for now - they can be added later
 // These would need to be implemented as actual classes

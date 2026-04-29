@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuarryManagementSystem.Data;
+using QuarryManagementSystem.Models;
 using QuarryManagementSystem.Models.Domain;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using QuarryManagementSystem.Services;
+using QuarryManagementSystem.Utilities;
+using QuarryManagementSystem.ViewModels;
 using System.Security.Claims;
 
 namespace QuarryManagementSystem.Controllers
@@ -16,19 +18,30 @@ namespace QuarryManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<PrepaymentController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICustomerPricingService _pricingService;
 
-        public PrepaymentController(ApplicationDbContext context, ILogger<PrepaymentController> logger)
+        public PrepaymentController(
+            ApplicationDbContext context,
+            ILogger<PrepaymentController> logger,
+            UserManager<ApplicationUser> userManager,
+            ICustomerPricingService pricingService)
         {
             _context = context;
             _logger = logger;
+            _userManager = userManager;
+            _pricingService = pricingService;
         }
 
+        // ----------------------------------------------------------------------
         // GET: Prepayment
+        // ----------------------------------------------------------------------
         public async Task<IActionResult> Index(int? customerId, DateTime? fromDate, DateTime? toDate)
         {
             var query = _context.CustomerPrepayments
                 .Include(p => p.Customer)
-                .Include(p => p.Material)
+                .Include(p => p.LineItems)
+                    .ThenInclude(li => li.Material)
                 .Include(p => p.Applications)
                 .AsQueryable();
 
@@ -36,12 +49,10 @@ namespace QuarryManagementSystem.Controllers
             {
                 query = query.Where(p => p.CustomerId == customerId.Value);
             }
-
             if (fromDate.HasValue)
             {
                 query = query.Where(p => p.PrepaymentDate >= fromDate.Value);
             }
-
             if (toDate.HasValue)
             {
                 query = query.Where(p => p.PrepaymentDate <= toDate.Value);
@@ -52,9 +63,8 @@ namespace QuarryManagementSystem.Controllers
                 .ThenByDescending(p => p.Id)
                 .ToListAsync();
 
-            // Ensure UsedAmount is always in sync with actual applications.
-            // This fixes any historical data where UsedAmount was not updated correctly
-            // when invoices applied prepayments.
+            // Keep the top-level UsedAmount in sync with its applications so the list
+            // view is always accurate even if something was missed upstream.
             bool anyUpdated = false;
             foreach (var p in prepayments)
             {
@@ -66,219 +76,385 @@ namespace QuarryManagementSystem.Controllers
                     p.UpdatedBy = User.Identity?.Name;
                     anyUpdated = true;
 
-                    // If fully used, mark as Exhausted
                     if (p.Amount - p.UsedAmount <= 0 && p.Status == "Active")
                     {
                         p.Status = "Exhausted";
                     }
                 }
             }
-
             if (anyUpdated)
             {
                 await _context.SaveChangesAsync();
             }
- 
+
             ViewBag.Customers = await _context.Customers
                 .OrderBy(c => c.Name)
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                })
+                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
                 .ToListAsync();
- 
+
             return View(prepayments);
         }
 
+        // ----------------------------------------------------------------------
         // GET: Prepayment/Create
+        // ----------------------------------------------------------------------
         public async Task<IActionResult> Create()
         {
-            await PopulateCustomersAsync();
-
-            var model = new CustomerPrepayment
+            var model = new PrepaymentCreateEditViewModel
             {
                 PrepaymentDate = DateTime.Now
             };
-
+            await PopulateDropdownsAsync(model);
             return View(model);
         }
 
+        // ----------------------------------------------------------------------
         // POST: Prepayment/Create
+        // ----------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CustomerPrepayment model)
+        public async Task<IActionResult> Create(PrepaymentCreateEditViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            if (!model.CustomerId.HasValue || model.CustomerId <= 0)
+            {
+                ModelState.AddModelError(nameof(model.CustomerId), "Please select a customer.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            // Validate lines. Allow empty values to be dropped silently but reject
+            // rows that have partial data (e.g. material but no quantity).
+            var validLines = (model.Items ?? new List<PrepaymentLineItemInput>())
+                .Where(li => li.MaterialId.HasValue && li.MaterialId > 0 && li.Quantity > 0 && li.UnitPrice > 0)
+                .ToList();
+
+            if (!validLines.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Please add at least one line item with material, quantity, and unit price.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            // Compute the VAT / rebate breakdown for each line from the posted
+            // raw UnitPrice and the customer's current settings. UnitPrice stays
+            // as-is (customer's catalog price); VatAmount and RebateAmount are
+            // filled in per line. LineTotal below uses all three.
+            await ComputeLineBreakdownAsync(model.CustomerId.Value, validLines);
+
+            // Line total model (new):
+            //   LineTotal = qty × UnitPrice + VatAmount − RebateAmount
+            // where VatAmount and RebateAmount have already been scaled to the
+            // line quantity by ComputeLineBreakdownAsync.
+            foreach (var li in validLines)
+            {
+                li.LineTotal = Math.Round(li.Quantity * li.UnitPrice + li.VatAmount - li.RebateAmount, 2);
+            }
+            model.TotalAmount = validLines.Sum(li => li.LineTotal);
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // PrepaymentNumber is system-generated, not entered by user,
-                // so remove it from model validation before checking ModelState.
-                ModelState.Remove(nameof(CustomerPrepayment.PrepaymentNumber));
-
-                if (!ModelState.IsValid)
+                var prepayment = new CustomerPrepayment
                 {
-                    await PopulateCustomersAsync();
-                    return View(model);
+                    PrepaymentNumber = await GeneratePrepaymentNumberAsync(),
+                    CustomerId = model.CustomerId.Value,
+                    PrepaymentDate = model.PrepaymentDate,
+                    ExpectedPickupDate = model.ExpectedPickupDate,
+                    PaymentMethod = await ResolvePaymentMethodNameAsync(model.PaymentMethodId, model.PaymentMethod),
+                    PaymentMethodId = model.PaymentMethodId,
+                    Reference = model.Reference,
+                    Notes = model.Notes,
+                    Status = "Active",
+                    Amount = model.TotalAmount,
+                    UsedAmount = 0m,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = User.Identity?.Name
+                };
+
+                foreach (var li in validLines)
+                {
+                    prepayment.LineItems.Add(new PrepaymentLineItem
+                    {
+                        MaterialId = li.MaterialId!.Value,
+                        Quantity = li.Quantity,
+                        Unit = string.IsNullOrWhiteSpace(li.Unit) ? "Ton" : li.Unit,
+                        UnitPrice = li.UnitPrice,
+                        VatAmount = li.VatAmount,
+                        RebateAmount = li.RebateAmount,
+                        LineTotal = li.LineTotal,
+                        UsedQuantity = 0m,
+                        UsedAmount = 0m,
+                        CreatedAt = DateTime.Now
+                    });
                 }
 
-                if (model.CustomerId <= 0)
-                {
-                    ModelState.AddModelError("CustomerId", "Please select a customer.");
-                    await PopulateCustomersAsync();
-                    return View(model);
-                }
-
-                if (model.Amount <= 0)
-                {
-                    ModelState.AddModelError("Amount", "Prepayment amount must be greater than zero.");
-                    await PopulateCustomersAsync();
-                    return View(model);
-                }
-
-                model.PrepaymentNumber = await GeneratePrepaymentNumberAsync();
-                model.Status = "Active";
-                model.CreatedAt = DateTime.Now;
-                model.CreatedBy = User.Identity?.Name;
-                model.UsedAmount = 0;
-
-                _context.CustomerPrepayments.Add(model);
+                _context.CustomerPrepayments.Add(prepayment);
                 await _context.SaveChangesAsync();
 
-                await CreatePrepaymentJournalEntryAsync(model);
+                await CreatePrepaymentJournalEntryAsync(prepayment);
 
-                TempData["Success"] = $"Prepayment {model.PrepaymentNumber} created successfully.";
-                _logger.LogInformation("Prepayment {PrepaymentNumber} created for customer {CustomerId} by {UserName}",
-                    model.PrepaymentNumber, model.CustomerId, User.Identity?.Name);
+                await transaction.CommitAsync();
 
-                return RedirectToAction(nameof(Index));
+                TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} created successfully with {validLines.Count} line item(s). Total: ₦{prepayment.Amount:N2}.";
+                _logger.LogInformation("Prepayment {PrepaymentNumber} created with {Count} lines for customer {CustomerId} by {UserName}",
+                    prepayment.PrepaymentNumber, validLines.Count, prepayment.CustomerId, User.Identity?.Name);
+
+                return RedirectToAction(nameof(Details), new { id = prepayment.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating prepayment");
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error creating prepayment. The transaction was rolled back.");
                 ModelState.AddModelError(string.Empty, "An error occurred while creating the prepayment. Please try again.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
             }
-
-            await PopulateCustomersAsync();
-            return View(model);
         }
 
+        // ----------------------------------------------------------------------
         // GET: Prepayment/Edit/5
+        // ----------------------------------------------------------------------
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var prepayment = await _context.CustomerPrepayments
-                .Include(p => p.Customer)
-                .Include(p => p.Material)
-                .FirstOrDefaultAsync(p => p.Id == id.Value);
-
-            if (prepayment == null)
-            {
-                return NotFound();
-            }
-
-            await PopulateCustomersAsync();
-            return View(prepayment);
-        }
-
-        // POST: Prepayment/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CustomerPrepayment model)
-        {
-            if (id != model.Id)
-            {
-                return NotFound();
-            }
-
-            // PrepaymentNumber is system-generated, not entered by user.
-            ModelState.Remove(nameof(CustomerPrepayment.PrepaymentNumber));
-
-            if (!ModelState.IsValid)
-            {
-                await PopulateCustomersAsync();
-                return View(model);
-            }
-
-            if (model.CustomerId <= 0)
-            {
-                ModelState.AddModelError("CustomerId", "Please select a customer.");
-                await PopulateCustomersAsync();
-                return View(model);
-            }
-
-            if (model.Amount <= 0)
-            {
-                ModelState.AddModelError("Amount", "Prepayment amount must be greater than zero.");
-                await PopulateCustomersAsync();
-                return View(model);
-            }
-
-            var prepayment = await _context.CustomerPrepayments.FindAsync(id);
-            if (prepayment == null)
-            {
-                return NotFound();
-            }
-
-            prepayment.CustomerId = model.CustomerId;
-            prepayment.PrepaymentDate = model.PrepaymentDate;
-            prepayment.Amount = model.Amount;
-            prepayment.PaymentMethod = model.PaymentMethod;
-            prepayment.MaterialId = model.MaterialId;
-            prepayment.WeightUnit = model.WeightUnit;
-            prepayment.Reference = model.Reference;
-            prepayment.Notes = model.Notes;
-            prepayment.Status = model.Status;
-            prepayment.UpdatedAt = DateTime.Now;
-            prepayment.UpdatedBy = User.Identity?.Name;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} updated successfully.";
-            _logger.LogInformation("Prepayment {PrepaymentNumber} updated by {UserName}",
-                prepayment.PrepaymentNumber, User.Identity?.Name);
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // GET: Prepayment/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var prepayment = await _context.CustomerPrepayments
-                .Include(p => p.Customer)
-                .Include(p => p.Material)
+                .Include(p => p.LineItems)
+                    .ThenInclude(li => li.Material)
                 .Include(p => p.Applications)
                 .FirstOrDefaultAsync(p => p.Id == id.Value);
 
-            if (prepayment == null)
+            if (prepayment == null) return NotFound();
+
+            if (prepayment.Applications != null && prepayment.Applications.Any())
             {
-                return NotFound();
+                TempData["Error"] = "This prepayment has already been applied to one or more invoices and can no longer be edited. Use Cancel instead.";
+                return RedirectToAction(nameof(Details), new { id });
             }
+
+            var model = MapToEditViewModel(prepayment);
+            await PopulateDropdownsAsync(model);
+            return View(model);
+        }
+
+        // ----------------------------------------------------------------------
+        // POST: Prepayment/Edit/5
+        // ----------------------------------------------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, PrepaymentCreateEditViewModel model)
+        {
+            if (id != model.Id) return NotFound();
+
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.LineItems)
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (prepayment == null) return NotFound();
+
+            if (prepayment.Applications != null && prepayment.Applications.Any())
+            {
+                TempData["Error"] = "This prepayment has already been applied to one or more invoices and can no longer be edited.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            if (!model.CustomerId.HasValue || model.CustomerId <= 0)
+            {
+                ModelState.AddModelError(nameof(model.CustomerId), "Please select a customer.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            var validLines = (model.Items ?? new List<PrepaymentLineItemInput>())
+                .Where(li => li.MaterialId.HasValue && li.MaterialId > 0 && li.Quantity > 0 && li.UnitPrice > 0)
+                .ToList();
+
+            if (!validLines.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Please add at least one line item with material, quantity, and unit price.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            // Re-compute VAT / rebate breakdown for the current customer settings.
+            // If settings changed since creation, Edit uses the new ones (matches
+            // what the operator sees on screen). UnitPrice remains the raw customer
+            // catalog price posted from the form; VatAmount / RebateAmount are derived.
+            await ComputeLineBreakdownAsync(model.CustomerId.Value, validLines);
+
+            // Line total model (new): qty × UnitPrice + VatAmount − RebateAmount.
+            foreach (var li in validLines)
+            {
+                li.LineTotal = Math.Round(li.Quantity * li.UnitPrice + li.VatAmount - li.RebateAmount, 2);
+            }
+            model.TotalAmount = validLines.Sum(li => li.LineTotal);
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                prepayment.CustomerId = model.CustomerId.Value;
+                prepayment.PrepaymentDate = model.PrepaymentDate;
+                prepayment.ExpectedPickupDate = model.ExpectedPickupDate;
+                prepayment.PaymentMethod = await ResolvePaymentMethodNameAsync(model.PaymentMethodId, model.PaymentMethod);
+                prepayment.PaymentMethodId = model.PaymentMethodId;
+                prepayment.Reference = model.Reference;
+                prepayment.Notes = model.Notes;
+                prepayment.Status = string.IsNullOrWhiteSpace(model.Status) ? prepayment.Status : model.Status;
+                prepayment.Amount = model.TotalAmount;
+                prepayment.UpdatedAt = DateTime.Now;
+                prepayment.UpdatedBy = User.Identity?.Name;
+
+                // Simplest correct approach: replace all line items. Safe because
+                // we've already refused editing if any applications exist.
+                _context.PrepaymentLineItems.RemoveRange(prepayment.LineItems);
+                prepayment.LineItems.Clear();
+
+                foreach (var li in validLines)
+                {
+                    prepayment.LineItems.Add(new PrepaymentLineItem
+                    {
+                        MaterialId = li.MaterialId!.Value,
+                        Quantity = li.Quantity,
+                        Unit = string.IsNullOrWhiteSpace(li.Unit) ? "Ton" : li.Unit,
+                        UnitPrice = li.UnitPrice,
+                        VatAmount = li.VatAmount,
+                        RebateAmount = li.RebateAmount,
+                        LineTotal = li.LineTotal,
+                        UsedQuantity = 0m,
+                        UsedAmount = 0m,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Reverse any prior ADV journal entry and re-post with the new amount,
+                // using the same "delete-and-repost" approach used by OpeningBalance.
+                await RecreatePrepaymentJournalEntryAsync(prepayment);
+
+                await transaction.CommitAsync();
+
+                TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} updated successfully.";
+                _logger.LogInformation("Prepayment {PrepaymentNumber} updated by {UserName}",
+                    prepayment.PrepaymentNumber, User.Identity?.Name);
+
+                return RedirectToAction(nameof(Details), new { id = prepayment.Id });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error updating prepayment {PrepaymentId}. The transaction was rolled back.", id);
+                ModelState.AddModelError(string.Empty, "An error occurred while updating the prepayment. Please try again.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+        }
+
+        // ----------------------------------------------------------------------
+        // GET: Prepayment/Details/5
+        // ----------------------------------------------------------------------
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.Customer)
+                .Include(p => p.LineItems)
+                    .ThenInclude(li => li.Material)
+                .Include(p => p.Applications)
+                    .ThenInclude(a => a.Invoice)
+                .Include(p => p.Applications)
+                    .ThenInclude(a => a.PrepaymentLineItem)
+                        .ThenInclude(li => li!.Material)
+                .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+            if (prepayment == null) return NotFound();
+
+            var totalApplied = prepayment.Applications?.Sum(a => a.AppliedAmount) ?? 0m;
+            var vm = new PrepaymentDetailsViewModel
+            {
+                Prepayment = prepayment,
+                LineItems = prepayment.LineItems.OrderBy(li => li.Id).ToList(),
+                Applications = prepayment.Applications?.OrderBy(a => a.AppliedDate).ThenBy(a => a.Id).ToList() ?? new(),
+                TotalApplied = totalApplied,
+                TotalRemaining = prepayment.Amount - totalApplied
+            };
+
+            return View(vm);
+        }
+
+        // ----------------------------------------------------------------------
+        // GET: Prepayment/Receipt/5 — printable receipt
+        // ----------------------------------------------------------------------
+        public async Task<IActionResult> Receipt(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.Customer)
+                .Include(p => p.LineItems)
+                    .ThenInclude(li => li.Material)
+                .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+            if (prepayment == null) return NotFound();
+
+            var vm = new PrepaymentReceiptPrintViewModel
+            {
+                Prepayment = prepayment,
+                LineItems = prepayment.LineItems.OrderBy(li => li.Id).ToList(),
+                AmountInWords = NumberToWordsConverter.ConvertToWords(prepayment.Amount),
+                CompanyDetails = GetCompanyDetails(),
+                PrintDate = DateTime.Now
+            };
+
+            return View(vm);
+        }
+
+        // ----------------------------------------------------------------------
+        // GET: Prepayment/Delete/5
+        // ----------------------------------------------------------------------
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var prepayment = await _context.CustomerPrepayments
+                .Include(p => p.Customer)
+                .Include(p => p.LineItems)
+                    .ThenInclude(li => li.Material)
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+            if (prepayment == null) return NotFound();
 
             return View(prepayment);
         }
 
+        // ----------------------------------------------------------------------
         // POST: Prepayment/Delete/5
+        // ----------------------------------------------------------------------
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var prepayment = await _context.CustomerPrepayments
                 .Include(p => p.Applications)
+                .Include(p => p.LineItems)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (prepayment == null)
-            {
-                return NotFound();
-            }
+            if (prepayment == null) return NotFound();
 
             if (prepayment.Applications != null && prepayment.Applications.Any())
             {
@@ -286,36 +462,267 @@ namespace QuarryManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.CustomerPrepayments.Remove(prepayment);
-            await _context.SaveChangesAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Reverse the ADV journal entry too
+                var advEntryPrefix = $"ADV/{prepayment.PrepaymentNumber}";
+                var priorEntries = await _context.JournalEntries
+                    .Include(je => je.JournalEntryLines)
+                    .Where(je => je.Reference != null && je.Reference.Contains(prepayment.PrepaymentNumber) && je.EntryNumber.StartsWith("ADV"))
+                    .ToListAsync();
 
-            TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} deleted successfully.";
-            _logger.LogInformation("Prepayment {PrepaymentNumber} deleted by {UserName}",
-                prepayment.PrepaymentNumber, User.Identity?.Name);
+                foreach (var prior in priorEntries)
+                {
+                    _context.JournalEntryLines.RemoveRange(prior.JournalEntryLines);
+                }
+                _context.JournalEntries.RemoveRange(priorEntries);
+
+                _context.PrepaymentLineItems.RemoveRange(prepayment.LineItems);
+                _context.CustomerPrepayments.Remove(prepayment);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} deleted successfully.";
+                _logger.LogInformation("Prepayment {PrepaymentNumber} deleted by {UserName}",
+                    prepayment.PrepaymentNumber, User.Identity?.Name);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error deleting prepayment {PrepaymentId}", id);
+                TempData["Error"] = "An error occurred while deleting the prepayment.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task PopulateCustomersAsync()
+        // ----------------------------------------------------------------------
+        // AJAX: Get material info for line-item auto-populate.
+        // When a customer is selected, prefer their custom price (pricing service
+        // honors per-customer history). Without a customer, fall back to the
+        // material's catalog price.
+        //
+        // Also returns the customer's VAT type (for gross-up display) and any
+        // per-unit rebate so the client can show the discounted line total
+        // immediately as the user types.
+        // ----------------------------------------------------------------------
+        [HttpGet]
+        public async Task<JsonResult> GetMaterialInfo(int materialId, int? customerId = null)
         {
-            ViewBag.Customers = await _context.Customers
-                .OrderBy(c => c.Name)
-                .Select(c => new SelectListItem
+            if (customerId.HasValue && customerId.Value > 0)
+            {
+                var pricing = await _pricingService.GetPricingAsync(customerId.Value, materialId);
+
+                // Still want the unit label (Ton/kg) from the material catalog.
+                var unit = await _context.Materials
+                    .Where(m => m.Id == materialId)
+                    .Select(m => m.Unit)
+                    .FirstOrDefaultAsync() ?? "Ton";
+
+                // Per-unit rebate for prepayments. The Customer.RebateAmount is the
+                // per-unit rebate (rebate scales with quantity on prepayments),
+                // which differs from how it's applied on invoices (flat discount).
+                var customerRebate = await _context.Customers
+                    .Where(c => c.Id == customerId.Value)
+                    .Select(c => new { c.HasRebate, c.RebateAmount })
+                    .FirstOrDefaultAsync();
+
+                return Json(new
                 {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                })
+                    success = true,
+                    unitPrice = pricing.UnitPrice,
+                    vatRate = pricing.VatRate,
+                    unit,
+                    isCustomerSpecific = pricing.IsCustomerSpecific,
+                    vatType = pricing.VatType,
+                    hasRebate = customerRebate?.HasRebate ?? false,
+                    rebateAmount = customerRebate?.RebateAmount ?? 0m
+                });
+            }
+
+            var material = await _context.Materials
+                .FirstOrDefaultAsync(m => m.Id == materialId);
+
+            if (material == null)
+            {
+                return Json(new { success = false, message = "Material not found." });
+            }
+
+            return Json(new
+            {
+                success = true,
+                unitPrice = material.UnitPrice,
+                vatRate = material.VatRate,
+                unit = material.Unit,
+                isCustomerSpecific = false,
+                vatType = (string?)null,
+                hasRebate = false,
+                rebateAmount = 0m
+            });
+        }
+
+        // ----------------------------------------------------------------------
+        // Helpers
+        // ----------------------------------------------------------------------
+
+        /// <summary>
+        /// For each line, compute the VAT and rebate amounts that correspond to
+        /// the raw UnitPrice (the customer's catalog price) and the customer's
+        /// current VAT type + rebate settings. The breakdown is stored alongside
+        /// UnitPrice so the UI can render three separate columns (Unit Price /
+        /// VAT / Rebate) instead of baking everything into a single number.
+        /// <para/>
+        /// Math (per line):
+        ///   Exclusive: perUnitVat = UnitPrice × rate / 100
+        ///   Inclusive: perUnitVat = UnitPrice × rate / (100 + rate)
+        ///   perUnitRebate = customer.RebateAmount (clamped to UnitPrice + perUnitVat)
+        ///   VatAmount    = round(perUnitVat * qty, 2)
+        ///   RebateAmount = round(perUnitRebate * qty, 2)
+        /// <para/>
+        /// The caller is responsible for LineTotal. The expected formula is:
+        ///   LineTotal = qty × UnitPrice + VatAmount − RebateAmount
+        /// </summary>
+        private async Task ComputeLineBreakdownAsync(int customerId, List<PrepaymentLineItemInput> lines)
+        {
+            if (lines == null || lines.Count == 0) return;
+
+            var customer = await _context.Customers
+                .Include(c => c.VatType)
+                .FirstOrDefaultAsync(c => c.Id == customerId);
+
+            var vatType = customer?.VatType?.Name ?? "Exclusive";
+            var perUnitRebate = (customer != null && customer.HasRebate) ? (customer.RebateAmount ?? 0m) : 0m;
+
+            foreach (var li in lines)
+            {
+                if (!li.MaterialId.HasValue)
+                {
+                    li.VatAmount = 0m;
+                    li.RebateAmount = 0m;
+                    continue;
+                }
+
+                // Resolve VAT rate for this customer+material via the pricing service
+                // (returns the material default when the customer has no override).
+                var pricing = await _pricingService.GetPricingAsync(customerId, li.MaterialId.Value);
+                var vatRate = pricing.VatRate;
+
+                // Per-unit VAT computed from the raw UnitPrice.
+                decimal unitVat;
+                if (vatRate <= 0)
+                {
+                    unitVat = 0m;
+                }
+                else if (string.Equals(vatType, "Inclusive", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Inclusive: the UnitPrice already includes VAT, so the VAT share is
+                    // embedded in it. Back it out proportionally.
+                    unitVat = li.UnitPrice * vatRate / (100m + vatRate);
+                }
+                else
+                {
+                    // Exclusive: VAT is added on top of the raw price.
+                    unitVat = li.UnitPrice * vatRate / 100m;
+                }
+
+                // Per-unit rebate clamped so a line can't go negative.
+                var cappedRebate = Math.Min(perUnitRebate, li.UnitPrice + unitVat);
+
+                li.VatAmount = Math.Round(unitVat * li.Quantity, 2);
+                li.RebateAmount = Math.Round(cappedRebate * li.Quantity, 2);
+            }
+        }
+
+        private async Task PopulateDropdownsAsync(PrepaymentCreateEditViewModel model)
+        {
+            model.Customers = await _context.Customers
+                .Where(c => c.Status == "Active")
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
                 .ToListAsync();
 
-            ViewBag.Materials = await _context.Materials
+            model.Materials = await _context.Materials
                 .Where(m => m.Status == "Active")
                 .OrderBy(m => m.Name)
-                .Select(m => new SelectListItem
+                .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = $"{m.Name} ({m.Type})" })
+                .ToListAsync();
+
+            // Payment methods from the lookup table. Only active ones show up
+            // in the dropdown; inactive methods stay in the DB so historical
+            // FKs don't break. DisplayOrder controls ranking so Cash lands at
+            // the top; ties are broken by Id for stability.
+            model.PaymentMethods = await _context.PaymentMethods
+                .Where(pm => pm.IsActive)
+                .OrderBy(pm => pm.DisplayOrder)
+                .ThenBy(pm => pm.Id)
+                .Select(pm => new SelectListItem
                 {
-                    Value = m.Id.ToString(),
-                    Text = $"{m.Name} ({m.Type})"
+                    Value = pm.Id.ToString(),
+                    Text = pm.Name
                 })
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Resolves the canonical payment method name from the selected FK. Used
+        /// to denormalize into the legacy <see cref="CustomerPrepayment.PaymentMethod"/>
+        /// string so old reports and string-based queries keep working.
+        /// <para/>
+        /// When <paramref name="paymentMethodId"/> is null (no selection made), we
+        /// fall back to whatever was posted in the legacy string field — this
+        /// happens only on records that predate the lookup table. Returns an
+        /// empty string if neither source has a value, matching the old behavior.
+        /// </summary>
+        private async Task<string> ResolvePaymentMethodNameAsync(int? paymentMethodId, string? fallback)
+        {
+            if (paymentMethodId.HasValue && paymentMethodId.Value > 0)
+            {
+                var name = await _context.PaymentMethods
+                    .Where(pm => pm.Id == paymentMethodId.Value)
+                    .Select(pm => pm.Name)
+                    .FirstOrDefaultAsync();
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    return name;
+                }
+            }
+            return fallback ?? string.Empty;
+        }
+
+        private PrepaymentCreateEditViewModel MapToEditViewModel(CustomerPrepayment prepayment)
+        {
+            return new PrepaymentCreateEditViewModel
+            {
+                Id = prepayment.Id,
+                PrepaymentNumber = prepayment.PrepaymentNumber,
+                CustomerId = prepayment.CustomerId,
+                PrepaymentDate = prepayment.PrepaymentDate,
+                ExpectedPickupDate = prepayment.ExpectedPickupDate,
+                PaymentMethod = prepayment.PaymentMethod ?? string.Empty,
+                PaymentMethodId = prepayment.PaymentMethodId,
+                Reference = prepayment.Reference,
+                Notes = prepayment.Notes,
+                Status = prepayment.Status,
+                TotalAmount = prepayment.Amount,
+                Items = prepayment.LineItems
+                    .OrderBy(li => li.Id)
+                    .Select(li => new PrepaymentLineItemInput
+                    {
+                        Id = li.Id,
+                        MaterialId = li.MaterialId,
+                        Quantity = li.Quantity,
+                        Unit = li.Unit,
+                        UnitPrice = li.UnitPrice,
+                        VatAmount = li.VatAmount,
+                        RebateAmount = li.RebateAmount,
+                        LineTotal = li.LineTotal,
+                        UsedAmount = li.UsedAmount,
+                        UsedQuantity = li.UsedQuantity
+                    })
+                    .ToList()
+            };
         }
 
         private async Task<string> GeneratePrepaymentNumberAsync()
@@ -331,8 +738,8 @@ namespace QuarryManagementSystem.Controllers
             int nextNumber = 1;
             if (last != null)
             {
-                var lastNumberStr = last.PrepaymentNumber.Substring(prefix.Length);
-                if (int.TryParse(lastNumberStr, out var lastNumber))
+                var suffix = last.PrepaymentNumber.Substring(prefix.Length);
+                if (int.TryParse(suffix, out var lastNumber))
                 {
                     nextNumber = lastNumber + 1;
                 }
@@ -341,17 +748,17 @@ namespace QuarryManagementSystem.Controllers
             return $"{prefix}{nextNumber:D4}";
         }
 
+        /// <summary>
+        /// Posts the Dr Cash / Cr Customer Prepayment liability journal entry for a
+        /// newly created prepayment, ensuring a per-customer 2103-xxxxxx sub-account exists.
+        /// </summary>
         private async Task CreatePrepaymentJournalEntryAsync(CustomerPrepayment prepayment)
         {
-            // Build the auto-generated journal entry for the prepayment
-            var entryNumber = JournalEntry.GenerateEntryNumber("ADV");
-
-            // Resolve account ids once so we can also recalculate their balances later
             var cashAccountId = await GetCashAccountId();
-
-            // Ensure a dedicated prepayment ledger account exists for this customer, e.g.
-            // AccountCode: 2103-000007, AccountName: "Customer Prepayments - Gems"
             var customerPrepaymentAccountId = await EnsureCustomerPrepaymentLedgerAccountAsync(prepayment);
+
+            var entryNumber = JournalEntry.GenerateEntryNumber("ADV");
+            var postedByUserId = _userManager.GetUserId(User);
 
             var journalEntry = new JournalEntry
             {
@@ -359,13 +766,11 @@ namespace QuarryManagementSystem.Controllers
                 EntryDate = prepayment.PrepaymentDate,
                 Reference = $"Prepayment {prepayment.PrepaymentNumber}",
                 Description = $"Customer prepayment of {prepayment.Amount:C} for customer {prepayment.CustomerId}",
-                // Use the ASP.NET Identity user id to satisfy FK_JournalEntries_AspNetUsers_PostedBy
-                PostedBy = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                PostedBy = postedByUserId,
                 IsAutoGenerated = true,
                 CreatedAt = DateTime.Now
             };
 
-            // Debit Cash/Bank
             journalEntry.JournalEntryLines.Add(new JournalEntryLine
             {
                 AccountId = cashAccountId,
@@ -374,7 +779,6 @@ namespace QuarryManagementSystem.Controllers
                 LineDescription = $"Prepayment received - {prepayment.PrepaymentNumber}"
             });
 
-            // Credit Customer Prepayments (liability)
             journalEntry.JournalEntryLines.Add(new JournalEntryLine
             {
                 AccountId = customerPrepaymentAccountId,
@@ -385,82 +789,65 @@ namespace QuarryManagementSystem.Controllers
 
             journalEntry.RecalculateTotals();
 
-            // Add the journal entry; EF will persist the attached lines as part of the graph
             _context.JournalEntries.Add(journalEntry);
-
             await _context.SaveChangesAsync();
 
-            // After the journal entry is saved, recalculate balances for the affected accounts
             await RecalculateAccountBalanceAsync(cashAccountId);
             await RecalculateAccountBalanceAsync(customerPrepaymentAccountId);
             await _context.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Recalculates a single account's CurrentBalance from all its journal entry lines
-        /// plus its OpeningBalance. This guarantees the Chart of Accounts ledger is accurate.
+        /// For the Edit flow: removes any prior ADV journal entry tagged with this
+        /// prepayment number and re-posts a fresh one at the updated amount.
         /// </summary>
+        private async Task RecreatePrepaymentJournalEntryAsync(CustomerPrepayment prepayment)
+        {
+            var priorEntries = await _context.JournalEntries
+                .Include(je => je.JournalEntryLines)
+                .Where(je =>
+                    je.EntryNumber.StartsWith("ADV") &&
+                    je.Reference != null &&
+                    je.Reference.Contains(prepayment.PrepaymentNumber))
+                .ToListAsync();
+
+            foreach (var prior in priorEntries)
+            {
+                _context.JournalEntryLines.RemoveRange(prior.JournalEntryLines);
+            }
+            _context.JournalEntries.RemoveRange(priorEntries);
+            await _context.SaveChangesAsync();
+
+            await CreatePrepaymentJournalEntryAsync(prepayment);
+        }
+
         private async Task RecalculateAccountBalanceAsync(int accountId)
         {
-            var account = await _context.ChartOfAccounts
-                .FirstOrDefaultAsync(a => a.Id == accountId);
-
-            if (account == null)
-                return;
+            var account = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            if (account == null) return;
 
             var totals = await _context.JournalEntryLines
                 .Where(l => l.AccountId == accountId)
                 .GroupBy(l => l.AccountId)
-                .Select(g => new
-                {
-                    Debit = g.Sum(l => l.DebitAmount),
-                    Credit = g.Sum(l => l.CreditAmount)
-                })
+                .Select(g => new { Debit = g.Sum(l => l.DebitAmount), Credit = g.Sum(l => l.CreditAmount) })
                 .FirstOrDefaultAsync();
 
             decimal totalDebit = totals?.Debit ?? 0;
             decimal totalCredit = totals?.Credit ?? 0;
-
-            decimal netMovement;
-
-            if (account.IsAssetAccount() || account.IsExpenseAccount())
-            {
-                // Assets & Expenses: debit increases, credit decreases
-                netMovement = totalDebit - totalCredit;
-            }
-            else
-            {
-                // Liabilities, Equity, Revenue: credit increases, debit decreases
-                netMovement = totalCredit - totalDebit;
-            }
-
+            decimal netMovement = (account.IsAssetAccount() || account.IsExpenseAccount())
+                ? totalDebit - totalCredit
+                : totalCredit - totalDebit;
             account.CurrentBalance = account.OpeningBalance + netMovement;
         }
 
-        /// <summary>
-        /// Returns the Id of the global Cash & Bank account (1001).
-        /// </summary>
         private async Task<int> GetCashAccountId()
         {
-            var cashAccount = await _context.ChartOfAccounts
-                .FirstOrDefaultAsync(ca => ca.AccountCode == "1001");
+            var cashAccount = await _context.ChartOfAccounts.FirstOrDefaultAsync(ca => ca.AccountCode == "1001");
             return cashAccount?.Id ?? 1;
         }
 
-        /// <summary>
-        /// Generates a per-customer prepayment account code based on the base
-        /// liability account 2103. Example: 2103-000007 for customer Id 7.
-        /// </summary>
-        private string GenerateCustomerPrepaymentAccountCode(int customerId)
-        {
-            return $"2103-{customerId:D6}";
-        }
+        private string GenerateCustomerPrepaymentAccountCode(int customerId) => $"2103-{customerId:D6}";
 
-        /// <summary>
-        /// Ensures that a dedicated ChartOfAccounts record exists for the customer's
-        /// prepayment balance, with a name like "Customer Prepayments - CompanyName".
-        /// Returns the account Id to be used in journal entries.
-        /// </summary>
         private async Task<int> EnsureCustomerPrepaymentLedgerAccountAsync(CustomerPrepayment prepayment)
         {
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == prepayment.CustomerId);
@@ -473,12 +860,9 @@ namespace QuarryManagementSystem.Controllers
             var desiredName = $"Customer Prepayments - {customer.Name}";
             var desiredActive = customer.Status == "Active";
 
-            var existing = await _context.ChartOfAccounts
-                .FirstOrDefaultAsync(a => a.AccountCode == accountCode);
-
+            var existing = await _context.ChartOfAccounts.FirstOrDefaultAsync(a => a.AccountCode == accountCode);
             if (existing != null)
             {
-                // Keep name/active flag in sync with latest customer info
                 if (!string.Equals(existing.AccountName, desiredName, StringComparison.Ordinal) ||
                     existing.IsActive != desiredActive)
                 {
@@ -486,11 +870,9 @@ namespace QuarryManagementSystem.Controllers
                     existing.IsActive = desiredActive;
                     await _context.SaveChangesAsync();
                 }
-
                 return existing.Id;
             }
 
-            // Create a new liability account dedicated to this customer's prepayments
             var account = new ChartOfAccounts
             {
                 AccountCode = accountCode,
@@ -502,11 +884,25 @@ namespace QuarryManagementSystem.Controllers
                 IsActive = desiredActive,
                 CreatedAt = DateTime.Now
             };
-
             _context.ChartOfAccounts.Add(account);
             await _context.SaveChangesAsync();
-
             return account.Id;
+        }
+
+        private CompanyDetailsViewModel GetCompanyDetails()
+        {
+            return new CompanyDetailsViewModel
+            {
+                CompanyName = "Nigerian Quarry Management System",
+                Address = "123 Quarry Road, Industrial Estate",
+                City = "Lagos",
+                State = "Lagos",
+                Phone = "+234-1-2345678",
+                Email = "info@quarry.ng",
+                Website = "www.quarry.ng",
+                TaxNumber = "12345678-0001",
+                BankDetails = "Access Bank, Account: 1234567890"
+            };
         }
     }
 }

@@ -1,8 +1,6 @@
-@model QuarryManagementSystem.Models.Domain.CustomerPrepayment
+@model QuarryManagementSystem.ViewModels.PrepaymentCreateEditViewModel
 @{
     ViewData["Title"] = "Edit Customer Prepayment";
-    var customers = ViewBag.Customers as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
-    var materials = ViewBag.Materials as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
 }
 
 <div class="content-header">
@@ -24,16 +22,12 @@
 
 <section class="content">
     <div class="container-fluid">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">@TempData["Success"]</div>
-        }
         @if (TempData["Error"] != null)
         {
             <div class="alert alert-danger">@TempData["Error"]</div>
         }
 
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" id="prepaymentForm">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
             <div class="row">
@@ -50,83 +44,203 @@
                                 <input asp-for="PrepaymentNumber" class="form-control" readonly />
                             </div>
 
-                            <div class="form-group">
-                                <label asp-for="CustomerId" class="control-label"></label>
-                                <select asp-for="CustomerId" class="form-control" asp-items="customers">
-                                    <option value="">-- Select Customer --</option>
-                                </select>
-                                <span asp-validation-for="CustomerId" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="PrepaymentDate" class="control-label"></label>
-                                <input asp-for="PrepaymentDate" class="form-control" type="date" />
-                                <span asp-validation-for="PrepaymentDate" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Amount" class="control-label"></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">₦</span>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerId" class="control-label"></label>
+                                        <select asp-for="CustomerId" class="form-control" asp-items="Model.Customers">
+                                            <option value="">-- Select Customer --</option>
+                                        </select>
+                                        <span asp-validation-for="CustomerId" class="text-danger"></span>
                                     </div>
-                                    <input asp-for="Amount" class="form-control" />
                                 </div>
-                                <span asp-validation-for="Amount" class="text-danger"></span>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="PrepaymentDate" class="control-label"></label>
+                                        <input asp-for="PrepaymentDate" class="form-control" type="date" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="ExpectedPickupDate" class="control-label"></label>
+                                        <input asp-for="ExpectedPickupDate" class="form-control" type="date" />
+                                        <small class="form-text text-muted">Optional</small>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label asp-for="PaymentMethod" class="control-label"></label>
-                                <input asp-for="PaymentMethod" class="form-control" placeholder="Cash, Transfer, POS, etc." />
-                                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="MaterialId" class="control-label"></label>
-                                <select asp-for="MaterialId" class="form-control" asp-items="materials">
-                                    <option value="">-- Select Material --</option>
-                                </select>
-                                <span asp-validation-for="MaterialId" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="WeightUnit" class="control-label"></label>
-                                <select asp-for="WeightUnit" class="form-control">
-                                    <option value="">-- Select Unit --</option>
-                                    <option value="kg">Kilograms (kg)</option>
-                                    <option value="ton">Tonnes (ton)</option>
-                                </select>
-                                <span asp-validation-for="WeightUnit" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Reference" class="control-label"></label>
-                                <input asp-for="Reference" class="form-control" placeholder="Bank reference / receipt number" />
-                                <span asp-validation-for="Reference" class="text-danger"></span>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="PaymentMethodId" class="control-label"></label>
+                                        <select asp-for="PaymentMethodId" class="form-control" asp-items="Model.PaymentMethods">
+                                            <option value="">-- Select Payment Method --</option>
+                                        </select>
+                                        <span asp-validation-for="PaymentMethodId" class="text-danger"></span>
+                                        @* Legacy string fallback: if the record predates PaymentMethodId and
+                                           we couldn't backfill it from the Migration_PaymentMethods.sql aliases,
+                                           surface the old value here so the operator sees what was stored and
+                                           can pick a proper method to replace it. *@
+                                        @if (!Model.PaymentMethodId.HasValue && !string.IsNullOrWhiteSpace(Model.PaymentMethod))
+                                        {
+                                            <small class="form-text text-warning">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Legacy value on record: <strong>@Model.PaymentMethod</strong>. Pick a method above to standardize.
+                                            </small>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Reference" class="control-label"></label>
+                                        <input asp-for="Reference" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Status" class="control-label"></label>
+                                        <select asp-for="Status" class="form-control">
+                                            <option value="Active">Active</option>
+                                            <option value="Exhausted">Exhausted</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
                                 <label asp-for="Notes" class="control-label"></label>
-                                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
-                                <span asp-validation-for="Notes" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Status" class="control-label"></label>
-                                <select asp-for="Status" class="form-control">
-                                    <option value="Active">Active</option>
-                                    <option value="Exhausted">Exhausted</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                                <span asp-validation-for="Status" class="text-danger"></span>
+                                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="card card-info">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Line Items</h3>
+                            <button type="button" id="addItemBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="itemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 24%;">Material</th>
+                                            <th style="width: 10%;">Qty</th>
+                                            <th style="width: 9%;">Unit</th>
+                                            <th style="width: 14%;">Unit Price (₦)</th>
+                                            <th style="width: 12%;" class="text-right">VAT (₦)</th>
+                                            <th style="width: 12%;" class="text-right">Rebate (₦)</th>
+                                            <th style="width: 14%;" class="text-right">Line Total</th>
+                                            <th style="width: 5%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsBody">
+                                        @{
+                                            var idx = 0;
+                                            foreach (var item in Model.Items)
+                                            {
+                                                // Per-unit breakdown derived from the stored absolute amounts so the
+                                                // row can continue displaying the same numbers even when the customer's
+                                                // VAT rate or rebate changes after creation.
+                                                var perUnitVat = item.Quantity > 0
+                                                    ? Math.Round(item.VatAmount / item.Quantity, 2)
+                                                    : 0m;
+                                                var perUnitRebate = item.Quantity > 0
+                                                    ? Math.Round(item.RebateAmount / item.Quantity, 2)
+                                                    : 0m;
+                                                <tr data-vat-per-unit="@perUnitVat" data-rebate-per-unit="@perUnitRebate">
+                                                    <td>
+                                                        <select name="Items[@idx].MaterialId" class="form-control form-control-sm material-select">
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var m in Model.Materials)
+                                                            {
+                                                                if (item.MaterialId?.ToString() == m.Value)
+                                                                {
+                                                                    <option value="@m.Value" selected="selected">@m.Text</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@m.Value">@m.Text</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                        <input type="hidden" name="Items[@idx].Id" value="@item.Id" />
+                                                        @* Hidden inputs carrying the stored per-line totals. Updated by
+                                                           recalcRow whenever qty/price changes so POST captures the current
+                                                           VAT and rebate breakdown. *@
+                                                        <input type="hidden" name="Items[@idx].VatAmount" value="@item.VatAmount" class="vat-amount-hidden" />
+                                                        <input type="hidden" name="Items[@idx].RebateAmount" value="@item.RebateAmount" class="rebate-amount-hidden" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.001" min="0" name="Items[@idx].Quantity" value="@item.Quantity" class="form-control form-control-sm qty-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input name="Items[@idx].Unit" value="@item.Unit" class="form-control form-control-sm unit-input" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" min="0" name="Items[@idx].UnitPrice" value="@item.UnitPrice" class="form-control form-control-sm price-input money-input" data-symbol="false" />
+                                                    </td>
+                                                    <td class="text-right align-middle">
+                                                        <span class="vat-display">@item.VatAmount.ToString("N2")</span>
+                                                    </td>
+                                                    <td class="text-right align-middle">
+                                                        <span class="rebate-display">@item.RebateAmount.ToString("N2")</span>
+                                                    </td>
+                                                    <td class="text-right align-middle">
+                                                        <input type="hidden" name="Items[@idx].LineTotal" value="@item.LineTotal" class="line-total-hidden" />
+                                                        <span class="line-total-display">@item.LineTotal.ToString("N2")</span>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                idx++;
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="6" class="text-right"><strong>Grand Total:</strong></td>
+                                            <td class="text-right"><strong id="grandTotal">0.00</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <small class="text-muted">
+                                Unit Price shows the raw customer price. VAT and Rebate are computed per line from the
+                                customer's settings. Line Total = qty × (Unit Price + per-unit VAT − per-unit Rebate).
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Prepayment Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Total Amount Prepaid</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                    <input id="TotalDisplay" class="form-control form-control-lg font-weight-bold money-input" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Update Prepayment
+                                <i class="fas fa-save"></i> Save Changes
                             </button>
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to List
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
                     </div>
@@ -138,4 +252,217 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (function () {
+            var materialsHtml = '@Html.Raw(string.Join("", Model.Materials.Select(m => $"<option value=\\\"{m.Value}\\\">{System.Net.WebUtility.HtmlEncode(m.Text)}</option>")))';
+
+            function fmt(n) {
+                if (window.NairaFormat) return NairaFormat.format(n, { symbol: false });
+                return (n || 0).toFixed(2);
+            }
+
+            // Use NairaFormat.parse for the price because the money-input helper
+            // puts a visible formatted proxy input before the real hidden input.
+            // jQuery's .val() on a multi-element set returns the first (proxy)
+            // element, whose value is something like "6,000.00" — parseFloat would
+            // chop that to 6. NairaFormat.parse strips commas correctly.
+            function readPrice($tr) {
+                if (window.NairaFormat) return NairaFormat.parse($tr.find('.price-input').val());
+                return parseFloat(($tr.find('.price-input').val() + '').replace(/,/g, '')) || 0;
+            }
+
+            // New line-total model:
+            //   lineTotal = qty × (unitPrice + perUnitVat − perUnitRebate)
+            // UnitPrice stays raw (the customer's catalog price) and VAT / Rebate
+            // are shown in their own columns. The per-unit VAT and per-unit rebate
+            // are cached on the <tr> via data attributes, either from the server-rendered
+            // stored values (on Edit load) or from the latest fetchPriceForRow call.
+            function recalcRow($tr) {
+                var qty = parseFloat($tr.find('.qty-input').val()) || 0;
+                var price = readPrice($tr);
+                var perUnitVat = parseFloat($tr.attr('data-vat-per-unit')) || 0;
+                var perUnitRebate = parseFloat($tr.attr('data-rebate-per-unit')) || 0;
+
+                // Clamp per-unit rebate to the unit price so a line can never go
+                // negative (matches server-side ComputeLineBreakdownAsync logic).
+                if (perUnitRebate > price + perUnitVat) {
+                    perUnitRebate = price + perUnitVat;
+                }
+
+                var vatAmount = Math.round(qty * perUnitVat * 100) / 100;
+                var rebateAmount = Math.round(qty * perUnitRebate * 100) / 100;
+                var lineTotal = Math.round((qty * price + vatAmount - rebateAmount) * 100) / 100;
+
+                $tr.find('.vat-display').text(fmt(vatAmount));
+                $tr.find('.rebate-display').text(fmt(rebateAmount));
+                $tr.find('.line-total-display').text(fmt(lineTotal));
+
+                // Push to hidden fields so POST submits what's on screen.
+                $tr.find('.vat-amount-hidden').val(vatAmount.toFixed(2));
+                $tr.find('.rebate-amount-hidden').val(rebateAmount.toFixed(2));
+                $tr.find('.line-total-hidden').val(lineTotal.toFixed(2));
+            }
+
+            function recalcGrandTotal() {
+                var total = 0;
+                $('#itemsBody tr').each(function () {
+                    total += parseFloat($(this).find('.line-total-hidden').val()) || 0;
+                });
+                total = Math.round(total * 100) / 100;
+                $('#grandTotal').text(fmt(total));
+                $('#TotalDisplay').val(total.toFixed(2)).trigger('change');
+            }
+
+            function renumberRows() {
+                $('#itemsBody tr').each(function (i) {
+                    $(this).find('input, select').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/Items\[\d+\]/, 'Items[' + i + ']'));
+                    });
+                });
+            }
+
+            function wireRowEvents($tr) {
+                $tr.on('input change', '.qty-input, .price-input', function () {
+                    recalcRow($tr);
+                    recalcGrandTotal();
+                });
+
+                $tr.find('.remove-item').on('click', function () {
+                    $tr.remove();
+                    renumberRows();
+                    recalcGrandTotal();
+                });
+
+                $tr.find('.material-select').on('change', function () {
+                    fetchPriceForRow($tr);
+                });
+            }
+
+            // Fetch the raw customer price and customer VAT / rebate settings
+            // for a row. UnitPrice stays as the customer's catalog price (no more
+            // baking VAT gross-up or rebate into it). The per-unit VAT and
+            // per-unit rebate are cached on the <tr> for recalcRow to use.
+            function fetchPriceForRow($tr) {
+                var materialId = $tr.find('.material-select').val();
+                if (!materialId) return;
+                var customerId = $('#CustomerId').val();
+                var data = { materialId: materialId };
+                if (customerId) data.customerId = customerId;
+
+                $.getJSON('@Url.Action("GetMaterialInfo", "Prepayment")', data, function (resp) {
+                    if (!resp || !resp.success) return;
+
+                    var $qty = $tr.find('.qty-input');
+                    var $unit = $tr.find('.unit-input');
+
+                    if (!(parseFloat($qty.val()) > 0)) {
+                        $qty.val(1);
+                    }
+                    if (!$unit.val()) {
+                        $unit.val(resp.unit || 'Ton');
+                    }
+
+                    // Store the raw customer price. The server's ComputeLineBreakdownAsync
+                    // will compute VAT and rebate shares from this at save time.
+                    var rawPrice = resp.unitPrice;
+                    var $priceInputs = $tr.find('.price-input');
+                    var $realPrice = $priceInputs.filter('[type=hidden]').first();
+                    if (!$realPrice.length) $realPrice = $priceInputs.first();
+                    $realPrice.val(rawPrice).trigger('change');
+
+                    // Compute per-unit VAT from the customer's VAT type.
+                    // Exclusive: VAT is added on top of the raw price  -> perUnitVat = price × rate/100
+                    // Inclusive: price already contains VAT             -> perUnitVat = price × rate/(100+rate)
+                    // No customer / no rate: perUnitVat = 0
+                    var perUnitVat = 0;
+                    if (resp.vatRate > 0) {
+                        if (resp.vatType && resp.vatType.toLowerCase() === 'inclusive') {
+                            perUnitVat = Math.round(rawPrice * resp.vatRate / (100 + resp.vatRate) * 100) / 100;
+                        } else {
+                            // Default to Exclusive (matches server-side default).
+                            perUnitVat = Math.round(rawPrice * resp.vatRate / 100 * 100) / 100;
+                        }
+                    }
+
+                    // Per-unit rebate comes from the customer profile as-is.
+                    // Clamp to the gross-of-VAT unit value so rebate can't exceed
+                    // what's billed per unit.
+                    var perUnitRebate = (resp.hasRebate && resp.rebateAmount > 0) ? resp.rebateAmount : 0;
+                    var maxRebate = rawPrice + perUnitVat;
+                    if (perUnitRebate > maxRebate) perUnitRebate = maxRebate;
+
+                    $tr.attr('data-vat-per-unit', perUnitVat);
+                    $tr.attr('data-rebate-per-unit', perUnitRebate);
+
+                    // Clean up any old inline hints from the previous column layout.
+                    $tr.find('.custom-price-hint, .vat-hint, .rebate-hint, .stored-vat-hint, .stored-rebate-hint, .line-rebate-note').remove();
+                    if (resp.isCustomerSpecific) {
+                        $tr.find('.material-select').after(
+                            '<small class="form-text text-success custom-price-hint"><i class="fas fa-tag"></i> Customer price applied</small>'
+                        );
+                    }
+
+                    recalcRow($tr);
+                    recalcGrandTotal();
+                });
+            }
+
+            // When the customer changes, re-fetch prices + VAT/rebate settings
+            // for every row so all rows reflect the new customer's context.
+            $('#CustomerId').on('change', function () {
+                $('#itemsBody tr').each(function () {
+                    fetchPriceForRow($(this));
+                });
+            });
+
+            function addEmptyRow() {
+                var idx = $('#itemsBody tr').length;
+                var row = `
+<tr data-vat-per-unit="0" data-rebate-per-unit="0">
+  <td>
+    <select name="Items[${idx}].MaterialId" class="form-control form-control-sm material-select">
+      <option value="">-- Select --</option>${materialsHtml}
+    </select>
+    <input type="hidden" name="Items[${idx}].Id" value="0" />
+    <input type="hidden" name="Items[${idx}].VatAmount" value="0" class="vat-amount-hidden" />
+    <input type="hidden" name="Items[${idx}].RebateAmount" value="0" class="rebate-amount-hidden" />
+  </td>
+  <td><input type="number" step="0.001" min="0" name="Items[${idx}].Quantity" value="1" class="form-control form-control-sm qty-input" /></td>
+  <td><input name="Items[${idx}].Unit" value="Ton" class="form-control form-control-sm unit-input" /></td>
+  <td><input type="number" step="0.01" min="0" name="Items[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input money-input" data-symbol="false" /></td>
+  <td class="text-right align-middle"><span class="vat-display">0.00</span></td>
+  <td class="text-right align-middle"><span class="rebate-display">0.00</span></td>
+  <td class="text-right align-middle">
+    <input type="hidden" name="Items[${idx}].LineTotal" value="0" class="line-total-hidden" />
+    <span class="line-total-display">0.00</span>
+  </td>
+  <td class="text-center align-middle">
+    <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash"></i></button>
+  </td>
+</tr>`;
+                var $row = $(row);
+                $('#itemsBody').append($row);
+                if (window.NairaFormat && NairaFormat.scan) NairaFormat.scan($row);
+                wireRowEvents($row);
+                recalcRow($row);
+                recalcGrandTotal();
+            }
+
+            if ($('#itemsBody tr').length === 0) {
+                addEmptyRow();
+            } else {
+                $('#itemsBody tr').each(function () {
+                    wireRowEvents($(this));
+                    recalcRow($(this));
+                });
+                recalcGrandTotal();
+            }
+
+            $('#addItemBtn').on('click', function () {
+                addEmptyRow();
+            });
+        })();
+    </script>
 }

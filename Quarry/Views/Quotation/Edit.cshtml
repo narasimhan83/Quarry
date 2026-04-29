@@ -112,7 +112,7 @@
                                             var index = 0;
                                             foreach (var item in Model.Items)
                                             {
-                                                <tr>
+                                                <tr data-line-rebate="@item.LineRebateAmount">
                                                     <td>
                                                         <select name="Items[@index].MaterialId" class="form-control form-control-sm material-select">
                                                             <option value="">-- Select --</option>
@@ -128,6 +128,11 @@
                                                                 }
                                                             }
                                                         </select>
+                                                        <input type="hidden" name="Items[@index].LineRebateAmount" value="@item.LineRebateAmount" class="line-rebate-hidden" />
+                                                        @if (item.LineRebateAmount > 0)
+                                                        {
+                                                            <small class="form-text text-warning stored-line-rebate-hint"><i class="fas fa-gift"></i> Rebate ₦@item.LineRebateAmount.ToString("N2") applied</small>
+                                                        }
                                                     </td>
                                                     <td>
                                                         <input name="Items[@index].Description" value="@item.Description" class="form-control form-control-sm desc-input" />
@@ -139,7 +144,7 @@
                                                         <input name="Items[@index].Unit" value="@item.Unit" class="form-control form-control-sm unit-input" />
                                                     </td>
                                                     <td>
-                                                        <input type="number" step="0.01" min="0" name="Items[@index].UnitPrice" value="@item.UnitPrice" class="form-control form-control-sm price-input" />
+                                                        <input type="number" step="0.01" min="0" name="Items[@index].UnitPrice" value="@item.UnitPrice" class="form-control form-control-sm price-input money-input" data-symbol="false" />
                                                     </td>
                                                     <td>
                                                         <input type="number" step="0.01" min="0" max="100" name="Items[@index].VatRate" value="@item.VatRate" class="form-control form-control-sm vat-input" />
@@ -193,21 +198,35 @@
                                 <label class="control-label">Subtotal</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
-                                    <input id="SummarySubTotal" class="form-control" readonly />
+                                    <input id="SummarySubTotal" class="form-control money-input" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group" id="SummaryRebateRow" style="display:@(Model.RebateAmount > 0 ? "block" : "none");">
+                                <label class="control-label text-warning">Rebate <small class="text-muted">(applied)</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">−₦</span></div>
+                                    <input id="SummaryRebate" class="form-control money-input" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group" id="SummaryTransportRow" style="display:@(Model.TransportAmount > 0 ? "block" : "none");">
+                                <label class="control-label">Transport <small class="text-muted">(added)</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">+₦</span></div>
+                                    <input id="SummaryTransport" class="form-control money-input" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label">VAT Amount</label>
+                                <label class="control-label">VAT Amount <small id="VatTypeLabel" class="text-muted">@(string.IsNullOrEmpty(Model.VatTypeSnapshot) ? "" : $"({Model.VatTypeSnapshot})")</small></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
-                                    <input id="SummaryVat" class="form-control" readonly />
+                                    <input id="SummaryVat" class="form-control money-input" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label"><strong>Total Amount</strong></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
-                                    <input id="SummaryTotal" class="form-control form-control-lg font-weight-bold" readonly />
+                                    <input id="SummaryTotal" class="form-control form-control-lg font-weight-bold money-input" readonly />
                                 </div>
                             </div>
                         </div>
@@ -235,37 +254,96 @@
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
         (function () {
+            // Customer context pre-populated from the stored values on the
+            // quotation being edited, so rebate / transport / VAT type show
+            // correctly on page load before any AJAX fires.
+            var customerCtx = {
+                hasRebate: @(Model.RebateAmount > 0 ? "true" : "false"),
+                rebateAmount: @Model.RebateAmount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                transportRequired: @(Model.TransportAmount > 0 ? "true" : "false"),
+                transportAmount: @Model.TransportAmount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                vatType: @(string.IsNullOrEmpty(Model.VatTypeSnapshot) ? "null" : $"'{Model.VatTypeSnapshot}'")
+            };
+
+            // Use NairaFormat.parse (not parseFloat) for the price because the
+            // money-input helper puts a visible proxy input before the real hidden
+            // input, and both carry the .price-input class. jQuery's .val() on a
+            // multi-element set returns the first element (the proxy), whose value
+            // is a formatted string like "45,000.00". parseFloat would chop that
+            // to 45, giving wrong line totals. NairaFormat.parse strips commas.
+            function readPrice($tr) {
+                if (window.NairaFormat) return NairaFormat.parse($tr.find('.price-input').val());
+                return parseFloat(($tr.find('.price-input').val() + '').replace(/,/g, '')) || 0;
+            }
+
             function recalcRow($tr) {
                 var qty = parseFloat($tr.find('.qty-input').val()) || 0;
-                var price = parseFloat($tr.find('.price-input').val()) || 0;
+                var price = readPrice($tr);
                 var vat = parseFloat($tr.find('.vat-input').val()) || 0;
                 var lineSub = qty * price;
                 var lineVat = lineSub * (vat / 100.0);
                 var lineTotal = lineSub + lineVat;
-                $tr.find('.line-total').text(lineTotal.toFixed(2));
+                $tr.find('.line-total').text(window.NairaFormat ? NairaFormat.format(lineTotal, { symbol: false }) : lineTotal.toFixed(2));
             }
 
             function recalcTotals() {
-                var sub = 0.0, vat = 0.0, total = 0.0;
+                var sub = 0.0, lineVatSum = 0.0;
                 $('#itemsBody tr').each(function () {
                     var $tr = $(this);
                     var qty = parseFloat($tr.find('.qty-input').val()) || 0;
-                    var price = parseFloat($tr.find('.price-input').val()) || 0;
+                    var price = readPrice($tr);
                     var vatRate = parseFloat($tr.find('.vat-input').val()) || 0;
                     var lineSub = qty * price;
                     var lineVat = lineSub * (vatRate / 100.0);
                     sub += lineSub;
-                    vat += lineVat;
-                    total += (lineSub + lineVat);
+                    lineVatSum += lineVat;
                 });
 
-                $('#subTotal').text(sub.toFixed(2));
-                $('#vatAmount').text(vat.toFixed(2));
-                $('#grandTotal').text(total.toFixed(2));
+                var rebate = customerCtx.hasRebate ? (customerCtx.rebateAmount || 0) : 0;
+                if (rebate > sub) rebate = sub;
+                var transport = customerCtx.transportRequired ? (customerCtx.transportAmount || 0) : 0;
+                var netBeforeVat = sub - rebate + transport;
 
-                $('#SummarySubTotal').val(sub.toFixed(2));
-                $('#SummaryVat').val(vat.toFixed(2));
-                $('#SummaryTotal').val(total.toFixed(2));
+                var vat, total;
+                if (customerCtx.vatType && customerCtx.vatType.toLowerCase() === 'inclusive') {
+                    var effRate = sub > 0 ? (lineVatSum / sub) * 100 : 0;
+                    vat = effRate > 0 ? (netBeforeVat * effRate / (100 + effRate)) : 0;
+                    total = netBeforeVat;
+                } else {
+                    vat = lineVatSum;
+                    if (sub > 0 && rebate > 0) {
+                        vat = vat * ((sub - rebate) / sub);
+                    }
+                    total = netBeforeVat + vat;
+                }
+
+                var fmt = function (n) { return window.NairaFormat ? NairaFormat.format(n, { symbol: false }) : n.toFixed(2); };
+                $('#subTotal').text(fmt(sub));
+                $('#vatAmount').text(fmt(vat));
+                $('#grandTotal').text(fmt(total));
+
+                $('#SummarySubTotal').val(sub.toFixed(2)).trigger('change');
+                $('#SummaryVat').val(vat.toFixed(2)).trigger('change');
+                $('#SummaryTotal').val(total.toFixed(2)).trigger('change');
+
+                if (rebate > 0) {
+                    $('#SummaryRebateRow').show();
+                    $('#SummaryRebate').val(rebate.toFixed(2)).trigger('change');
+                } else {
+                    $('#SummaryRebateRow').hide();
+                }
+                if (transport > 0) {
+                    $('#SummaryTransportRow').show();
+                    $('#SummaryTransport').val(transport.toFixed(2)).trigger('change');
+                } else {
+                    $('#SummaryTransportRow').hide();
+                }
+
+                if (customerCtx.vatType) {
+                    $('#VatTypeLabel').text('(' + customerCtx.vatType + ')');
+                } else {
+                    $('#VatTypeLabel').text('');
+                }
             }
 
             function wireRowEvents($tr) {
@@ -281,8 +359,7 @@
                 });
 
                 $tr.find('.material-select').on('change', function () {
-                    // Optional: Could auto-fill price/unit if desired from option text
-                    // Keep simple; user can override price/unit manually
+                    fetchPriceForRow($tr);
                 });
             }
 
@@ -308,9 +385,9 @@
     </select>
   </td>
   <td><input name="Items[${idx}].Description" class="form-control form-control-sm desc-input" /></td>
-  <td><input type="number" step="0.01" min="0" name="Items[${idx}].Quantity" value="0" class="form-control form-control-sm qty-input" /></td>
+  <td><input type="number" step="0.01" min="0" name="Items[${idx}].Quantity" value="1" class="form-control form-control-sm qty-input" /></td>
   <td><input name="Items[${idx}].Unit" value="Ton" class="form-control form-control-sm unit-input" /></td>
-  <td><input type="number" step="0.01" min="0" name="Items[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input" /></td>
+  <td><input type="number" step="0.01" min="0" name="Items[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input money-input" data-symbol="false" /></td>
   <td><input type="number" step="0.01" min="0" max="100" name="Items[${idx}].VatRate" value="7.5" class="form-control form-control-sm vat-input" /></td>
   <td class="text-right align-middle"><span class="line-total">0.00</span></td>
   <td class="text-center align-middle">
@@ -319,6 +396,7 @@
 </tr>`;
                 var $row = $(row);
                 $('#itemsBody').append($row);
+                if (window.NairaFormat && NairaFormat.scan) NairaFormat.scan($row);
                 wireRowEvents($row);
                 recalcRow($row);
                 recalcTotals();
@@ -334,6 +412,65 @@
 
             $('#addItemBtn').on('click', function () {
                 addEmptyRow();
+            });
+
+            // Fetch effective price (customer-specific when available, else catalog)
+            // for a row. Writes unit price + VAT rate and re-runs calculations.
+            function fetchPriceForRow($tr) {
+                var materialId = $tr.find('.material-select').val();
+                if (!materialId) return;
+                var customerId = $('#CustomerId').val();
+                var data = { materialId: materialId };
+                if (customerId) data.customerId = customerId;
+
+                $.getJSON('@Url.Action("GetMaterialPrice", "Quotation")', data, function (resp) {
+                    if (!resp || !resp.success) return;
+
+                    var $priceInputs = $tr.find('.price-input');
+                    var $realPrice = $priceInputs.filter('[type=hidden]').first();
+                    if (!$realPrice.length) $realPrice = $priceInputs.first();
+                    $realPrice.val(resp.unitPrice).trigger('change');
+
+                    $tr.find('.vat-input').val(resp.vatRate);
+                    if (resp.unit) $tr.find('.unit-input').val(resp.unit);
+
+                    $tr.find('.custom-price-hint').remove();
+                    if (resp.isCustomerSpecific) {
+                        $tr.find('.material-select').after(
+                            '<small class="form-text text-success custom-price-hint"><i class="fas fa-tag"></i> Customer price applied</small>'
+                        );
+                    }
+
+                    recalcRow($tr);
+                    recalcTotals();
+                });
+            }
+
+            // When customer changes, fetch new context and re-fetch all prices.
+            // A changed customer overrides any stale stored line-rebate hint.
+            $('#CustomerId').on('change', function () {
+                var customerId = $(this).val();
+                $('#itemsBody tr').find('.stored-line-rebate-hint').remove();
+                if (!customerId) {
+                    customerCtx = { hasRebate: false, rebateAmount: 0, transportRequired: false, transportAmount: 0, vatType: null };
+                    recalcTotals();
+                    return;
+                }
+                $.getJSON('@Url.Action("GetCustomerContext", "Quotation")', { customerId: customerId }, function (resp) {
+                    if (resp && resp.success) {
+                        customerCtx = {
+                            hasRebate: resp.hasRebate,
+                            rebateAmount: resp.rebateAmount,
+                            transportRequired: resp.transportRequired,
+                            transportAmount: resp.transportAmount,
+                            vatType: resp.vatType
+                        };
+                    }
+                    $('#itemsBody tr').each(function () {
+                        fetchPriceForRow($(this));
+                    });
+                    recalcTotals();
+                });
             });
 
             // Keep ExpiryDate default relative to QuotationDate (+30 days) when changing date

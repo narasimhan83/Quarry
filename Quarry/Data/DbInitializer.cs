@@ -218,6 +218,10 @@ namespace QuarryManagementSystem.Data
                 new ChartOfAccounts { AccountCode = "4001", AccountName = "Sale of Aggregates",                AccountType = "Revenue",   SubType = "Sales" },
                 new ChartOfAccounts { AccountCode = "4002", AccountName = "Transport & Delivery Income",   AccountType = "Revenue",   SubType = "Service" },
                 new ChartOfAccounts { AccountCode = "4003", AccountName = "Other Operating Income",            AccountType = "Revenue",   SubType = "Other" },
+                // Contra-revenue: rebates/discounts given to customers. Debit this
+                // account when an invoice grants a rebate so net revenue in the P&L
+                // is visible (Sales − Rebates).
+                new ChartOfAccounts { AccountCode = "4010", AccountName = "Sales Rebates & Discounts",        AccountType = "Revenue",   SubType = "Contra" },
 
                 // Direct costs / COGS
                 new ChartOfAccounts { AccountCode = "5001", AccountName = "Cost of Materials Sold",            AccountType = "Expense",   SubType = "COGS" },

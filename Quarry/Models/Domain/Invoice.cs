@@ -31,6 +31,18 @@ namespace QuarryManagementSystem.Models.Domain
         public decimal SubTotal { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Rebate (discount)")]
+        public decimal RebateAmount { get; set; } = 0;
+
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Transport")]
+        public decimal TransportAmount { get; set; } = 0;
+
+        [StringLength(20)]
+        [Display(Name = "VAT Type")]
+        public string? VatTypeSnapshot { get; set; } // "Inclusive" or "Exclusive" captured at invoice time
+
+        [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "VAT Amount")]
         public decimal VatAmount { get; set; }
 

@@ -172,6 +172,10 @@
                 <div class="meta-line"><span>Invoice Date</span><span>@inv.InvoiceDate.ToString("dd/MM/yyyy")</span></div>
                 <div class="meta-line"><span>Due Date</span><span>@(inv.DueDate?.ToString("dd/MM/yyyy") ?? "-")</span></div>
                 <div class="meta-line"><span>Status</span><span>@inv.Status</span></div>
+                @if (!string.IsNullOrWhiteSpace(inv.VatTypeSnapshot))
+                {
+                    <div class="meta-line"><span>VAT Type</span><span>@inv.VatTypeSnapshot</span></div>
+                }
             </div>
         </div>
 
@@ -208,7 +212,7 @@
                     {
                         <tr>
                             <td>@item.Description</td>
-                            <td class="text-right">@item.Quantity.ToString("N2")</td>
+                            <td class="text-right">@item.Quantity.ToString("N3")</td>
                             <td>@item.Unit</td>
                             <td class="text-right">@item.UnitPrice.ToString("N2")</td>
                             <td class="text-right">@item.TotalAmount.ToString("N2")</td>
@@ -230,8 +234,22 @@
                 <div>Subtotal</div>
                 <div class="text-right">₦@inv.SubTotal.ToString("N2")</div>
             </div>
+            @if (inv.RebateAmount > 0)
+            {
+                <div class="row">
+                    <div>Rebate (discount)</div>
+                    <div class="text-right">− ₦@inv.RebateAmount.ToString("N2")</div>
+                </div>
+            }
+            @if (inv.TransportAmount > 0)
+            {
+                <div class="row">
+                    <div>Transport</div>
+                    <div class="text-right">+ ₦@inv.TransportAmount.ToString("N2")</div>
+                </div>
+            }
             <div class="row">
-                <div>VAT</div>
+                <div>VAT @(string.IsNullOrWhiteSpace(inv.VatTypeSnapshot) ? "" : $"({inv.VatTypeSnapshot})")</div>
                 <div class="text-right">₦@inv.VatAmount.ToString("N2")</div>
             </div>
             <div class="row grand">

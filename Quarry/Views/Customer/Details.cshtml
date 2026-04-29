@@ -1,0 +1,222 @@
+@model QuarryManagementSystem.ViewModels.CustomerDetailsViewModel
+@{
+    ViewData["Title"] = "Customer Details";
+    var c = Model.Customer;
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">@c.Name</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Customer")">Customers</a></li>
+                    <li class="breadcrumb-item active">@c.Name</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Company Information</h3>
+                        <span class="badge badge-@(c.Status == "Active" ? "success" : c.Status == "Blacklisted" ? "danger" : "secondary")">@c.Status</span>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Company Name</dt>
+                            <dd class="col-sm-9">@c.Name</dd>
+
+                            <dt class="col-sm-3">Customer Type</dt>
+                            <dd class="col-sm-9">@(c.CustomerType?.Name ?? "-")</dd>
+
+                            <dt class="col-sm-3">VAT Type</dt>
+                            <dd class="col-sm-9">
+                                @if (c.VatType != null)
+                                {
+                                    <span class="badge badge-info">@c.VatType.Name</span>
+                                    if (c.VatType.Name == "Inclusive")
+                                    {
+                                        <small class="text-muted ml-2">Unit prices include VAT.</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted ml-2">VAT added on top of unit prices.</small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-3">RC Number</dt>
+                            <dd class="col-sm-9">@(c.RCNumber ?? "-")</dd>
+
+                            <dt class="col-sm-3">Contact Person</dt>
+                            <dd class="col-sm-9">@(c.ContactPerson ?? "-")</dd>
+
+                            <dt class="col-sm-3">Phone</dt>
+                            <dd class="col-sm-9">@(c.Phone ?? "-")</dd>
+
+                            <dt class="col-sm-3">Email</dt>
+                            <dd class="col-sm-9">@(c.Email ?? "-")</dd>
+
+                            <dt class="col-sm-3">Address</dt>
+                            <dd class="col-sm-9">
+                                @{ var addr = c.GetFullAddress(); }
+                                @(string.IsNullOrWhiteSpace(addr) ? "-" : addr)
+                            </dd>
+
+                            <dt class="col-sm-3">Billing Address</dt>
+                            <dd class="col-sm-9">@(c.BillingAddress ?? "-")</dd>
+
+                            <dt class="col-sm-3">TIN</dt>
+                            <dd class="col-sm-9">@(c.TIN ?? "-")</dd>
+
+                            <dt class="col-sm-3">BVN</dt>
+                            <dd class="col-sm-9">@(c.BVN ?? "-")</dd>
+
+                            <dt class="col-sm-3">Mining License</dt>
+                            <dd class="col-sm-9">@(c.MiningLicenseNumber ?? "-")</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card card-warning">
+                    <div class="card-header"><h3 class="card-title">Rebate &amp; Transport</h3></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Rebate:</strong>
+                                @if (c.HasRebate)
+                                {
+                                    <span class="badge badge-success">Yes</span>
+                                    <div class="mt-1">Amount: <strong>₦@((c.RebateAmount ?? 0).ToString("N2"))</strong></div>
+                                    <small class="text-muted">Applied as a discount line on every invoice for this customer.</small>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">No</span>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Transport Required:</strong>
+                                @if (c.TransportRequired)
+                                {
+                                    <span class="badge badge-success">Yes</span>
+                                    <div class="mt-1">Amount: <strong>₦@((c.TransportAmount ?? 0).ToString("N2"))</strong></div>
+                                    <small class="text-muted">Added as an extra line on every invoice for this customer.</small>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">No</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-info">
+                    <div class="card-header"><h3 class="card-title">Material Pricing (Current)</h3></div>
+                    <div class="card-body p-0">
+                        @if (Model.CurrentPrices.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Material</th>
+                                            <th class="text-right">Unit Price (₦)</th>
+                                            <th class="text-right">VAT Rate</th>
+                                            <th>Effective From</th>
+                                            <th class="text-right">History Rows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var p in Model.CurrentPrices)
+                                        {
+                                            <tr>
+                                                <td>@p.MaterialName</td>
+                                                <td class="text-right">@p.UnitPrice.ToString("N2")</td>
+                                                <td class="text-right">@(p.VatRate?.ToString("N2") + "%" ?? "-")</td>
+                                                <td>@p.EffectiveFrom.ToString("dd/MM/yyyy")</td>
+                                                <td class="text-right">@p.HistoryCount</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-3 text-muted">No custom pricing set. The catalog price will be used for this customer.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-success">
+                    <div class="card-header"><h3 class="card-title">Credit &amp; Activity</h3></div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-7">Credit Limit</dt>
+                            <dd class="col-sm-5 text-right">₦@c.CreditLimit.ToString("N2")</dd>
+
+                            <dt class="col-sm-7">Outstanding</dt>
+                            <dd class="col-sm-5 text-right">₦@c.OutstandingBalance.ToString("N2")</dd>
+
+                            <dt class="col-sm-7">Available Credit</dt>
+                            <dd class="col-sm-5 text-right"><strong class="text-success">₦@c.AvailableCredit.ToString("N2")</strong></dd>
+
+                            <dt class="col-sm-7">Total Transactions</dt>
+                            <dd class="col-sm-5 text-right">@Model.TotalTransactions</dd>
+
+                            <dt class="col-sm-7">Total Invoices (amount)</dt>
+                            <dd class="col-sm-5 text-right">₦@Model.TotalInvoiceAmount.ToString("N2")</dd>
+
+                            <dt class="col-sm-7">Last Transaction</dt>
+                            <dd class="col-sm-5 text-right">@(Model.LastTransactionDate?.ToString("dd/MM/yyyy") ?? "-")</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Actions</h3></div>
+                    <div class="card-body">
+                        <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-warning btn-block">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a asp-controller="Prepayment" asp-action="Index" asp-route-customerId="@c.Id" class="btn btn-info btn-block">
+                            <i class="fas fa-wallet"></i> Prepayments
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-danger btn-block">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary btn-block mt-2">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

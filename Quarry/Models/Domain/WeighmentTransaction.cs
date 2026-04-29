@@ -85,6 +85,17 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "VAT Amount")]
         public decimal? VatAmount { get; set; }
 
+        /// <summary>
+        /// Per-line rebate captured at weighment time, computed as the customer's
+        /// per-unit rebate × net tons. Stored alongside SubTotal / VatAmount so
+        /// the saved TotalAmount equation (Subtotal + VAT − Rebate) is reproducible
+        /// later for audit / receipts. Nullable so legacy rows (created before
+        /// rebate was tracked here) keep loading without a default value.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Rebate Amount")]
+        public decimal? RebateAmount { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "Total Amount")]
         public decimal? TotalAmount { get; set; }
@@ -129,12 +140,32 @@ namespace QuarryManagementSystem.Models.Domain
         [Display(Name = "Invoice ID")]
         public int? InvoiceId { get; set; }
 
+        /// <summary>
+        /// Customer prepayment the operator picked at weighment time, if any.
+        /// Purely a booking hint — the invoice created later will try to drain
+        /// this prepayment first, then fall back to FIFO for any shortfall. Null
+        /// when the weighment isn't being billed against a prepayment.
+        /// </summary>
+        [Display(Name = "Selected Prepayment")]
+        public int? SelectedPrepaymentId { get; set; }
+
+        /// <summary>
+        /// Specific line item within the selected prepayment that this weighment
+        /// is intended to draw from (typically matched by material). Null when
+        /// the operator picked a prepayment but not a specific line, or when no
+        /// prepayment was selected at all.
+        /// </summary>
+        [Display(Name = "Selected Prepayment Line")]
+        public int? SelectedPrepaymentLineItemId { get; set; }
+
         // Navigation properties
         public virtual Customer? Customer { get; set; }
         public virtual Weighbridge? Weighbridge { get; set; }
         public virtual Material? Material { get; set; }
         public virtual ApplicationUser? OperatorUser { get; set; }
         public virtual Invoice? Invoice { get; set; }
+        public virtual CustomerPrepayment? SelectedPrepayment { get; set; }
+        public virtual PrepaymentLineItem? SelectedPrepaymentLineItem { get; set; }
 
         // Helper methods
         public void CalculateFinancials()
