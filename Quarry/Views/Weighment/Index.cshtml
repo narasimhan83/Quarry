@@ -143,7 +143,8 @@
                             {
                                 @foreach (var weighment in Model.Weighments)
                                 {
-                                    <tr>
+                                    var rowClass = weighment.Customer != null ? weighment.Customer.GetBalanceStatusCssClass() : string.Empty;
+                                    <tr class="@rowClass">
                                         <td>
                                             <strong>@weighment.TransactionNumber</strong>
                                             @if (!string.IsNullOrEmpty(weighment.ChallanNumber))

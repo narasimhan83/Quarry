@@ -119,8 +119,9 @@
                                             ? (p.LineItems.First().Material?.Name ?? "-")
                                             : $"{p.LineItems.Count} items")
                                         : (p.Material?.Name ?? "-");
+                                    var rowClass = p.Customer != null ? p.Customer.GetBalanceStatusCssClass() : string.Empty;
 
-                                    <tr>
+                                    <tr class="@rowClass">
                                         <td>@p.PrepaymentNumber</td>
                                         <td>@p.PrepaymentDate.ToString("dd/MM/yyyy")</td>
                                         <td>@(p.ExpectedPickupDate?.ToString("dd/MM/yyyy") ?? "-")</td>

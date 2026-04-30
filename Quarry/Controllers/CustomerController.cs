@@ -160,6 +160,14 @@ namespace QuarryManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CustomerCreateViewModel model)
         {
+            // Drop empty truck rows BEFORE model validation runs. The form may
+            // post blank rows (an "Add Truck" click that the operator didn't
+            // fill in). Without this, [Required] on CustomerTruckNumber would
+            // reject the whole submit. We also clear matching ModelState entries
+            // so leftover validation errors don't survive.
+            CleanEmptyTruckRows(model);
+            CleanEmptyBankRows(model);
+
             // Conditional validation: if HasRebate is on, RebateAmount is required; same for transport.
             if (model.HasRebate && (!model.RebateAmount.HasValue || model.RebateAmount <= 0))
             {
@@ -188,7 +196,9 @@ namespace QuarryManagementSystem.Controllers
                 var customer = new Customer
                 {
                     Name = model.Name.Trim(),
-                    RCNumber = model.RCNumber?.Trim(),
+                    RCNumber = string.IsNullOrWhiteSpace(model.RCNumber)
+                        ? await GenerateNextCustomerNumberAsync()
+                        : model.RCNumber.Trim(),
                     Location = model.Location?.Trim() ?? string.Empty,
                     LGA = model.LGA?.Trim() ?? string.Empty,
                     State = model.State?.Trim() ?? string.Empty,
@@ -235,6 +245,57 @@ namespace QuarryManagementSystem.Controllers
                     await _context.SaveChangesAsync();
                 }
 
+                // Save per-customer trucks (de-dup, trim, ignore blanks)
+                var validTrucks = (model.Trucks ?? new())
+                    .Where(t => !string.IsNullOrWhiteSpace(t.CustomerTruckNumber))
+                    .GroupBy(t => t.CustomerTruckNumber.Trim(), StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First())
+                    .ToList();
+
+                foreach (var truck in validTrucks)
+                {
+                    _context.CustomerTrucks.Add(new CustomerTruck
+                    {
+                        CustomerId = customer.Id,
+                        CustomerTruckNumber = truck.CustomerTruckNumber.Trim(),
+                        IsActive = truck.IsActive,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+                if (validTrucks.Any())
+                {
+                    await _context.SaveChangesAsync();
+                }
+
+                // Save per-customer bank accounts (de-dup, trim, ignore blanks).
+                // A row counts as blank when both account number AND bank name
+                // are missing — either alone would have been caught earlier by
+                // CleanEmptyBankRows / Required validators.
+                var validBanks = (model.BankAccounts ?? new())
+                    .Where(b => !string.IsNullOrWhiteSpace(b.AccountNumber) && !string.IsNullOrWhiteSpace(b.BankName))
+                    .GroupBy(b => b.AccountNumber.Trim(), StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First())
+                    .ToList();
+
+                foreach (var bank in validBanks)
+                {
+                    _context.CustomerBanks.Add(new CustomerBank
+                    {
+                        CustomerId = customer.Id,
+                        AccountNumber = bank.AccountNumber.Trim(),
+                        BankName = bank.BankName.Trim(),
+                        BankAddress = bank.BankAddress?.Trim(),
+                        BankBranch = bank.BankBranch?.Trim(),
+                        BankSwiftCode = bank.BankSwiftCode?.Trim(),
+                        IsActive = bank.IsActive,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+                if (validBanks.Any())
+                {
+                    await _context.SaveChangesAsync();
+                }
+
                 await EnsureCustomerLedgerAccountAsync(customer);
 
                 await transaction.CommitAsync();
@@ -263,6 +324,8 @@ namespace QuarryManagementSystem.Controllers
             var customer = await _context.Customers
                 .Include(c => c.MaterialPrices)
                     .ThenInclude(cmp => cmp.Material)
+                .Include(c => c.Trucks)
+                .Include(c => c.BankAccounts)
                 .FirstOrDefaultAsync(c => c.Id == id.Value);
 
             if (customer == null) return NotFound();
@@ -314,6 +377,32 @@ namespace QuarryManagementSystem.Controllers
                 .OrderBy(p => p.MaterialId)
                 .ToList();
 
+            // Load existing trucks so the operator can edit / remove them.
+            model.Trucks = customer.Trucks
+                .OrderBy(t => t.CustomerTruckNumber)
+                .Select(t => new CustomerTruckInput
+                {
+                    Id = t.CustomerTruckId,
+                    CustomerTruckNumber = t.CustomerTruckNumber,
+                    IsActive = t.IsActive
+                })
+                .ToList();
+
+            // Load existing bank accounts so the operator can edit / remove them.
+            model.BankAccounts = customer.BankAccounts
+                .OrderBy(b => b.BankName).ThenBy(b => b.AccountNumber)
+                .Select(b => new CustomerBankInput
+                {
+                    Id = b.CustomerBankId,
+                    AccountNumber = b.AccountNumber,
+                    BankName = b.BankName,
+                    BankAddress = b.BankAddress,
+                    BankBranch = b.BankBranch,
+                    BankSwiftCode = b.BankSwiftCode,
+                    IsActive = b.IsActive
+                })
+                .ToList();
+
             await PopulateDropdownsAsync(model);
             return View(model);
         }
@@ -324,6 +413,10 @@ namespace QuarryManagementSystem.Controllers
         public async Task<IActionResult> Edit(int id, CustomerEditViewModel model)
         {
             if (id != model.Id) return NotFound();
+
+            // Drop empty truck rows BEFORE model validation runs (see Create POST).
+            CleanEmptyTruckRows(model);
+            CleanEmptyBankRows(model);
 
             if (model.HasRebate && (!model.RebateAmount.HasValue || model.RebateAmount <= 0))
             {
@@ -348,6 +441,8 @@ namespace QuarryManagementSystem.Controllers
 
             var customer = await _context.Customers
                 .Include(c => c.MaterialPrices)
+                .Include(c => c.Trucks)
+                .Include(c => c.BankAccounts)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (customer == null) return NotFound();
@@ -356,7 +451,19 @@ namespace QuarryManagementSystem.Controllers
             try
             {
                 customer.Name = model.Name.Trim();
-                customer.RCNumber = model.RCNumber?.Trim();
+                // Customer Number: keep whatever the form posted back (read-only
+                // input echoes the existing value), or generate one if for some
+                // reason the customer never had one assigned (legacy data).
+                if (string.IsNullOrWhiteSpace(model.RCNumber))
+                {
+                    customer.RCNumber = string.IsNullOrWhiteSpace(customer.RCNumber)
+                        ? await GenerateNextCustomerNumberAsync()
+                        : customer.RCNumber;
+                }
+                else
+                {
+                    customer.RCNumber = model.RCNumber.Trim();
+                }
                 customer.Location = model.Location?.Trim() ?? string.Empty;
                 customer.LGA = model.LGA?.Trim() ?? string.Empty;
                 customer.State = model.State?.Trim() ?? string.Empty;
@@ -365,7 +472,10 @@ namespace QuarryManagementSystem.Controllers
                 customer.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
                 customer.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim();
                 customer.TIN = model.TIN?.Trim();
-                customer.BVN = model.BVN?.Trim();
+                // BVN field removed from form. Don't overwrite the existing
+                // database value with the null that arrives from the unposted
+                // input. Leaving the assignment out preserves any previously
+                // saved BVN.
                 customer.BillingAddress = model.BillingAddress?.Trim();
                 customer.CreditLimit = model.CreditLimit;
                 customer.Status = string.IsNullOrWhiteSpace(model.Status) ? customer.Status : model.Status;
@@ -412,6 +522,96 @@ namespace QuarryManagementSystem.Controllers
                             submitted.EffectiveFrom == default ? DateTime.Today : submitted.EffectiveFrom,
                             User.Identity?.Name,
                             submitted.Notes);
+                    }
+                }
+                await _context.SaveChangesAsync();
+
+                // Reconcile per-customer trucks. Submitted rows fully replace
+                // the existing list: rows the operator removed in the form are
+                // deleted, rows with new values are added or updated. Truck
+                // numbers are unique per customer (DB-enforced).
+                var submittedTrucks = (model.Trucks ?? new())
+                    .Where(t => !string.IsNullOrWhiteSpace(t.CustomerTruckNumber))
+                    .GroupBy(t => t.CustomerTruckNumber.Trim(), StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First())
+                    .ToList();
+
+                var submittedIds = submittedTrucks.Where(t => t.Id > 0).Select(t => t.Id).ToHashSet();
+                var trucksToRemove = customer.Trucks.Where(t => !submittedIds.Contains(t.CustomerTruckId)).ToList();
+                foreach (var truck in trucksToRemove)
+                {
+                    _context.CustomerTrucks.Remove(truck);
+                }
+
+                foreach (var submitted in submittedTrucks)
+                {
+                    if (submitted.Id > 0)
+                    {
+                        var existing = customer.Trucks.FirstOrDefault(t => t.CustomerTruckId == submitted.Id);
+                        if (existing != null)
+                        {
+                            existing.CustomerTruckNumber = submitted.CustomerTruckNumber.Trim();
+                            existing.IsActive = submitted.IsActive;
+                        }
+                    }
+                    else
+                    {
+                        _context.CustomerTrucks.Add(new CustomerTruck
+                        {
+                            CustomerId = customer.Id,
+                            CustomerTruckNumber = submitted.CustomerTruckNumber.Trim(),
+                            IsActive = submitted.IsActive,
+                            CreatedAt = DateTime.Now
+                        });
+                    }
+                }
+                await _context.SaveChangesAsync();
+
+                // Reconcile per-customer bank accounts. Same shape as the truck
+                // reconciliation above: rows the operator removed in the form
+                // are deleted, rows with new values are added or updated. Account
+                // numbers are unique per customer (DB-enforced).
+                var submittedBanks = (model.BankAccounts ?? new())
+                    .Where(b => !string.IsNullOrWhiteSpace(b.AccountNumber) && !string.IsNullOrWhiteSpace(b.BankName))
+                    .GroupBy(b => b.AccountNumber.Trim(), StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First())
+                    .ToList();
+
+                var submittedBankIds = submittedBanks.Where(b => b.Id > 0).Select(b => b.Id).ToHashSet();
+                var banksToRemove = customer.BankAccounts.Where(b => !submittedBankIds.Contains(b.CustomerBankId)).ToList();
+                foreach (var bank in banksToRemove)
+                {
+                    _context.CustomerBanks.Remove(bank);
+                }
+
+                foreach (var submitted in submittedBanks)
+                {
+                    if (submitted.Id > 0)
+                    {
+                        var existing = customer.BankAccounts.FirstOrDefault(b => b.CustomerBankId == submitted.Id);
+                        if (existing != null)
+                        {
+                            existing.AccountNumber = submitted.AccountNumber.Trim();
+                            existing.BankName = submitted.BankName.Trim();
+                            existing.BankAddress = submitted.BankAddress?.Trim();
+                            existing.BankBranch = submitted.BankBranch?.Trim();
+                            existing.BankSwiftCode = submitted.BankSwiftCode?.Trim();
+                            existing.IsActive = submitted.IsActive;
+                        }
+                    }
+                    else
+                    {
+                        _context.CustomerBanks.Add(new CustomerBank
+                        {
+                            CustomerId = customer.Id,
+                            AccountNumber = submitted.AccountNumber.Trim(),
+                            BankName = submitted.BankName.Trim(),
+                            BankAddress = submitted.BankAddress?.Trim(),
+                            BankBranch = submitted.BankBranch?.Trim(),
+                            BankSwiftCode = submitted.BankSwiftCode?.Trim(),
+                            IsActive = submitted.IsActive,
+                            CreatedAt = DateTime.Now
+                        });
                     }
                 }
                 await _context.SaveChangesAsync();
@@ -553,6 +753,63 @@ namespace QuarryManagementSystem.Controllers
         // ----------------------------------------------------------------------
         private bool CustomerExists(int id) => _context.Customers.Any(e => e.Id == id);
 
+        /// <summary>
+        /// Removes truck rows that have an empty/whitespace truck number from
+        /// both the model collection and from ModelState. This lets the operator
+        /// add a row in the UI and not fill it in without blocking submit on
+        /// the [Required] validator. Truck numbers that ARE filled in still
+        /// validate normally.
+        /// </summary>
+        private void CleanEmptyTruckRows(CustomerCreateViewModel model)
+        {
+            if (model.Trucks == null || model.Trucks.Count == 0) return;
+
+            for (int i = model.Trucks.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrWhiteSpace(model.Trucks[i].CustomerTruckNumber))
+                {
+                    // Drop any ModelState errors registered against this row
+                    // (e.g. "Trucks[3].CustomerTruckNumber" required errors).
+                    var prefix = $"Trucks[{i}]";
+                    var keysToRemove = ModelState.Keys.Where(k => k.StartsWith(prefix, StringComparison.Ordinal)).ToList();
+                    foreach (var key in keysToRemove)
+                    {
+                        ModelState.Remove(key);
+                    }
+
+                    model.Trucks.RemoveAt(i);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Same idea as <see cref="CleanEmptyTruckRows"/>, but for bank-account
+        /// rows. A bank row is treated as blank when BOTH AccountNumber and
+        /// BankName are missing — that means the operator added a row but
+        /// never typed anything. If only one of the two is missing, validation
+        /// runs normally and the operator gets a proper error.
+        /// </summary>
+        private void CleanEmptyBankRows(CustomerCreateViewModel model)
+        {
+            if (model.BankAccounts == null || model.BankAccounts.Count == 0) return;
+
+            for (int i = model.BankAccounts.Count - 1; i >= 0; i--)
+            {
+                var row = model.BankAccounts[i];
+                if (string.IsNullOrWhiteSpace(row.AccountNumber) && string.IsNullOrWhiteSpace(row.BankName))
+                {
+                    var prefix = $"BankAccounts[{i}]";
+                    var keysToRemove = ModelState.Keys.Where(k => k.StartsWith(prefix, StringComparison.Ordinal)).ToList();
+                    foreach (var key in keysToRemove)
+                    {
+                        ModelState.Remove(key);
+                    }
+
+                    model.BankAccounts.RemoveAt(i);
+                }
+            }
+        }
+
         private async Task<decimal> GetAvailablePrepaymentAsync(int customerId)
         {
             var prepayments = await _context.CustomerPrepayments
@@ -661,6 +918,39 @@ namespace QuarryManagementSystem.Controllers
         }
 
         private string GenerateCustomerAccountCode(int customerId) => $"1101-{customerId:D6}";
+
+        /// <summary>
+        /// Returns the next sequential customer number in the format CUST-NNNNNN.
+        /// Strategy: find the highest existing value matching the CUST-* pattern,
+        /// parse the numeric tail, increment, zero-pad to 6 digits. Records that
+        /// already carry a non-CUST identifier (legacy RC numbers like RC123456)
+        /// are intentionally ignored — they keep their existing value but do
+        /// not contribute to the running counter. If two near-simultaneous
+        /// creates would collide, a unique-index conflict at the DB layer would
+        /// surface as a save error and the operator can retry; this method does
+        /// NOT add an index because there isn't one today and one accidental
+        /// collision per millennium isn't worth a schema change.
+        /// </summary>
+        private async Task<string> GenerateNextCustomerNumberAsync()
+        {
+            const string prefix = "CUST-";
+            const int padWidth = 6;
+
+            var existing = await _context.Customers
+                .Where(c => c.RCNumber != null && c.RCNumber.StartsWith(prefix))
+                .Select(c => c.RCNumber!)
+                .ToListAsync();
+
+            int max = 0;
+            foreach (var code in existing)
+            {
+                if (code.Length <= prefix.Length) continue;
+                var tail = code.Substring(prefix.Length);
+                if (int.TryParse(tail, out var n) && n > max) max = n;
+            }
+
+            return $"{prefix}{(max + 1).ToString(new string('0', padWidth))}";
+        }
 
         private async Task EnsureCustomerLedgerAccountAsync(Customer customer)
         {

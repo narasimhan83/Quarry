@@ -374,3 +374,34 @@ html, body {
 .money-display {
   font-variant-numeric: tabular-nums;
 }
+
+/* ---------------------------------------------
+   BALANCE-STATUS ROW / CARD TINTING
+   Applied via Customer.GetBalanceStatusCssClass(). Used in:
+   - Customer/Index list rows
+   - Weighment/Index list rows (per-row customer health)
+   - Prepayment/Index list rows (wallet screen)
+   - Customer/Details outer card (background)
+   Background tints are intentionally LIGHT so that table-striped /
+   table-hover stripes and standard text colors stay readable. The
+   border accent on the left edge gives a stronger visual signal that
+   survives at-a-glance scanning down a long list.
+---------------------------------------------- */
+.balance-good {
+  background-color: #e9f7ef !important;   /* very light green */
+  border-left: 4px solid #28a745;
+}
+.balance-warning {
+  background-color: #fff8e1 !important;   /* very light amber */
+  border-left: 4px solid #ffc107;
+}
+.balance-critical {
+  background-color: #fdecea !important;   /* very light red */
+  border-left: 4px solid #dc3545;
+}
+
+/* Hover state — keep a hint of the tint while still showing Bootstrap's
+   table-hover lift. Slightly darker so the row reads as "hovered". */
+tr.balance-good:hover    { background-color: #d4eedd !important; }
+tr.balance-warning:hover { background-color: #ffefb8 !important; }
+tr.balance-critical:hover{ background-color: #fbd9d4 !important; }

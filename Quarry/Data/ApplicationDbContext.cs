@@ -42,6 +42,8 @@ namespace QuarryManagementSystem.Data
         public DbSet<CustomerType> CustomerTypes { get; set; }
         public DbSet<VatType> VatTypes { get; set; }
         public DbSet<CustomerMaterialPrice> CustomerMaterialPrices { get; set; }
+        public DbSet<CustomerTruck> CustomerTrucks { get; set; }
+        public DbSet<CustomerBank> CustomerBanks { get; set; }
 
         // Payment methods lookup (Cash, Bank Transfer, Online Payment, Cheque, ...)
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
@@ -189,6 +191,34 @@ namespace QuarryManagementSystem.Data
             // is managed at service level (only one row per pair has IsCurrent = true).
             modelBuilder.Entity<CustomerMaterialPrice>()
                 .HasIndex(cmp => new { cmp.CustomerId, cmp.MaterialId, cmp.EffectiveFrom });
+
+            // Per-customer trucks. Cascade on delete so removing a customer
+            // also clears their truck list (no business meaning on its own).
+            // Unique-per-customer truck number prevents accidental duplicates;
+            // two different customers may still register the same plate.
+            modelBuilder.Entity<CustomerTruck>()
+                .HasOne(t => t.Customer)
+                .WithMany(c => c.Trucks)
+                .HasForeignKey(t => t.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CustomerTruck>()
+                .HasIndex(t => new { t.CustomerId, t.CustomerTruckNumber })
+                .IsUnique();
+
+            // Per-customer bank accounts. Same cascade pattern as trucks: bank
+            // rows are meaningless without a customer to belong to. Unique
+            // index on (CustomerId, AccountNumber) prevents accidental duplicate
+            // entry of the same account for the same customer.
+            modelBuilder.Entity<CustomerBank>()
+                .HasOne(b => b.Customer)
+                .WithMany(c => c.BankAccounts)
+                .HasForeignKey(b => b.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CustomerBank>()
+                .HasIndex(b => new { b.CustomerId, b.AccountNumber })
+                .IsUnique();
  
             // Configure Employee relationships
             modelBuilder.Entity<Employee>()

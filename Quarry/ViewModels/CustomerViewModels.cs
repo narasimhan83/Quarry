@@ -41,7 +41,7 @@ namespace QuarryManagementSystem.ViewModels
         public string Name { get; set; } = string.Empty;
 
         [StringLength(20)]
-        [Display(Name = "RC Number")]
+        [Display(Name = "Customer Number")]
         public string? RCNumber { get; set; }
 
         [StringLength(255)]
@@ -115,6 +115,12 @@ namespace QuarryManagementSystem.ViewModels
         // ---------- Per-customer pricing (line items) ----------
         public List<CustomerMaterialPriceInput> MaterialPrices { get; set; } = new();
 
+        // ---------- Per-customer trucks ----------
+        public List<CustomerTruckInput> Trucks { get; set; } = new();
+
+        // ---------- Per-customer bank accounts ----------
+        public List<CustomerBankInput> BankAccounts { get; set; } = new();
+
         // Dropdown data
         public List<SelectListItem> States { get; set; } = new();
         public List<SelectListItem> LGAs { get; set; } = new();
@@ -160,6 +166,58 @@ namespace QuarryManagementSystem.ViewModels
 
         [StringLength(200)]
         public string? Notes { get; set; }
+    }
+
+    /// <summary>
+    /// One row in the per-customer truck list on Create/Edit.
+    /// New rows arrive with Id = 0; existing ones round-trip their primary key.
+    /// </summary>
+    public class CustomerTruckInput
+    {
+        public int Id { get; set; } // 0 = new row
+
+        [Required(ErrorMessage = "Truck number is required")]
+        [StringLength(100)]
+        [Display(Name = "Truck Number")]
+        public string CustomerTruckNumber { get; set; } = string.Empty;
+
+        [Display(Name = "Active")]
+        public bool IsActive { get; set; } = true;
+    }
+
+    /// <summary>
+    /// One row in the per-customer bank-account list on Create/Edit.
+    /// New rows arrive with Id = 0; existing ones round-trip their primary key.
+    /// AccountNumber and BankName are required; the rest are optional.
+    /// </summary>
+    public class CustomerBankInput
+    {
+        public int Id { get; set; } // 0 = new row
+
+        [Required(ErrorMessage = "Account number is required")]
+        [StringLength(50)]
+        [Display(Name = "Account Number")]
+        public string AccountNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Bank name is required")]
+        [StringLength(150)]
+        [Display(Name = "Bank Name")]
+        public string BankName { get; set; } = string.Empty;
+
+        [StringLength(255)]
+        [Display(Name = "Bank Address")]
+        public string? BankAddress { get; set; }
+
+        [StringLength(150)]
+        [Display(Name = "Bank Branch")]
+        public string? BankBranch { get; set; }
+
+        [StringLength(20)]
+        [Display(Name = "SWIFT Code")]
+        public string? BankSwiftCode { get; set; }
+
+        [Display(Name = "Active")]
+        public bool IsActive { get; set; } = true;
     }
 
     public class CustomerDetailsViewModel

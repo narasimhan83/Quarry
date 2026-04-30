@@ -49,7 +49,8 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="RCNumber" class="control-label"></label>
-                                        <input asp-for="RCNumber" class="form-control" />
+                                        <input asp-for="RCNumber" class="form-control bg-light" readonly />
+                                        <small class="form-text text-muted">System-assigned. Not editable.</small>
                                         <span asp-validation-for="RCNumber" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -134,20 +135,7 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="Location" class="control-label"></label>
-                                        <input asp-for="Location" class="form-control" placeholder="Location (Optional)" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="MiningLicenseNumber" class="control-label"></label>
-                                        <input asp-for="MiningLicenseNumber" class="form-control" />
-                                    </div>
-                                </div>
-                            </div>
+                            <input type="hidden" asp-for="MiningLicenseNumber" />
 
                             <div class="row">
                                 <div class="col-md-6">
@@ -156,17 +144,13 @@
                                         <input asp-for="TIN" class="form-control" />
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="BVN" class="control-label"></label>
-                                        <input asp-for="BVN" class="form-control" />
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="form-group">
                                 <label asp-for="BillingAddress" class="control-label"></label>
+                                <span id="billingAddressRequired" class="text-danger" style="display:none;">*</span>
                                 <textarea asp-for="BillingAddress" class="form-control" rows="2"></textarea>
+                                <span id="billingAddressError" class="text-danger" style="display:none;">Billing Address is required for Company customers.</span>
                             </div>
                         </div>
                     </div>
@@ -284,6 +268,110 @@
                         </div>
                     </div>
 
+                    <!-- Customer Trucks -->
+                    <div class="card card-success">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Customer Trucks</h3>
+                            <button type="button" id="addTruckBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Truck
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Register the truck/plate numbers belonging to this customer. Truck numbers must be unique per customer.</p>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="trucksTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70%;">Truck Number</th>
+                                            <th style="width: 18%;" class="text-center">Active</th>
+                                            <th style="width: 12%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="trucksBody">
+                                        @{ var tIdx = 0; }
+                                        @foreach (var t in Model.Trucks)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="hidden" name="Trucks[@tIdx].Id" value="@t.Id" />
+                                                    <input type="text" name="Trucks[@tIdx].CustomerTruckNumber" value="@t.CustomerTruckNumber" class="form-control form-control-sm truck-input" maxlength="100" placeholder="e.g. ABC123XY" />
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <input type="hidden" name="Trucks[@tIdx].IsActive" value="false" />
+                                                    <input type="checkbox" name="Trucks[@tIdx].IsActive" value="true" @(t.IsActive ? "checked" : "") />
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <button type="button" class="btn btn-sm btn-danger remove-truck"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            tIdx++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Bank Accounts -->
+                    <div class="card card-secondary">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Customer Bank Accounts</h3>
+                            <button type="button" id="addBankBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Bank
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Account Number and Bank Name are required. Address, Branch and SWIFT code are optional. Account numbers must be unique per customer.</p>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="banksTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 16%;">Account Number <span class="text-danger">*</span></th>
+                                            <th style="width: 18%;">Bank Name <span class="text-danger">*</span></th>
+                                            <th style="width: 22%;">Bank Address</th>
+                                            <th style="width: 16%;">Branch</th>
+                                            <th style="width: 12%;">SWIFT Code</th>
+                                            <th style="width: 8%;" class="text-center">Active</th>
+                                            <th style="width: 8%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="banksBody">
+                                        @{ var bIdx = 0; }
+                                        @foreach (var b in Model.BankAccounts)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="hidden" name="BankAccounts[@bIdx].Id" value="@b.Id" />
+                                                    <input type="text" name="BankAccounts[@bIdx].AccountNumber" value="@b.AccountNumber" class="form-control form-control-sm bank-account-input" maxlength="50" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="BankAccounts[@bIdx].BankName" value="@b.BankName" class="form-control form-control-sm bank-name-input" maxlength="150" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="BankAccounts[@bIdx].BankAddress" value="@b.BankAddress" class="form-control form-control-sm" maxlength="255" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="BankAccounts[@bIdx].BankBranch" value="@b.BankBranch" class="form-control form-control-sm" maxlength="150" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="BankAccounts[@bIdx].BankSwiftCode" value="@b.BankSwiftCode" class="form-control form-control-sm bank-swift-input" maxlength="20" />
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <input type="hidden" name="BankAccounts[@bIdx].IsActive" value="false" />
+                                                    <input type="checkbox" name="BankAccounts[@bIdx].IsActive" value="true" @(b.IsActive ? "checked" : "") />
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <button type="button" class="btn btn-sm btn-danger remove-bank"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            bIdx++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">
@@ -381,6 +469,109 @@
             $('#pricesBody tr').each(function () { wirePriceRowEvents($(this)); });
             $('#addPriceBtn').on('click', function () { addPriceRow(); });
 
+            // ----- Customer Trucks dynamic rows -----
+            function renumberTruckRows() {
+                $('#trucksBody tr').each(function (i) {
+                    $(this).find('input').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/Trucks\[\d+\]/, 'Trucks[' + i + ']'));
+                    });
+                });
+            }
+
+            function wireTruckRowEvents($tr) {
+                $tr.find('.remove-truck').on('click', function () {
+                    $tr.remove();
+                    renumberTruckRows();
+                });
+                $tr.find('.truck-input').on('input', function () {
+                    $(this).val($(this).val().toUpperCase());
+                });
+            }
+
+            function addTruckRow() {
+                var idx = $('#trucksBody tr').length;
+                var row = `
+<tr>
+  <td>
+    <input type="hidden" name="Trucks[${idx}].Id" value="0" />
+    <input type="text" name="Trucks[${idx}].CustomerTruckNumber" value="" class="form-control form-control-sm truck-input" maxlength="100" placeholder="e.g. ABC123XY" />
+  </td>
+  <td class="text-center align-middle">
+    <input type="hidden" name="Trucks[${idx}].IsActive" value="false" />
+    <input type="checkbox" name="Trucks[${idx}].IsActive" value="true" checked />
+  </td>
+  <td class="text-center align-middle">
+    <button type="button" class="btn btn-sm btn-danger remove-truck"><i class="fas fa-trash"></i></button>
+  </td>
+</tr>`;
+                var $row = $(row);
+                $('#trucksBody').append($row);
+                wireTruckRowEvents($row);
+                $row.find('.truck-input').focus();
+            }
+
+            $('#trucksBody tr').each(function () { wireTruckRowEvents($(this)); });
+            $('#addTruckBtn').on('click', function () { addTruckRow(); });
+
+            // ----- Customer Bank Accounts dynamic rows -----
+            function renumberBankRows() {
+                $('#banksBody tr').each(function (i) {
+                    $(this).find('input').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/BankAccounts\[\d+\]/, 'BankAccounts[' + i + ']'));
+                    });
+                });
+            }
+
+            function wireBankRowEvents($tr) {
+                $tr.find('.remove-bank').on('click', function () {
+                    $tr.remove();
+                    renumberBankRows();
+                });
+                // Account number: digits only, sensible upper bound.
+                $tr.find('.bank-account-input').on('input', function () {
+                    var v = $(this).val().replace(/\D/g, '');
+                    if (v.length > 20) v = v.substring(0, 20);
+                    $(this).val(v);
+                });
+                // SWIFT: uppercase letters and digits (8 or 11 chars typical).
+                $tr.find('.bank-swift-input').on('input', function () {
+                    $(this).val($(this).val().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+                });
+            }
+
+            function addBankRow() {
+                var idx = $('#banksBody tr').length;
+                var row = `
+<tr>
+  <td>
+    <input type="hidden" name="BankAccounts[${idx}].Id" value="0" />
+    <input type="text" name="BankAccounts[${idx}].AccountNumber" value="" class="form-control form-control-sm bank-account-input" maxlength="50" />
+  </td>
+  <td><input type="text" name="BankAccounts[${idx}].BankName" value="" class="form-control form-control-sm bank-name-input" maxlength="150" /></td>
+  <td><input type="text" name="BankAccounts[${idx}].BankAddress" value="" class="form-control form-control-sm" maxlength="255" /></td>
+  <td><input type="text" name="BankAccounts[${idx}].BankBranch" value="" class="form-control form-control-sm" maxlength="150" /></td>
+  <td><input type="text" name="BankAccounts[${idx}].BankSwiftCode" value="" class="form-control form-control-sm bank-swift-input" maxlength="20" /></td>
+  <td class="text-center align-middle">
+    <input type="hidden" name="BankAccounts[${idx}].IsActive" value="false" />
+    <input type="checkbox" name="BankAccounts[${idx}].IsActive" value="true" checked />
+  </td>
+  <td class="text-center align-middle">
+    <button type="button" class="btn btn-sm btn-danger remove-bank"><i class="fas fa-trash"></i></button>
+  </td>
+</tr>`;
+                var $row = $(row);
+                $('#banksBody').append($row);
+                wireBankRowEvents($row);
+                $row.find('.bank-account-input').focus();
+            }
+
+            $('#banksBody tr').each(function () { wireBankRowEvents($(this)); });
+            $('#addBankBtn').on('click', function () { addBankRow(); });
+
             // Phone / BVN / TIN helpers
             $('#Phone').on('input', function () {
                 var phone = $(this).val().replace(/\D/g, '');
@@ -393,15 +584,113 @@
                 }
                 $(this).val(phone);
             });
-            $('#BVN').on('input', function () {
-                var bvn = $(this).val().replace(/\D/g, '');
-                if (bvn.length > 11) bvn = bvn.substring(0, 11);
-                $(this).val(bvn);
-            });
             $('#TIN').on('input', function () {
                 var tin = $(this).val().replace(/\D/g, '');
                 if (tin.length > 12) tin = tin.substring(0, 12);
                 $(this).val(tin);
+            });
+
+            // For Company customers: enable TIN and make Billing Address mandatory.
+            // For Individual (or anything else): disable TIN and Billing Address is optional.
+            // Also: Rebate is for Individuals only — forced off and hidden for Company,
+            // pre-filled to Yes / ₦700 the FIRST time an Individual is selected in
+            // this session, but never overrides values the operator has already typed.
+            var rebateDefaultsApplied = false;
+            function applyCustomerTypeRules() {
+                var typeText = ($('#CustomerTypeId option:selected').text() || '').trim().toLowerCase();
+                var isCompany = typeText === 'company';
+                var isIndividual = typeText === 'individual';
+
+                // TIN field
+                var $tin = $('#TIN');
+                if (isCompany) {
+                    $tin.prop('disabled', false).removeClass('bg-light');
+                } else {
+                    $tin.val('').prop('disabled', true).addClass('bg-light');
+                }
+
+                // Billing Address requirement
+                var $billing = $('#BillingAddress');
+                if (isCompany) {
+                    $billing.attr('required', 'required');
+                    $('#billingAddressRequired').show();
+                } else {
+                    $billing.removeAttr('required');
+                    $('#billingAddressRequired').hide();
+                    $('#billingAddressError').hide();
+                    $billing.removeClass('is-invalid');
+                }
+
+                // Rebate handling
+                var $rebateYes = $('#HasRebateYes');
+                var $rebateNo  = $('#HasRebateNo');
+                var $rebateAmt = $('input[name="RebateAmount"]');
+                var $rebateBox = $('#rebateAmountBox');
+
+                if (isCompany) {
+                    // Company: rebate is not applicable. Force No, disable both
+                    // radios and the amount, and clear the value.
+                    $rebateNo.prop('checked', true);
+                    $rebateYes.prop('checked', false);
+                    $rebateYes.prop('disabled', true);
+                    $rebateNo.prop('disabled', true);
+                    $rebateAmt.val('').prop('disabled', true).addClass('bg-light');
+                    $rebateBox.hide();
+                } else if (isIndividual) {
+                    // Individual: rebate is enabled. The first time the operator
+                    // picks Individual in this session, default to Yes / 700 —
+                    // but only if no value has been saved yet (avoids overwriting
+                    // existing data on the Edit screen).
+                    $rebateYes.prop('disabled', false);
+                    $rebateNo.prop('disabled', false);
+                    $rebateAmt.prop('disabled', false).removeClass('bg-light');
+
+                    if (!rebateDefaultsApplied) {
+                        var nothingChecked = !$rebateYes.is(':checked') && !$rebateNo.is(':checked');
+                        if (nothingChecked) {
+                            $rebateYes.prop('checked', true);
+                        }
+                        if ($rebateYes.is(':checked') && !parseFloat($rebateAmt.val())) {
+                            // Use the formatted-money helper if present so the
+                            // ₦ prefix and commas render; fall back to a plain set.
+                            if (window.NairaFormat && typeof NairaFormat.setValue === 'function') {
+                                NairaFormat.setValue($rebateAmt[0], 700);
+                            } else {
+                                $rebateAmt.val(700).trigger('change');
+                            }
+                        }
+                        rebateDefaultsApplied = true;
+                    }
+                    $rebateBox.toggle($rebateYes.is(':checked'));
+                } else {
+                    // No type chosen yet: leave radios alone but ensure they are
+                    // not stuck disabled from a prior Company selection.
+                    $rebateYes.prop('disabled', false);
+                    $rebateNo.prop('disabled', false);
+                    $rebateAmt.prop('disabled', false).removeClass('bg-light');
+                }
+            }
+            $('#CustomerTypeId').on('change', applyCustomerTypeRules);
+            applyCustomerTypeRules();
+
+            // Client-side guard: block submit when Company is selected but Billing Address is empty
+            $('#customerForm').on('submit', function (e) {
+                var typeText = ($('#CustomerTypeId option:selected').text() || '').trim().toLowerCase();
+                if (typeText === 'company') {
+                    var $billing = $('#BillingAddress');
+                    if (!$.trim($billing.val())) {
+                        e.preventDefault();
+                        $billing.addClass('is-invalid').focus();
+                        $('#billingAddressError').show();
+                        return false;
+                    }
+                }
+            });
+            $('#BillingAddress').on('input', function () {
+                if ($.trim($(this).val())) {
+                    $(this).removeClass('is-invalid');
+                    $('#billingAddressError').hide();
+                }
             });
         });
     </script>
