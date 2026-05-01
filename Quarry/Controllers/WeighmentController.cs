@@ -130,6 +130,12 @@ namespace QuarryManagementSystem.Controllers
         {
             try
             {
+                // Vehicle registration must come from the selected customer's
+                // truck list. Walk-in / no-customer weighments are blocked here
+                // because the form's truck dropdown is driven entirely by the
+                // chosen customer — there is no way to pick a plate without one.
+                await ValidateVehicleRegAgainstCustomerAsync(model.CustomerId, model.VehicleRegNumber);
+
                 if (ModelState.IsValid)
                 {
                     // Validate customer credit limit - warn but do not block creation
@@ -182,9 +188,11 @@ namespace QuarryManagementSystem.Controllers
                         WeightUnit = model.WeightUnit,
                         EntryTime = model.EntryTime,
                         ExitTime = model.ExitTime,
-                        TransactionType = model.TransactionType,
+                        // TransactionType and ChallanNumber were removed from the
+                        // form. TransactionType defaults to "Sales" on the entity;
+                        // ChallanNumber stays null. Both columns remain in the DB
+                        // for legacy data and may be reintroduced if needed.
                         Status = model.Status,
-                        ChallanNumber = model.ChallanNumber,
                         SelectedPrepaymentId = model.SelectedPrepaymentId,
                         SelectedPrepaymentLineItemId = model.SelectedPrepaymentLineItemId,
                         CreatedBy = User.Identity?.Name,
@@ -289,6 +297,10 @@ namespace QuarryManagementSystem.Controllers
 
             try
             {
+                // Same guard as Create: the truck has to belong to the chosen
+                // customer (and a customer must be chosen).
+                await ValidateVehicleRegAgainstCustomerAsync(model.CustomerId, model.VehicleRegNumber);
+
                 if (ModelState.IsValid)
                 {
                     var weighment = await _context.WeighmentTransactions.FindAsync(id);
@@ -328,9 +340,11 @@ namespace QuarryManagementSystem.Controllers
                     weighment.WeightUnit = model.WeightUnit;
                     weighment.EntryTime = model.EntryTime;
                     weighment.ExitTime = model.ExitTime;
-                    weighment.TransactionType = model.TransactionType;
+                    // TransactionType and ChallanNumber removed from the form.
+                    // Don't overwrite the existing DB values with the null that
+                    // arrives from unposted inputs. Existing rows keep their
+                    // saved values; new rows default TransactionType to "Sales".
                     weighment.Status = model.Status;
-                    weighment.ChallanNumber = model.ChallanNumber;
                     weighment.ModifiedBy = User.Identity?.Name;
                     weighment.ModifiedAt = DateTime.Now;
                     weighment.SelectedPrepaymentId = model.SelectedPrepaymentId;
@@ -578,6 +592,39 @@ namespace QuarryManagementSystem.Controllers
             }
         }
 
+        // AJAX: List trucks registered to a customer. The Vehicle Registration
+        // field on Create / Edit is a strict dropdown driven by this endpoint —
+        // only trucks that belong to the chosen customer can be selected.
+        // We include inactive trucks but flag them in the label, since some
+        // existing data was saved with IsActive defaulted to false (a legacy
+        // form-binding quirk) and operators still need to pick those plates.
+        // Filter clients can hide inactive ones if they want.
+        [HttpGet]
+        public async Task<JsonResult> GetCustomerTrucks(int customerId)
+        {
+            try
+            {
+                var trucks = await _context.CustomerTrucks
+                    .Where(t => t.CustomerId == customerId)
+                    .OrderByDescending(t => t.IsActive)
+                    .ThenBy(t => t.CustomerTruckNumber)
+                    .Select(t => new
+                    {
+                        id = t.CustomerTruckId,
+                        number = t.CustomerTruckNumber,
+                        isActive = t.IsActive
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, trucks });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error listing trucks for customer {CustomerId}", customerId);
+                return Json(new { success = false, message = "Error loading trucks" });
+            }
+        }
+
         // AJAX: Get the line items of a specific prepayment, with per-line remaining
         // quantity / amount. The weighment form uses this to populate a secondary
         // material dropdown once a prepayment is picked — so the operator sees
@@ -802,6 +849,48 @@ namespace QuarryManagementSystem.Controllers
         }
 
         /// <summary>
+        /// Validates that the posted VehicleRegNumber belongs to the chosen
+        /// customer's active truck list. The Create / Edit form's truck field
+        /// is a strict dropdown driven by GetCustomerTrucks, so under normal
+        /// use this is a no-op — but a tampered POST or stale form could
+        /// still smuggle a wrong plate through, hence the server-side check.
+        /// Walk-in weighments (no customer) are also rejected because trucks
+        /// can only be picked once a customer is chosen.
+        /// </summary>
+        private async Task ValidateVehicleRegAgainstCustomerAsync(int? customerId, string? vehicleRegNumber)
+        {
+            if (!customerId.HasValue)
+            {
+                ModelState.AddModelError(nameof(WeighmentCreateViewModel.CustomerId),
+                    "Customer is required so the truck can be validated against the customer's registered fleet.");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(vehicleRegNumber))
+            {
+                ModelState.AddModelError(nameof(WeighmentCreateViewModel.VehicleRegNumber),
+                    "Vehicle registration is required — pick one of the customer's registered trucks.");
+                return;
+            }
+
+            var trimmed = vehicleRegNumber.Trim();
+            // Match on customer + plate only; do not require IsActive. The
+            // checkbox-binding bug we hit early in the rollout left some
+            // valid trucks saved with IsActive = false. Filtering on it here
+            // would block saves of trucks the operator can clearly see in
+            // the dropdown. Once that data is cleaned up, this filter can be
+            // tightened back to require IsActive.
+            var matches = await _context.CustomerTrucks.AnyAsync(t =>
+                t.CustomerId == customerId.Value &&
+                t.CustomerTruckNumber == trimmed);
+
+            if (!matches)
+            {
+                ModelState.AddModelError(nameof(WeighmentCreateViewModel.VehicleRegNumber),
+                    "This vehicle is not registered to the selected customer. Add the truck to the customer first, or pick a registered one.");
+            }
+        }
+
+        /// <summary>
         /// Populates SubTotal / VatAmount / RebateAmount / TotalAmount on the
         /// weighment using the customer's VAT treatment and rebate settings.
         /// Mirrors the Invoice / Quotation logic so the saved numbers match the
@@ -847,8 +936,9 @@ namespace QuarryManagementSystem.Controllers
             var rate = weighment.VatRate;
 
             // Look up VAT type + rebate from the customer (if any). No customer →
-            // Exclusive + no rebate (conservative: the old behavior).
-            string vatType = "Exclusive";
+            // no VAT separation, no rebate. Same default as the client-side
+            // calculateFinancials() in Weighment Create / Edit views.
+            string vatType = string.Empty;
             decimal perUnitRebate = 0m;
             if (customerId.HasValue)
             {
@@ -865,19 +955,25 @@ namespace QuarryManagementSystem.Controllers
                 }
             }
 
+            // VAT is only computed for Exclusive customers. For Inclusive (or
+            // no VAT type set, or no customer), VAT is not separated out at
+            // all — the price IS the price. Subtotal = full line gross,
+            // VatAmount = 0. Mirrors the UI behaviour exactly so the saved
+            // numbers match what the operator saw on screen at submit time.
+            // Use a Contains check so labels like "Exclusive(Paid By Customer)"
+            // still match — the seeded names aren't always exactly "Exclusive".
             decimal subtotal;
             decimal vat;
-            if (string.Equals(vatType, "Inclusive", StringComparison.OrdinalIgnoreCase))
+            var isExclusive = vatType.IndexOf("Exclusive", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (isExclusive)
             {
-                vat = rate > 0
-                    ? Math.Round(lineGross * rate / (100m + rate), 2)
-                    : 0m;
-                subtotal = Math.Round(lineGross - vat, 2);
+                subtotal = Math.Round(lineGross, 2);
+                vat = Math.Round(subtotal * (rate / 100m), 2);
             }
             else
             {
                 subtotal = Math.Round(lineGross, 2);
-                vat = Math.Round(subtotal * (rate / 100m), 2);
+                vat = 0m;
             }
 
             // Rebate scales with quantity. Cap at Subtotal + VAT so the line

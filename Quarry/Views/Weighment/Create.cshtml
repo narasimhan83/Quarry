@@ -108,7 +108,10 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="VehicleRegNumber" class="control-label"></label>
-                                        <input asp-for="VehicleRegNumber" class="form-control" placeholder="ABC-123-XYZ" />
+                                        <select asp-for="VehicleRegNumber" id="VehicleRegNumber" class="form-control" disabled>
+                                            <option value="">-- Select Customer first --</option>
+                                        </select>
+                                        <small class="form-text text-muted">Vehicle must be one of the selected customer's registered trucks.</small>
                                         <span asp-validation-for="VehicleRegNumber" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -129,13 +132,6 @@
                                         <span asp-validation-for="DriverPhone" class="text-danger"></span>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="ChallanNumber" class="control-label"></label>
-                                        <input asp-for="ChallanNumber" class="form-control" />
-                                        <span asp-validation-for="ChallanNumber" class="text-danger"></span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -153,13 +149,6 @@
                                             <option value="">-- Select Material --</option>
                                         </select>
                                         <span asp-validation-for="MaterialId" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="TransactionType" class="control-label"></label>
-                                        <select asp-for="TransactionType" asp-items="Model.TransactionTypes" class="form-control"></select>
-                                        <span asp-validation-for="TransactionType" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -475,7 +464,49 @@
                 // Load active prepayments for this customer; reveal the
                 // Prepayment dropdown when any are available.
                 loadCustomerPrepayments(customerId);
+
+                // Load this customer's truck list into the Vehicle Registration
+                // dropdown. No customer → dropdown is disabled so the operator
+                // can't proceed without picking one.
+                loadCustomerTrucks(customerId);
             });
+
+            function loadCustomerTrucks(customerId) {
+                var $sel = $('#VehicleRegNumber');
+                $sel.empty();
+
+                if (!customerId) {
+                    $sel.append('<option value="">-- Select Customer first --</option>');
+                    $sel.prop('disabled', true);
+                    return;
+                }
+
+                $sel.append('<option value="">-- Loading trucks... --</option>');
+                $sel.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("GetCustomerTrucks", "Weighment")',
+                    type: 'GET',
+                    cache: false, // ensure fresh truck list every call — the customer's fleet may have changed since the page loaded
+                    data: { customerId: customerId, _ts: new Date().getTime() },
+                    success: function (resp) {
+                        $sel.empty();
+                        if (resp && resp.success && resp.trucks && resp.trucks.length > 0) {
+                            $sel.append('<option value="">-- Select Truck --</option>');
+                            $.each(resp.trucks, function (i, t) {
+                                $sel.append('<option value="' + t.number + '">' + t.number + '</option>');
+                            });
+                            $sel.prop('disabled', false);
+                        } else {
+                            $sel.append('<option value="">-- No trucks registered — add one in Customer screen --</option>');
+                            $sel.prop('disabled', true);
+                        }
+                    },
+                    error: function () {
+                        $sel.empty().append('<option value="">-- Error loading trucks --</option>').prop('disabled', true);
+                    }
+                });
+            }
 
             function loadCustomerPrepayments(customerId) {
                 var $prepayRow = $('#prepaymentRow');
@@ -598,17 +629,20 @@
                 // Gross line amount before branching on VAT treatment.
                 var lineGross = netWeightTons * pricePerUnit;
                 var subtotal, vatAmount;
+                // VAT is only computed for Exclusive customers. For Inclusive
+                // (or no VAT type set, or no customer), VAT is not separated
+                // out at all — the price IS the price, and the VAT row is
+                // hidden in the UI. Subtotal becomes the full line gross.
+                // Use a substring check so VAT-type labels with extra wording
+                // — e.g. "Exclusive(Paid By Customer)" — still match.
+                var isExclusive = currentVatType && currentVatType.toLowerCase().indexOf('exclusive') !== -1;
 
-                if (currentVatType && currentVatType.toLowerCase() === 'inclusive') {
-                    // Inclusive: the unit price already contains VAT. Back it out
-                    // so Subtotal is net-of-VAT. Total then equals lineGross − Rebate.
-                    //   VAT = gross * rate / (100 + rate)
-                    vatAmount = vatRate > 0 ? lineGross * vatRate / (100 + vatRate) : 0;
-                    subtotal = lineGross - vatAmount;
-                } else {
-                    // Exclusive (default): VAT is added on top of the net subtotal.
+                if (isExclusive) {
                     subtotal = lineGross;
                     vatAmount = subtotal * (vatRate / 100);
+                } else {
+                    subtotal = lineGross;
+                    vatAmount = 0;
                 }
 
                 // Rebate scales with net tons. Cap at Subtotal + VAT so the line
@@ -623,6 +657,15 @@
                 $('#VatAmount').val(vatAmount.toFixed(2)).trigger('change');
                 $('#TotalAmount').val(totalAmount.toFixed(2)).trigger('change');
 
+                // Show / hide the entire VAT Amount row — only Exclusive customers
+                // get a VAT line.
+                var $vatGroup = $('#VatAmount').closest('.form-group');
+                if (isExclusive) {
+                    $vatGroup.show();
+                } else {
+                    $vatGroup.hide();
+                }
+
                 // Rebate row: only visible when there's an actual rebate to show.
                 if (rebateAmount > 0) {
                     $('#RebateRow').show();
@@ -636,14 +679,11 @@
                     $('#RebateHint').text('');
                 }
 
-                // Show the operator which VAT treatment is being applied so the
-                // summary isn't a black box when the same price could produce
-                // two very different totals.
+                // VAT-treatment hint only makes sense when the VAT row is visible.
                 $('.vat-type-hint').remove();
-                if (currentVatType) {
-                    var label = currentVatType.toLowerCase() === 'inclusive' ? 'Inclusive' : 'Exclusive';
-                    $('#VatAmount').closest('.form-group').append(
-                        '<small class="form-text text-muted vat-type-hint">VAT treatment: <strong>' + label + '</strong></small>'
+                if (isExclusive) {
+                    $vatGroup.append(
+                        '<small class="form-text text-muted vat-type-hint">VAT treatment: <strong>Exclusive</strong></small>'
                     );
                 }
 
@@ -696,6 +736,16 @@
             // Initial calculations
             recomputeWeights();
             calculateFinancials();
+
+            // If a customer is already selected on initial render (e.g. the
+            // form rebound after a validation error, or a query string passed
+            // a customer through), populate the truck dropdown right away.
+            // The change handler only fires on user input, so without this
+            // the dropdown would stay at "-- Select Customer first --".
+            var initialCustomerId = $('#CustomerId').val();
+            if (initialCustomerId) {
+                loadCustomerTrucks(initialCustomerId);
+            }
         });
     </script>
 }

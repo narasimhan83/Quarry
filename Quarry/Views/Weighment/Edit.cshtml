@@ -98,7 +98,10 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label asp-for="VehicleRegNumber" class="control-label"></label>
-                                        <input asp-for="VehicleRegNumber" class="form-control" placeholder="ABC-123-XYZ" />
+                                        <select asp-for="VehicleRegNumber" id="VehicleRegNumber" class="form-control" disabled>
+                                            <option value="@Model.VehicleRegNumber">@(string.IsNullOrWhiteSpace(Model.VehicleRegNumber) ? "-- Loading trucks... --" : Model.VehicleRegNumber)</option>
+                                        </select>
+                                        <small class="form-text text-muted">Vehicle must be one of the selected customer's registered trucks.</small>
                                         <span asp-validation-for="VehicleRegNumber" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -119,13 +122,6 @@
                                         <span asp-validation-for="DriverPhone" class="text-danger"></span>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="ChallanNumber" class="control-label"></label>
-                                        <input asp-for="ChallanNumber" class="form-control" />
-                                        <span asp-validation-for="ChallanNumber" class="text-danger"></span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -143,13 +139,6 @@
                                             <option value="">-- Select Material --</option>
                                         </select>
                                         <span asp-validation-for="MaterialId" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="TransactionType" class="control-label"></label>
-                                        <select asp-for="TransactionType" asp-items="Model.TransactionTypes" class="form-control"></select>
-                                        <span asp-validation-for="TransactionType" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -430,7 +419,68 @@
                 $('#SelectedPrepaymentId').val('');
                 $('#SelectedPrepaymentLineItemId').val('');
                 loadCustomerPrepayments(customerId, null, null);
+
+                // Reload the Vehicle Registration dropdown for the new customer.
+                // Pass null for the desired truck so it lands on "-- Select Truck --":
+                // the previously chosen plate almost certainly belonged to the old
+                // customer and shouldn't be carried over.
+                loadCustomerTrucks(customerId, null);
             });
+
+            // Load the customer's active trucks into #VehicleRegNumber.
+            // desiredTruck (optional): if provided AND it appears in the loaded
+            // list, pre-select it. If it's NOT in the list (legacy plate, or the
+            // customer has since removed/deactivated that truck), surface it as
+            // a disabled "(legacy)" option so the operator can see what was
+            // saved and pick a registered replacement before saving.
+            function loadCustomerTrucks(customerId, desiredTruck) {
+                var $sel = $('#VehicleRegNumber');
+                $sel.empty();
+
+                if (!customerId) {
+                    $sel.append('<option value="">-- Select Customer first --</option>');
+                    $sel.prop('disabled', true);
+                    return;
+                }
+
+                $sel.append('<option value="">-- Loading trucks... --</option>');
+                $sel.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("GetCustomerTrucks", "Weighment")',
+                    type: 'GET',
+                    cache: false, // ensure fresh truck list every call — the customer's fleet may have changed since the page loaded
+                    data: { customerId: customerId, _ts: new Date().getTime() },
+                    success: function (resp) {
+                        $sel.empty();
+                        var matched = false;
+                        if (resp && resp.success && resp.trucks && resp.trucks.length > 0) {
+                            $sel.append('<option value="">-- Select Truck --</option>');
+                            $.each(resp.trucks, function (i, t) {
+                                var selected = desiredTruck && t.number === desiredTruck;
+                                if (selected) matched = true;
+                                $sel.append('<option value="' + t.number + '"' + (selected ? ' selected' : '') + '>' + t.number + '</option>');
+                            });
+                            $sel.prop('disabled', false);
+                        } else {
+                            $sel.append('<option value="">-- No trucks registered — add one in Customer screen --</option>');
+                            $sel.prop('disabled', true);
+                        }
+
+                        // Legacy fallback: the saved plate isn't in this customer's
+                        // current truck list. Surface it as a clearly-labelled
+                        // option so the operator sees the existing value and can
+                        // explicitly pick a registered one before saving.
+                        if (desiredTruck && !matched) {
+                            $sel.append('<option value="' + desiredTruck + '" selected>' + desiredTruck + ' (legacy / not registered)</option>');
+                            $sel.prop('disabled', false);
+                        }
+                    },
+                    error: function () {
+                        $sel.empty().append('<option value="">-- Error loading trucks --</option>').prop('disabled', true);
+                    }
+                });
+            }
 
             // Preserves a desired prepayment / line selection so the Edit view
             // can restore the stored choice when the AJAX finishes populating.
@@ -529,15 +579,20 @@
 
                 var lineGross = netWeightTons * pricePerUnit;
                 var subtotal, vatAmount;
+                // VAT is only computed for Exclusive customers. For Inclusive
+                // (or no VAT type set, or no customer), VAT is not separated
+                // out at all — the price IS the price, and the VAT row is
+                // hidden in the UI. Subtotal becomes the full line gross.
+                // Use a substring check so VAT-type labels with extra wording
+                // — e.g. "Exclusive(Paid By Customer)" — still match.
+                var isExclusive = currentVatType && currentVatType.toLowerCase().indexOf('exclusive') !== -1;
 
-                if (currentVatType && currentVatType.toLowerCase() === 'inclusive') {
-                    // Inclusive: unit price already contains VAT. Back it out.
-                    vatAmount = vatRate > 0 ? lineGross * vatRate / (100 + vatRate) : 0;
-                    subtotal = lineGross - vatAmount;
-                } else {
-                    // Exclusive (default): VAT added on top.
+                if (isExclusive) {
                     subtotal = lineGross;
                     vatAmount = subtotal * (vatRate / 100);
+                } else {
+                    subtotal = lineGross;
+                    vatAmount = 0;
                 }
 
                 // Rebate scales with net tons. Cap at Subtotal + VAT so the line
@@ -552,6 +607,15 @@
                 $('#VatAmount').val(vatAmount.toFixed(2)).trigger('change');
                 $('#TotalAmount').val(totalAmount.toFixed(2)).trigger('change');
 
+                // Show / hide the entire VAT Amount row — only Exclusive customers
+                // get a VAT line. The hint underneath also goes with it.
+                var $vatGroup = $('#VatAmount').closest('.form-group');
+                if (isExclusive) {
+                    $vatGroup.show();
+                } else {
+                    $vatGroup.hide();
+                }
+
                 // Rebate row: only visible when there's an actual rebate to show.
                 if (rebateAmount > 0) {
                     $('#RebateRow').show();
@@ -565,12 +629,11 @@
                     $('#RebateHint').text('');
                 }
 
-                // Show which VAT treatment is being applied.
+                // VAT-treatment hint only makes sense when the VAT row is visible.
                 $('.vat-type-hint').remove();
-                if (currentVatType) {
-                    var label = currentVatType.toLowerCase() === 'inclusive' ? 'Inclusive' : 'Exclusive';
-                    $('#VatAmount').closest('.form-group').append(
-                        '<small class="form-text text-muted vat-type-hint">VAT treatment: <strong>' + label + '</strong></small>'
+                if (isExclusive) {
+                    $vatGroup.append(
+                        '<small class="form-text text-muted vat-type-hint">VAT treatment: <strong>Exclusive</strong></small>'
                     );
                 }
 
@@ -638,6 +701,15 @@
             var storedLineId       = @(Model.SelectedPrepaymentLineItemId?.ToString() ?? "null");
             if (initialCustomerId) {
                 loadCustomerPrepayments(initialCustomerId, storedPrepaymentId, storedLineId);
+            }
+
+            // Initial trucks load: populate the dropdown for the saved customer
+            // and pre-select the saved plate. If the saved plate isn't currently
+            // registered, the function adds it as a "(legacy / not registered)"
+            // option so it's still visible and editable.
+            var savedTruck = @Html.Raw("\"" + (Model.VehicleRegNumber ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"");
+            if (initialCustomerId) {
+                loadCustomerTrucks(initialCustomerId, savedTruck || null);
             }
         });
     </script>
