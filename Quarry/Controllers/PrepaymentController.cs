@@ -128,18 +128,78 @@ namespace QuarryManagementSystem.Controllers
                 return View(model);
             }
 
-            // Validate lines. Allow empty values to be dropped silently but reject
-            // rows that have partial data (e.g. material but no quantity).
-            var validLines = (model.Items ?? new List<PrepaymentLineItemInput>())
+            // Either-or: a Direct Amount entry skips line items entirely;
+            // line items skip Direct Amount. Both filled = ambiguous and rejected.
+            var hasDirectAmount = model.DirectAmount.HasValue && model.DirectAmount.Value > 0m;
+            var rawValidLines = (model.Items ?? new List<PrepaymentLineItemInput>())
                 .Where(li => li.MaterialId.HasValue && li.MaterialId > 0 && li.Quantity > 0 && li.UnitPrice > 0)
                 .ToList();
+            var hasLineItems = rawValidLines.Any();
 
-            if (!validLines.Any())
+            if (hasDirectAmount && hasLineItems)
             {
-                ModelState.AddModelError(string.Empty, "Please add at least one line item with material, quantity, and unit price.");
+                ModelState.AddModelError(string.Empty, "Enter either a Direct Amount OR line items, not both. Clear one of them and try again.");
                 await PopulateDropdownsAsync(model);
                 return View(model);
             }
+
+            if (!hasDirectAmount && !hasLineItems)
+            {
+                ModelState.AddModelError(string.Empty, "Enter a Direct Amount, or add at least one line item with material, quantity and unit price.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            // Direct Amount path: save a flat deposit with no line items.
+            // VAT / rebate are recognised at invoice time when this prepayment
+            // is drawn down, not at deposit time — the same way real
+            // accounting treats customer deposits.
+            if (hasDirectAmount)
+            {
+                using var tx = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    var directPrepayment = new CustomerPrepayment
+                    {
+                        PrepaymentNumber = await GeneratePrepaymentNumberAsync(),
+                        CustomerId = model.CustomerId.Value,
+                        PrepaymentDate = model.PrepaymentDate,
+                        ExpectedPickupDate = model.ExpectedPickupDate,
+                        PaymentMethod = await ResolvePaymentMethodNameAsync(model.PaymentMethodId, model.PaymentMethod),
+                        PaymentMethodId = model.PaymentMethodId,
+                        Reference = model.Reference,
+                        Notes = model.Notes,
+                        Status = "Active",
+                        Amount = Math.Round(model.DirectAmount!.Value, 2),
+                        UsedAmount = 0m,
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = User.Identity?.Name
+                    };
+
+                    _context.CustomerPrepayments.Add(directPrepayment);
+                    await _context.SaveChangesAsync();
+
+                    await CreatePrepaymentJournalEntryAsync(directPrepayment);
+
+                    await tx.CommitAsync();
+
+                    TempData["Success"] = $"Prepayment {directPrepayment.PrepaymentNumber} created. Direct deposit ₦{directPrepayment.Amount:N2}.";
+                    _logger.LogInformation("Prepayment {PrepaymentNumber} (direct amount) created for customer {CustomerId} by {UserName}",
+                        directPrepayment.PrepaymentNumber, directPrepayment.CustomerId, User.Identity?.Name);
+                    return RedirectToAction(nameof(Details), new { id = directPrepayment.Id });
+                }
+                catch (Exception ex)
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogError(ex, "Error creating direct-amount prepayment. Transaction rolled back.");
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating the prepayment. Please try again.");
+                    await PopulateDropdownsAsync(model);
+                    return View(model);
+                }
+            }
+
+            // Line-items path (existing behaviour).
+            var validLines = rawValidLines;
 
             // Compute the VAT / rebate breakdown for each line from the posted
             // raw UnitPrice and the customer's current settings. UnitPrice stays
@@ -278,16 +338,67 @@ namespace QuarryManagementSystem.Controllers
                 return View(model);
             }
 
-            var validLines = (model.Items ?? new List<PrepaymentLineItemInput>())
+            // Either-or, same as Create: Direct Amount XOR line items.
+            var hasDirectAmount = model.DirectAmount.HasValue && model.DirectAmount.Value > 0m;
+            var rawValidLines = (model.Items ?? new List<PrepaymentLineItemInput>())
                 .Where(li => li.MaterialId.HasValue && li.MaterialId > 0 && li.Quantity > 0 && li.UnitPrice > 0)
                 .ToList();
+            var hasLineItems = rawValidLines.Any();
 
-            if (!validLines.Any())
+            if (hasDirectAmount && hasLineItems)
             {
-                ModelState.AddModelError(string.Empty, "Please add at least one line item with material, quantity, and unit price.");
+                ModelState.AddModelError(string.Empty, "Enter either a Direct Amount OR line items, not both. Clear one of them and try again.");
                 await PopulateDropdownsAsync(model);
                 return View(model);
             }
+            if (!hasDirectAmount && !hasLineItems)
+            {
+                ModelState.AddModelError(string.Empty, "Enter a Direct Amount, or add at least one line item with material, quantity and unit price.");
+                await PopulateDropdownsAsync(model);
+                return View(model);
+            }
+
+            // Direct Amount path: persist a flat deposit. Wipe any pre-existing
+            // line items the prepayment used to carry (operator switched modes).
+            if (hasDirectAmount)
+            {
+                using var dirTx = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    prepayment.CustomerId = model.CustomerId.Value;
+                    prepayment.PrepaymentDate = model.PrepaymentDate;
+                    prepayment.ExpectedPickupDate = model.ExpectedPickupDate;
+                    prepayment.PaymentMethod = await ResolvePaymentMethodNameAsync(model.PaymentMethodId, model.PaymentMethod);
+                    prepayment.PaymentMethodId = model.PaymentMethodId;
+                    prepayment.Reference = model.Reference;
+                    prepayment.Notes = model.Notes;
+                    prepayment.Status = string.IsNullOrWhiteSpace(model.Status) ? prepayment.Status : model.Status;
+                    prepayment.Amount = Math.Round(model.DirectAmount!.Value, 2);
+                    prepayment.UpdatedAt = DateTime.Now;
+                    prepayment.UpdatedBy = User.Identity?.Name;
+
+                    _context.PrepaymentLineItems.RemoveRange(prepayment.LineItems);
+                    prepayment.LineItems.Clear();
+
+                    await _context.SaveChangesAsync();
+                    await RecreatePrepaymentJournalEntryAsync(prepayment);
+                    await dirTx.CommitAsync();
+
+                    TempData["Success"] = $"Prepayment {prepayment.PrepaymentNumber} updated. Direct deposit ₦{prepayment.Amount:N2}.";
+                    return RedirectToAction(nameof(Details), new { id = prepayment.Id });
+                }
+                catch (Exception ex)
+                {
+                    await dirTx.RollbackAsync();
+                    _logger.LogError(ex, "Error updating direct-amount prepayment {PrepaymentId}. Transaction rolled back.", id);
+                    ModelState.AddModelError(string.Empty, "An error occurred while updating the prepayment. Please try again.");
+                    await PopulateDropdownsAsync(model);
+                    return View(model);
+                }
+            }
+
+            // Line-items path (existing behaviour).
+            var validLines = rawValidLines;
 
             // Re-compute VAT / rebate breakdown for the current customer settings.
             // If settings changed since creation, Edit uses the new ones (matches
@@ -693,6 +804,14 @@ namespace QuarryManagementSystem.Controllers
 
         private PrepaymentCreateEditViewModel MapToEditViewModel(CustomerPrepayment prepayment)
         {
+            // Direct-amount detection: a prepayment with no line items but a
+            // non-zero Amount was created via the "Direct Amount" path. Surface
+            // that value back into the form's DirectAmount so Edit shows it
+            // exactly as it was entered.
+            decimal? directAmount = (prepayment.LineItems == null || prepayment.LineItems.Count == 0)
+                ? (prepayment.Amount > 0m ? (decimal?)prepayment.Amount : null)
+                : null;
+
             return new PrepaymentCreateEditViewModel
             {
                 Id = prepayment.Id,
@@ -706,6 +825,7 @@ namespace QuarryManagementSystem.Controllers
                 Notes = prepayment.Notes,
                 Status = prepayment.Status,
                 TotalAmount = prepayment.Amount,
+                DirectAmount = directAmount,
                 Items = prepayment.LineItems
                     .OrderBy(li => li.Id)
                     .Select(li => new PrepaymentLineItemInput

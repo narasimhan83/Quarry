@@ -87,6 +87,23 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <hr/>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="DirectAmount" class="control-label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text">₦</span></div>
+                                            <input asp-for="DirectAmount" id="DirectAmount" class="form-control money-input" data-symbol="false" placeholder="0.00" />
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Use this for a flat deposit on account (no specific material).
+                                            Fill <strong>either</strong> Direct Amount <strong>or</strong> the Line Items below — not both.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -103,14 +120,12 @@
                                 <table class="table table-sm table-bordered" id="itemsTable">
                                     <thead>
                                         <tr>
-                                            <th style="width: 24%;">Material</th>
-                                            <th style="width: 10%;">Qty</th>
-                                            <th style="width: 9%;">Unit</th>
-                                            <th style="width: 14%;">Unit Price (₦)</th>
-                                            <th style="width: 12%;" class="text-right">VAT (₦)</th>
-                                            <th style="width: 12%;" class="text-right">Rebate (₦)</th>
+                                            <th style="width: 38%;">Material</th>
+                                            <th style="width: 14%;">Qty</th>
+                                            <th style="width: 12%;">Unit</th>
+                                            <th style="width: 18%;">Unit Price (₦)</th>
                                             <th style="width: 14%;" class="text-right">Line Total</th>
-                                            <th style="width: 5%;"></th>
+                                            <th style="width: 4%;"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="itemsBody">
@@ -146,8 +161,6 @@
                                                     <td>
                                                         <input type="number" step="0.01" min="0" name="Items[@idx].UnitPrice" value="@item.UnitPrice" class="form-control form-control-sm price-input money-input" data-symbol="false" />
                                                     </td>
-                                                    <td class="text-right align-middle"><span class="vat-display">0.00</span></td>
-                                                    <td class="text-right align-middle"><span class="rebate-display">0.00</span></td>
                                                     <td class="text-right align-middle">
                                                         <input type="hidden" name="Items[@idx].LineTotal" value="@item.LineTotal" class="line-total-hidden" />
                                                         <span class="line-total-display">0.00</span>
@@ -162,7 +175,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="6" class="text-right"><strong>Grand Total:</strong></td>
+                                            <td colspan="4" class="text-right"><strong>Grand Total:</strong></td>
                                             <td class="text-right"><strong id="grandTotal">0.00</strong></td>
                                             <td></td>
                                         </tr>
@@ -170,8 +183,7 @@
                                 </table>
                             </div>
                             <small class="text-muted">
-                                Unit Price shows the raw customer price. VAT and Rebate are computed per line from the
-                                customer's settings. Line Total = qty × (Unit Price + per-unit VAT − per-unit Rebate).
+                                Unit Price is the customer's catalog price. Line Total = qty × Unit Price. Any VAT and rebate are applied at invoice time when this prepayment is drawn down.
                             </small>
                         </div>
                     </div>
@@ -364,8 +376,6 @@
   <td><input type="number" step="0.001" min="0" name="Items[${idx}].Quantity" value="1" class="form-control form-control-sm qty-input" /></td>
   <td><input name="Items[${idx}].Unit" value="Ton" class="form-control form-control-sm unit-input" /></td>
   <td><input type="number" step="0.01" min="0" name="Items[${idx}].UnitPrice" value="0" class="form-control form-control-sm price-input money-input" data-symbol="false" /></td>
-  <td class="text-right align-middle"><span class="vat-display">0.00</span></td>
-  <td class="text-right align-middle"><span class="rebate-display">0.00</span></td>
   <td class="text-right align-middle">
     <input type="hidden" name="Items[${idx}].LineTotal" value="0" class="line-total-hidden" />
     <span class="line-total-display">0.00</span>
@@ -397,18 +407,75 @@
                 addEmptyRow();
             });
 
+            // Either-or mode toggle: if Direct Amount is filled, dim and disable
+            // the Line Items card; if any line item has data, dim and disable the
+            // Direct Amount input. The aim is to make the choice obvious without
+            // forcing the operator through a separate radio button.
+            function readDirectAmount() {
+                if (window.NairaFormat) return NairaFormat.parse($('#DirectAmount').val());
+                return parseFloat(($('#DirectAmount').val() + '').replace(/,/g, '')) || 0;
+            }
+
+            function anyLineItemFilled() {
+                var any = false;
+                $('#itemsBody tr').each(function () {
+                    var mat = $(this).find('.material-select').val();
+                    var qty = parseFloat($(this).find('.qty-input').val()) || 0;
+                    var price = readPrice($(this));
+                    if (mat || qty > 0 || price > 0) any = true;
+                });
+                return any;
+            }
+
+            function applyEitherOrMode() {
+                var directAmount = readDirectAmount();
+                var hasLines = anyLineItemFilled();
+                var $linesCard = $('#itemsTable').closest('.card');
+                var $directGroup = $('#DirectAmount').closest('.form-group');
+
+                if (directAmount > 0 && !hasLines) {
+                    $linesCard.css({ opacity: 0.45, 'pointer-events': 'none' });
+                    $('#TotalDisplay').val(directAmount.toFixed(2)).trigger('change');
+                    $directGroup.css({ opacity: 1, 'pointer-events': 'auto' });
+                } else if (hasLines && !(directAmount > 0)) {
+                    $directGroup.css({ opacity: 0.45, 'pointer-events': 'none' });
+                    $linesCard.css({ opacity: 1, 'pointer-events': 'auto' });
+                    recalcGrandTotal();
+                } else {
+                    // Both empty, or both filled (the latter is a validation error
+                    // we'll surface on submit). Leave both interactive.
+                    $linesCard.css({ opacity: 1, 'pointer-events': 'auto' });
+                    $directGroup.css({ opacity: 1, 'pointer-events': 'auto' });
+                    if (directAmount > 0) {
+                        $('#TotalDisplay').val(directAmount.toFixed(2)).trigger('change');
+                    } else {
+                        recalcGrandTotal();
+                    }
+                }
+            }
+
+            $('#DirectAmount').on('input change', applyEitherOrMode);
+            $(document).on('input change', '#itemsBody .material-select, #itemsBody .qty-input, #itemsBody .price-input', applyEitherOrMode);
+            applyEitherOrMode();
+
             // Guard: client-side sanity check before submit
             $('#prepaymentForm').on('submit', function (e) {
+                var directAmount = readDirectAmount();
                 var hasValid = false;
                 $('#itemsBody tr').each(function () {
                     var mat = $(this).find('.material-select').val();
                     var qty = parseFloat($(this).find('.qty-input').val()) || 0;
-                    var price = parseFloat($(this).find('.price-input').val()) || 0;
+                    var price = readPrice($(this));
                     if (mat && qty > 0 && price > 0) hasValid = true;
                 });
-                if (!hasValid) {
+                if (directAmount > 0 && hasValid) {
                     e.preventDefault();
-                    alert('Please add at least one complete line item (material + quantity + unit price).');
+                    alert('Enter either a Direct Amount OR line items, not both.');
+                    return;
+                }
+                if (directAmount <= 0 && !hasValid) {
+                    e.preventDefault();
+                    alert('Enter a Direct Amount, or add at least one complete line item (material + quantity + unit price).');
                 }
             });
         })();

@@ -53,6 +53,15 @@ namespace QuarryManagementSystem.ViewModels
 
         public List<PrepaymentLineItemInput> Items { get; set; } = new();
 
+        /// <summary>
+        /// Optional "amount-only" mode: when this is &gt; 0, the prepayment is
+        /// recorded as a flat deposit on account with no per-material line items.
+        /// Use this for cash-on-account / generic credit. The form enforces
+        /// either-or: operator fills DirectAmount OR line items, never both.
+        /// </summary>
+        [Display(Name = "Direct Amount")]
+        public decimal? DirectAmount { get; set; }
+
         // Display helpers (not persisted)
         public decimal TotalAmount { get; set; }
 
