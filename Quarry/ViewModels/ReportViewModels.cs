@@ -199,6 +199,16 @@ namespace QuarryManagementSystem.ViewModels
         [DataType(DataType.Date)]
         public DateTime DateTo { get; set; }
 
+        /// <summary>
+        /// VAT-type filter applied to TB / P&amp;L. "all" means no filter; the
+        /// values "Exclusive" or "Inclusive" filter to journal entries whose
+        /// customer leg belongs to a customer of that VAT type. Has no effect
+        /// on Balance Sheet / Cash Flow / Summary (the controller only honors
+        /// it on the three reports where it produces accurate numbers).
+        /// </summary>
+        [Display(Name = "VAT Type")]
+        public string VatTypeFilter { get; set; } = "all";
+
         public ReportCompanyDetailsViewModel CompanyDetails { get; set; } = new();
 
         // Report Data
@@ -559,6 +569,13 @@ namespace QuarryManagementSystem.ViewModels
 
         [Display(Name = "Month")]
         public int Month { get; set; }
+
+        /// <summary>
+        /// VAT-type filter applied to the VAT Report. Other tax reports
+        /// (PAYE, Pension, etc.) ignore it because they're not customer-driven.
+        /// </summary>
+        [Display(Name = "VAT Type")]
+        public string VatTypeFilter { get; set; } = "all";
 
         public ReportCompanyDetailsViewModel CompanyDetails { get; set; } = new();
 

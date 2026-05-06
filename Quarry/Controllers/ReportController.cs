@@ -102,7 +102,7 @@ namespace QuarryManagementSystem.Controllers
         }
 
         // GET: Report/Financial
-        public async Task<IActionResult> Financial(DateTime? dateFrom, DateTime? dateTo, string reportType = "summary")
+        public async Task<IActionResult> Financial(DateTime? dateFrom, DateTime? dateTo, string reportType = "summary", string vatTypeFilter = "all")
         {
             try
             {
@@ -114,18 +114,19 @@ namespace QuarryManagementSystem.Controllers
                     DateFrom = fromDate,
                     DateTo = toDate,
                     ReportType = reportType,
+                    VatTypeFilter = vatTypeFilter,
                     CompanyDetails = new ReportCompanyDetailsViewModel()
                 };
 
                 switch (reportType.ToLower())
                 {
                     case "trialbalance":
-                        viewModel.TrialBalance = await GenerateTrialBalance(fromDate, toDate);
-                        viewModel.ReportTitle = "Trial Balance";
+                        viewModel.TrialBalance = await GenerateTrialBalance(fromDate, toDate, vatTypeFilter);
+                        viewModel.ReportTitle = "Trial Balance" + VatFilterSuffix(vatTypeFilter);
                         break;
                     case "profitloss":
-                        viewModel.ProfitLoss = await GenerateProfitLoss(fromDate, toDate);
-                        viewModel.ReportTitle = "Profit & Loss Statement";
+                        viewModel.ProfitLoss = await GenerateProfitLoss(fromDate, toDate, vatTypeFilter);
+                        viewModel.ReportTitle = "Profit & Loss Statement" + VatFilterSuffix(vatTypeFilter);
                         break;
                     case "balancesheet":
                         viewModel.BalanceSheet = await GenerateBalanceSheet(toDate);
@@ -205,7 +206,7 @@ namespace QuarryManagementSystem.Controllers
         }
 
         // GET: Report/Tax
-        public async Task<IActionResult> Tax(int? year, int? month, string reportType = "vat")
+        public async Task<IActionResult> Tax(int? year, int? month, string reportType = "vat", string vatTypeFilter = "all")
         {
             try
             {
@@ -217,14 +218,15 @@ namespace QuarryManagementSystem.Controllers
                     Year = currentYear,
                     Month = currentMonth,
                     ReportType = reportType,
+                    VatTypeFilter = vatTypeFilter,
                     CompanyDetails = new ReportCompanyDetailsViewModel() // Stub implementation
                 };
 
                 switch (reportType.ToLower())
                 {
                     case "vat":
-                        viewModel.VATReport = await GenerateVATReport(currentYear, currentMonth);
-                        viewModel.ReportTitle = "VAT Report";
+                        viewModel.VATReport = await GenerateVATReport(currentYear, currentMonth, vatTypeFilter);
+                        viewModel.ReportTitle = "VAT Report" + VatFilterSuffix(vatTypeFilter);
                         break;
                     case "paye":
                         viewModel.PAYEReport = await GeneratePAYEReport(currentYear, currentMonth);
@@ -590,54 +592,243 @@ namespace QuarryManagementSystem.Controllers
             return totalEmployees > 0 ? (double)activeEmployees / totalEmployees : 0;
         }
 
-        // Financial Report Generation Methods
-        private async Task<TrialBalanceReport> GenerateTrialBalance(DateTime fromDate, DateTime toDate)
+        // ==================================================================
+        // VAT-TYPE FILTERING HELPERS
+        // ==================================================================
+        // Reports below aggregate from JournalEntryLines (not from
+        // ChartOfAccounts.CurrentBalance) so the date range is honored AND
+        // the VAT-type filter can be applied.
+        //
+        // The filter works at the JournalEntry level, not the line level.
+        // For each entry we look at its lines, find the customer-attributable
+        // ones (account codes starting with "1101-" for receivables and
+        // "2103-" for prepayment liabilities), parse the customer ID from the
+        // suffix, and look up that customer's VAT type. The whole entry is
+        // then either In or Out of the filtered view — keeping debits = credits
+        // within the filter, which is the only honest way to do it.
+        //
+        // Entries with NO customer leg (rent, payroll, depreciation, etc.)
+        // are excluded from filtered views entirely — they have no VAT type
+        // to attribute them to. They reappear in the unfiltered "All" view.
+        // ==================================================================
+
+        /// <summary>
+        /// Returns the suffix shown in report titles to make the active filter visible.
+        /// </summary>
+        private static string VatFilterSuffix(string vatTypeFilter)
         {
-            var accounts = await _context.ChartOfAccounts
-                .Where(ca => ca.IsActive)
-                .OrderBy(ca => ca.AccountCode)
-                .ToListAsync();
-
-            var trialBalance = new TrialBalanceReport
-            {
-                FromDate = fromDate,
-                ToDate = toDate,
-                Accounts = accounts.Select(ca => new TrialBalanceAccount
-                {
-                    AccountCode = ca.AccountCode,
-                    AccountName = ca.AccountName,
-                    AccountType = ca.AccountType,
-                    DebitBalance = ca.AccountType == "Asset" || ca.AccountType == "Expense" ? ca.CurrentBalance : 0,
-                    CreditBalance = ca.AccountType == "Liability" || ca.AccountType == "Equity" || ca.AccountType == "Revenue" ? ca.CurrentBalance : 0
-                }).ToList()
-            };
-
-            trialBalance.TotalDebit = trialBalance.Accounts.Sum(a => a.DebitBalance);
-            trialBalance.TotalCredit = trialBalance.Accounts.Sum(a => a.CreditBalance);
-
-            return trialBalance;
+            return string.Equals(vatTypeFilter, "all", StringComparison.OrdinalIgnoreCase)
+                ? string.Empty
+                : $" — {vatTypeFilter} customers only";
         }
 
-        private async Task<ProfitLossReport> GenerateProfitLoss(DateTime fromDate, DateTime toDate)
+        /// <summary>
+        /// Builds a set of JournalEntry IDs that match the requested VAT-type
+        /// filter for the date range. Returns null when the filter is "all"
+        /// (caller should treat null as "no filter, include everything").
+        /// </summary>
+        private async Task<HashSet<int>?> GetEntryIdsMatchingVatTypeAsync(
+            DateTime fromDate, DateTime toDate, string vatTypeFilter)
         {
-            var revenueAccounts = await _context.ChartOfAccounts
-                .Where(ca => ca.AccountType == "Revenue" && ca.IsActive)
+            if (string.Equals(vatTypeFilter, "all", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            // Build a CustomerId → VatTypeName map once. Reading all customers
+            // is fine — it's a tiny table compared with journal lines, and
+            // doing it via JOIN inside the line query gets ugly because the
+            // CustomerId is encoded in the account code, not stored as a FK.
+            var customerVatMap = await _context.Customers
+                .Include(c => c.VatType)
+                .Select(c => new { c.Id, VatTypeName = c.VatType != null ? c.VatType.Name : null })
                 .ToListAsync();
 
-            var expenseAccounts = await _context.ChartOfAccounts
-                .Where(ca => ca.AccountType == "Expense" && ca.IsActive)
+            // Match by Contains so labels like "Exclusive(Paid By Customer)"
+            // and "Inclusive(Paid By Quarry)" still classify correctly.
+            var matchingCustomerIds = customerVatMap
+                .Where(c => !string.IsNullOrEmpty(c.VatTypeName)
+                            && c.VatTypeName!.IndexOf(vatTypeFilter, StringComparison.OrdinalIgnoreCase) >= 0)
+                .Select(c => c.Id)
+                .ToHashSet();
+
+            if (matchingCustomerIds.Count == 0)
+            {
+                // No customers of this VAT type → nothing to include.
+                return new HashSet<int>();
+            }
+
+            // Pull all entry lines in the date range, with the matching account
+            // codes only. Anything starting with 1101- (A/R) or 2103-
+            // (prepayments) carries a customer ID in its suffix.
+            var customerLines = await _context.JournalEntryLines
+                .Include(l => l.Account)
+                .Include(l => l.JournalEntry)
+                .Where(l => l.JournalEntry.EntryDate >= fromDate
+                         && l.JournalEntry.EntryDate <= toDate)
+                .Where(l => l.Account.AccountCode.StartsWith("1101-")
+                         || l.Account.AccountCode.StartsWith("2103-"))
+                .Select(l => new { l.JournalEntryId, l.Account.AccountCode })
                 .ToListAsync();
 
-            var pnlReport = new ProfitLossReport
+            var matchingEntryIds = new HashSet<int>();
+            foreach (var line in customerLines)
+            {
+                // Account code shape: "1101-NNNNNN" or "2103-NNNNNN".
+                var dashIdx = line.AccountCode.IndexOf('-');
+                if (dashIdx < 0 || dashIdx == line.AccountCode.Length - 1) continue;
+                var suffix = line.AccountCode.Substring(dashIdx + 1);
+                if (!int.TryParse(suffix, out var customerId)) continue;
+                if (matchingCustomerIds.Contains(customerId))
+                {
+                    matchingEntryIds.Add(line.JournalEntryId);
+                }
+            }
+
+            return matchingEntryIds;
+        }
+
+        // Financial Report Generation Methods
+        private async Task<TrialBalanceReport> GenerateTrialBalance(
+            DateTime fromDate, DateTime toDate, string vatTypeFilter = "all")
+        {
+            // Find which entries are in scope for the filter (null = all).
+            var allowedEntryIds = await GetEntryIdsMatchingVatTypeAsync(fromDate, toDate, vatTypeFilter);
+
+            // Aggregate per account from JournalEntryLines, honoring the date
+            // range. Compared with reading ChartOfAccounts.CurrentBalance,
+            // this fixes a long-standing bug: previously TB ignored its date
+            // filter and always returned current-balance figures.
+            var lineQuery = _context.JournalEntryLines
+                .Include(l => l.Account)
+                .Include(l => l.JournalEntry)
+                .Where(l => l.JournalEntry.EntryDate >= fromDate
+                         && l.JournalEntry.EntryDate <= toDate)
+                .Where(l => l.Account.IsActive);
+
+            if (allowedEntryIds != null)
+            {
+                if (allowedEntryIds.Count == 0)
+                {
+                    // Filter chosen but no entries match. Return an empty TB
+                    // rather than something misleading.
+                    return new TrialBalanceReport
+                    {
+                        FromDate = fromDate,
+                        ToDate = toDate,
+                        Accounts = new List<TrialBalanceAccount>(),
+                        TotalDebit = 0,
+                        TotalCredit = 0
+                    };
+                }
+                lineQuery = lineQuery.Where(l => allowedEntryIds.Contains(l.JournalEntryId));
+            }
+
+            var perAccount = await lineQuery
+                .GroupBy(l => new { l.AccountId, l.Account.AccountCode, l.Account.AccountName, l.Account.AccountType })
+                .Select(g => new
+                {
+                    g.Key.AccountCode,
+                    g.Key.AccountName,
+                    g.Key.AccountType,
+                    Debit = g.Sum(l => l.DebitAmount),
+                    Credit = g.Sum(l => l.CreditAmount)
+                })
+                .ToListAsync();
+
+            // Convert per-account net activity into the trial-balance two-column
+            // format. Asset/Expense are debit-natural — a positive net (more
+            // debits than credits) lands in the Debit column; a negative net
+            // means the account ran as a contra and lands in Credit. The
+            // mirror applies to liability/equity/revenue accounts. Rows that
+            // netted to zero in the period are dropped.
+            var accounts = perAccount
+                .Select(a =>
+                {
+                    var net = a.Debit - a.Credit;
+                    var isDebitNatural = a.AccountType == "Asset" || a.AccountType == "Expense";
+                    decimal dr = 0, cr = 0;
+                    if (isDebitNatural)
+                    {
+                        if (net >= 0) dr = net; else cr = -net;
+                    }
+                    else
+                    {
+                        if (net <= 0) cr = -net; else dr = net;
+                    }
+                    return new TrialBalanceAccount
+                    {
+                        AccountCode = a.AccountCode,
+                        AccountName = a.AccountName,
+                        AccountType = a.AccountType,
+                        DebitBalance = dr,
+                        CreditBalance = cr
+                    };
+                })
+                .Where(a => a.DebitBalance != 0 || a.CreditBalance != 0)
+                .OrderBy(a => a.AccountCode)
+                .ToList();
+
+            return new TrialBalanceReport
             {
                 FromDate = fromDate,
                 ToDate = toDate,
-                Revenue = revenueAccounts.Sum(ca => ca.CurrentBalance),
-                Expenses = expenseAccounts.Sum(ca => ca.CurrentBalance),
-                NetProfit = revenueAccounts.Sum(ca => ca.CurrentBalance) - expenseAccounts.Sum(ca => ca.CurrentBalance)
+                Accounts = accounts,
+                TotalDebit = accounts.Sum(a => a.DebitBalance),
+                TotalCredit = accounts.Sum(a => a.CreditBalance)
             };
+        }
 
-            return pnlReport;
+        private async Task<ProfitLossReport> GenerateProfitLoss(
+            DateTime fromDate, DateTime toDate, string vatTypeFilter = "all")
+        {
+            var allowedEntryIds = await GetEntryIdsMatchingVatTypeAsync(fromDate, toDate, vatTypeFilter);
+
+            var lineQuery = _context.JournalEntryLines
+                .Include(l => l.Account)
+                .Include(l => l.JournalEntry)
+                .Where(l => l.JournalEntry.EntryDate >= fromDate
+                         && l.JournalEntry.EntryDate <= toDate)
+                .Where(l => l.Account.IsActive)
+                .Where(l => l.Account.AccountType == "Revenue" || l.Account.AccountType == "Expense");
+
+            if (allowedEntryIds != null)
+            {
+                if (allowedEntryIds.Count == 0)
+                {
+                    return new ProfitLossReport
+                    {
+                        FromDate = fromDate,
+                        ToDate = toDate,
+                        Revenue = 0,
+                        Expenses = 0,
+                        NetProfit = 0
+                    };
+                }
+                lineQuery = lineQuery.Where(l => allowedEntryIds.Contains(l.JournalEntryId));
+            }
+
+            var rows = await lineQuery
+                .GroupBy(l => l.Account.AccountType)
+                .Select(g => new { Type = g.Key, Debit = g.Sum(l => l.DebitAmount), Credit = g.Sum(l => l.CreditAmount) })
+                .ToListAsync();
+
+            // Revenue accounts are credit-natural: revenue total = credits − debits.
+            // Expense accounts are debit-natural: expense total = debits − credits.
+            var revenueRow = rows.FirstOrDefault(r => r.Type == "Revenue");
+            var expenseRow = rows.FirstOrDefault(r => r.Type == "Expense");
+
+            var revenue = revenueRow != null ? revenueRow.Credit - revenueRow.Debit : 0m;
+            var expenses = expenseRow != null ? expenseRow.Debit - expenseRow.Credit : 0m;
+
+            return new ProfitLossReport
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                Revenue = revenue,
+                Expenses = expenses,
+                NetProfit = revenue - expenses
+            };
         }
 
         private async Task<BalanceSheetReport> GenerateBalanceSheet(DateTime asOfDate)
@@ -688,7 +879,7 @@ namespace QuarryManagementSystem.Controllers
         }
 
         // Tax Report Generation Methods
-        private async Task<VATReport> GenerateVATReport(int year, int month)
+        private async Task<VATReport> GenerateVATReport(int year, int month, string vatTypeFilter = "all")
         {
             var startDate = new DateTime(year, month, 1);
             var endDate = startDate.AddMonths(1).AddDays(-1);
@@ -700,10 +891,23 @@ namespace QuarryManagementSystem.Controllers
                 Period = startDate.ToString("MMMM yyyy")
             };
 
-            // VAT on Sales (Output VAT)
-            var salesInvoices = await _context.Invoices
-                .Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate)
-                .ToListAsync();
+            // Pull invoices for the period, with the customer's VAT type so we
+            // can apply the filter. Substring match on the VatType.Name keeps
+            // labels like "Exclusive(Paid By Customer)" classified correctly.
+            var query = _context.Invoices
+                .Include(i => i.Customer)
+                    .ThenInclude(c => c!.VatType)
+                .Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate);
+
+            var salesInvoices = await query.ToListAsync();
+
+            if (!string.Equals(vatTypeFilter, "all", StringComparison.OrdinalIgnoreCase))
+            {
+                salesInvoices = salesInvoices
+                    .Where(i => i.Customer?.VatType?.Name != null
+                                && i.Customer.VatType.Name.IndexOf(vatTypeFilter, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToList();
+            }
 
             vatReport.OutputVAT = salesInvoices.Sum(i => i.VatAmount);
 

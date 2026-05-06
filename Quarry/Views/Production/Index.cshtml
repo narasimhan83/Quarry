@@ -1,0 +1,140 @@
+@model IEnumerable<QuarryManagementSystem.Models.Domain.ProductionRun>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Production Runs";
+    var quarries = ViewBag.Quarries as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Production Runs</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item active">Production</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="card card-outline card-primary">
+            <div class="card-header"><h3 class="card-title">Filters</h3></div>
+            <div class="card-body">
+                <form method="get" class="form-inline">
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Quarry</label>
+                        <select name="quarryId" class="form-control">
+                            <option value="">All</option>
+                            @foreach (var q in quarries)
+                            {
+                                <option value="@q.Value">@q.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Status</label>
+                        <select name="status" class="form-control">
+                            <option value="">All</option>
+                            <option value="Draft">Draft</option>
+                            <option value="Posted">Posted</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">From</label>
+                        <input type="date" name="fromDate" class="form-control" />
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">To</label>
+                        <input type="date" name="toDate" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h3 class="card-title mb-0">Runs</h3>
+                <a asp-action="Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> New Production Run
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Any())
+                {
+                    <div class="p-4 text-muted">No production runs match the filters.</div>
+                }
+                else
+                {
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Run #</th>
+                                <th>Date</th>
+                                <th>Quarry</th>
+                                <th>Raw Material</th>
+                                <th class="text-right">Input Qty</th>
+                                <th class="text-right">Output Qty</th>
+                                <th class="text-right">Waste</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model)
+                            {
+                                var totalOut = p.Outputs?.Sum(o => o.Quantity) ?? 0m;
+                                <tr>
+                                    <td><strong>@p.RunNumber</strong></td>
+                                    <td>@p.RunDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@(p.Quarry?.Name ?? "-")</td>
+                                    <td>@(p.RawMaterial?.Name ?? "-")</td>
+                                    <td class="text-right">@p.InputQuantity.ToString("N3")</td>
+                                    <td class="text-right">@totalOut.ToString("N3")</td>
+                                    <td class="text-right">@p.WasteQuantity.ToString("N3")</td>
+                                    <td>
+                                        @if (p.Status == "Posted")
+                                        {
+                                            <span class="badge badge-success">Posted</span>
+                                        }
+                                        else if (p.Status == "Draft")
+                                        {
+                                            <span class="badge badge-warning">Draft</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">@p.Status</span>
+                                        }
+                                    </td>
+                                    <td class="text-right">
+                                        <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                                        @if (p.Status == "Draft")
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</section>

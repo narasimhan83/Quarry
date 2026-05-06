@@ -1,0 +1,244 @@
+@model QuarryManagementSystem.ViewModels.ProductionRunEditViewModel
+@{
+    ViewData["Title"] = "New Production Run";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">New Production Run</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Production</a></li>
+                    <li class="breadcrumb-item active">New</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <form asp-action="Create" method="post" id="runForm">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header"><h3 class="card-title">Run Information</h3></div>
+                        <div class="card-body">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="RunNumber" class="control-label"></label>
+                                        <input asp-for="RunNumber" class="form-control" placeholder="(auto-generated if blank)" />
+                                        <small class="form-text text-muted">Leave blank to auto-generate (PR-YYYYMM-NNNN).</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="RunDate" class="control-label"></label>
+                                        <input asp-for="RunDate" class="form-control" type="date" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="QuarryId" class="control-label"></label>
+                                        <select asp-for="QuarryId" asp-items="Model.Quarries" class="form-control">
+                                            <option value="">-- Select Quarry --</option>
+                                        </select>
+                                        <span asp-validation-for="QuarryId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="RawMaterialId" class="control-label"></label>
+                                        <select asp-for="RawMaterialId" asp-items="Model.RawMaterials" class="form-control">
+                                            <option value="">-- Select Raw Material --</option>
+                                        </select>
+                                        <span asp-validation-for="RawMaterialId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="InputQuantity" class="control-label"></label>
+                                        <input asp-for="InputQuantity" type="number" step="0.001" min="0" class="form-control" id="InputQuantity" />
+                                        <span asp-validation-for="InputQuantity" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="WasteQuantity" class="control-label"></label>
+                                        <input asp-for="WasteQuantity" type="number" step="0.001" min="0" class="form-control" id="WasteQuantity" />
+                                        <small class="form-text text-muted">Optional. Any unaccounted-for difference between input and outputs is auto-rolled into waste at Post time.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Operator" class="control-label"></label>
+                                <input asp-for="Operator" class="form-control" placeholder="Operator / shift name" />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Notes" class="control-label"></label>
+                                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-info">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0">Outputs</h3>
+                            <button type="button" id="addOutputBtn" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add Output
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="outputsTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60%;">Material</th>
+                                            <th style="width: 30%;">Quantity</th>
+                                            <th style="width: 10%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="outputsBody">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td class="text-right"><strong>Total Output:</strong></td>
+                                            <td class="text-right"><strong id="totalOutput">0.000</strong></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr id="balanceRow">
+                                            <td class="text-right text-muted">Mass balance (input − outputs − waste):</td>
+                                            <td class="text-right text-muted"><span id="massBalance">0.000</span></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <small class="text-muted">Cost is allocated across outputs by weight share at Post time. Operators don't enter cost here.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save as Draft</button>
+                            <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                            <hr/>
+                            <small class="text-muted">Saving creates the run in <strong>Draft</strong>. Use <strong>Post</strong> on the details screen to commit it to inventory.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (function () {
+            var materialsHtml = '@Html.Raw(string.Join("", Model.Materials.Select(m => $"<option value=\\\"{m.Value}\\\">{System.Net.WebUtility.HtmlEncode(m.Text)}</option>")))';
+
+            function addRow(materialId, quantity) {
+                var idx = $('#outputsBody tr').length;
+                var qty = quantity != null ? quantity : '';
+                var row = $('<tr></tr>');
+                row.html(
+                    '<td>' +
+                        '<select name="Outputs[' + idx + '].MaterialId" class="form-control form-control-sm material-select">' +
+                            '<option value="">-- Select --</option>' + materialsHtml +
+                        '</select>' +
+                    '</td>' +
+                    '<td>' +
+                        '<input type="number" step="0.001" min="0" name="Outputs[' + idx + '].Quantity" value="' + qty + '" class="form-control form-control-sm qty-input" />' +
+                    '</td>' +
+                    '<td class="text-center">' +
+                        '<button type="button" class="btn btn-sm btn-danger remove-row"><i class="fas fa-trash"></i></button>' +
+                    '</td>'
+                );
+                if (materialId) {
+                    row.find('.material-select').val(materialId);
+                }
+                $('#outputsBody').append(row);
+                wireRow(row);
+                recompute();
+            }
+
+            function wireRow($tr) {
+                $tr.on('input change', '.qty-input', recompute);
+                $tr.find('.remove-row').on('click', function () {
+                    $tr.remove();
+                    renumber();
+                    recompute();
+                });
+            }
+
+            function renumber() {
+                $('#outputsBody tr').each(function (i) {
+                    $(this).find('input, select').each(function () {
+                        var name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/Outputs\[\d+\]/, 'Outputs[' + i + ']'));
+                    });
+                });
+            }
+
+            function recompute() {
+                var total = 0;
+                $('#outputsBody .qty-input').each(function () {
+                    total += parseFloat($(this).val()) || 0;
+                });
+                $('#totalOutput').text(total.toFixed(3));
+
+                var input = parseFloat($('#InputQuantity').val()) || 0;
+                var waste = parseFloat($('#WasteQuantity').val()) || 0;
+                var delta = input - total - waste;
+                var $balance = $('#massBalance');
+                $balance.text(delta.toFixed(3));
+                $balance.toggleClass('text-danger', delta < -0.0001);
+                $balance.toggleClass('text-warning', delta > 0.0001);
+            }
+
+            $('#addOutputBtn').on('click', function () { addRow(null, null); });
+            $('#InputQuantity, #WasteQuantity').on('input change', recompute);
+
+            // Seed rows from server-side model on validation re-render.
+            var seeded = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Outputs));
+            if (seeded && seeded.length) {
+                seeded.forEach(function (o) { addRow(o.materialId, o.quantity); });
+            } else {
+                addRow(null, null);
+            }
+
+            // Submit guard.
+            $('#runForm').on('submit', function (e) {
+                var anyValid = false;
+                $('#outputsBody tr').each(function () {
+                    var mat = $(this).find('.material-select').val();
+                    var qty = parseFloat($(this).find('.qty-input').val()) || 0;
+                    if (mat && qty > 0) anyValid = true;
+                });
+                if (!anyValid) {
+                    e.preventDefault();
+                    alert('Add at least one output line with a material and a positive quantity.');
+                }
+            });
+        })();
+    </script>
+}

@@ -235,6 +235,35 @@
 
                         @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Accountant"))
                         {
+                            <li class="nav-header">INVENTORY</li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Stock")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Stock" ? "active" : "")">
+                                    <i class="nav-icon fas fa-warehouse"></i>
+                                    <p>Stock On Hand</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "RawMaterial")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RawMaterial" ? "active" : "")">
+                                    <i class="nav-icon fas fa-mountain"></i>
+                                    <p>Raw Materials</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "RawMaterialReceipt")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RawMaterialReceipt" ? "active" : "")">
+                                    <i class="nav-icon fas fa-truck-loading"></i>
+                                    <p>Raw Material Receipts</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Production")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Production" ? "active" : "")">
+                                    <i class="nav-icon fas fa-industry"></i>
+                                    <p>Production Runs</p>
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Accountant"))
+                        {
                             <li class="nav-header">FINANCIAL</li>
                             <li class="nav-item">
                                 <a href="@Url.Action("Index", "Invoice")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" ? "active" : "")">

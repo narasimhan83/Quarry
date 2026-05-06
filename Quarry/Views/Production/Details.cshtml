@@ -1,0 +1,190 @@
+@model QuarryManagementSystem.ViewModels.ProductionRunDetailsViewModel
+@{
+    ViewData["Title"] = $"Run {Model.Run.RunNumber}";
+    var run = Model.Run;
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Production Run @run.RunNumber</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Production</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h3 class="card-title mb-0">Run Information</h3>
+                        @if (run.Status == "Posted")
+                        {
+                            <span class="badge badge-success">Posted</span>
+                        }
+                        else if (run.Status == "Draft")
+                        {
+                            <span class="badge badge-warning">Draft</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">@run.Status</span>
+                        }
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">Run Number</dt>
+                            <dd class="col-sm-8">@run.RunNumber</dd>
+
+                            <dt class="col-sm-4">Date</dt>
+                            <dd class="col-sm-8">@run.RunDate.ToString("yyyy-MM-dd")</dd>
+
+                            <dt class="col-sm-4">Quarry</dt>
+                            <dd class="col-sm-8">@(run.Quarry?.Name ?? "-")</dd>
+
+                            <dt class="col-sm-4">Raw Material</dt>
+                            <dd class="col-sm-8">@(run.RawMaterial?.Name ?? "-")</dd>
+
+                            <dt class="col-sm-4">Input Quantity</dt>
+                            <dd class="col-sm-8">@run.InputQuantity.ToString("N3")</dd>
+
+                            <dt class="col-sm-4">Input Total Cost</dt>
+                            <dd class="col-sm-8">@(run.Status == "Draft" ? "(set at Post time)" : run.InputTotalCost.ToString("C"))</dd>
+
+                            <dt class="col-sm-4">Total Output Qty</dt>
+                            <dd class="col-sm-8">@Model.TotalOutputQuantity.ToString("N3")</dd>
+
+                            <dt class="col-sm-4">Waste</dt>
+                            <dd class="col-sm-8">@run.WasteQuantity.ToString("N3")</dd>
+
+                            <dt class="col-sm-4">Mass Balance</dt>
+                            <dd class="col-sm-8">
+                                @if (Math.Abs(Model.MassBalanceDelta) <= 0.0001m)
+                                {
+                                    <span class="text-success">Balanced</span>
+                                }
+                                else if (Model.MassBalanceDelta > 0)
+                                {
+                                    <span class="text-warning">+@Model.MassBalanceDelta.ToString("N3") (will be rolled into waste at Post time)</span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">@Model.MassBalanceDelta.ToString("N3") (outputs exceed input — Post will fail)</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">Operator</dt>
+                            <dd class="col-sm-8">@(run.Operator ?? "-")</dd>
+
+                            <dt class="col-sm-4">Notes</dt>
+                            <dd class="col-sm-8">@(run.Notes ?? "-")</dd>
+
+                            <dt class="col-sm-4">Created</dt>
+                            <dd class="col-sm-8">@run.CreatedAt.ToString("yyyy-MM-dd HH:mm") by @(run.CreatedBy ?? "-")</dd>
+
+                            @if (run.PostedAt.HasValue)
+                            {
+                                <dt class="col-sm-4">Posted</dt>
+                                <dd class="col-sm-8">@run.PostedAt.Value.ToString("yyyy-MM-dd HH:mm")</dd>
+                            }
+                        </dl>
+
+                        <div class="mt-3">
+                            <a asp-action="Index" class="btn btn-secondary btn-sm"><i class="fas fa-list"></i> Back to List</a>
+                            @if (run.Status == "Draft")
+                            {
+                                <a asp-action="Edit" asp-route-id="@run.Id" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
+
+                                <form asp-action="Post" asp-route-id="@run.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Post this run? It will draw raw inventory at the current weighted-average cost and update finished-goods stock. This cannot be undone except by Cancel.');">
+                                        <i class="fas fa-check"></i> Post
+                                    </button>
+                                </form>
+
+                                <form asp-action="Cancel" asp-route-id="@run.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this Draft run?');">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </form>
+                            }
+                            else if (run.Status == "Posted")
+                            {
+                                <form asp-action="Cancel" asp-route-id="@run.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this Posted run? Inventory movements will be reversed and the run marked Cancelled. This cannot be undone.');">
+                                        <i class="fas fa-undo"></i> Cancel & Reverse
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card card-info">
+                    <div class="card-header"><h3 class="card-title">Outputs</h3></div>
+                    <div class="card-body p-0">
+                        @if (run.Outputs == null || !run.Outputs.Any())
+                        {
+                            <div class="p-3 text-muted">No output lines.</div>
+                        }
+                        else
+                        {
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Material</th>
+                                        <th class="text-right">Quantity</th>
+                                        <th class="text-right">Allocated Cost</th>
+                                        <th class="text-right">Unit Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var o in run.Outputs.OrderBy(x => x.Id))
+                                    {
+                                        <tr>
+                                            <td>@(o.Material?.Name ?? "-")</td>
+                                            <td class="text-right">@o.Quantity.ToString("N3")</td>
+                                            <td class="text-right">@(run.Status == "Draft" ? "-" : o.AllocatedCost.ToString("N2"))</td>
+                                            <td class="text-right">@(run.Status == "Draft" ? "-" : (o.Quantity > 0 ? Math.Round(o.AllocatedCost / o.Quantity, 4).ToString("N4") : "-"))</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Total</th>
+                                        <th class="text-right">@Model.TotalOutputQuantity.ToString("N3")</th>
+                                        <th class="text-right">@(run.Status == "Draft" ? "-" : Model.TotalAllocatedCost.ToString("N2"))</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

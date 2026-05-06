@@ -45,6 +45,16 @@ namespace QuarryManagementSystem.Data
         public DbSet<CustomerTruck> CustomerTrucks { get; set; }
         public DbSet<CustomerBank> CustomerBanks { get; set; }
 
+        // Inventory — Phase 1 (schema only). Production controllers, weighbridge
+        // integration, journal posting and the cost-flow service all land in
+        // later phases (see Data/Migrations/manual/inventory_roadmap.md).
+        public DbSet<RawMaterial> RawMaterials { get; set; }
+        public DbSet<RawMaterialReceipt> RawMaterialReceipts { get; set; }
+        public DbSet<ProductionRun> ProductionRuns { get; set; }
+        public DbSet<ProductionRunOutput> ProductionRunOutputs { get; set; }
+        public DbSet<StockMovement> StockMovements { get; set; }
+        public DbSet<MaterialCostState> MaterialCostStates { get; set; }
+
         // Payment methods lookup (Cash, Bank Transfer, Online Payment, Cheque, ...)
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
@@ -219,6 +229,105 @@ namespace QuarryManagementSystem.Data
             modelBuilder.Entity<CustomerBank>()
                 .HasIndex(b => new { b.CustomerId, b.AccountNumber })
                 .IsUnique();
+
+            // ----- Inventory: Phase 1 schema -----
+            // Receipts cascade with their quarry / raw material parents. Production
+            // runs cascade their outputs but NEVER cascade through quarry/material
+            // — a quarry rename or material edit must not delete production history.
+            modelBuilder.Entity<RawMaterialReceipt>()
+                .HasOne(r => r.Quarry)
+                .WithMany()
+                .HasForeignKey(r => r.QuarryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<RawMaterialReceipt>()
+                .HasOne(r => r.RawMaterial)
+                .WithMany(rm => rm.Receipts)
+                .HasForeignKey(r => r.RawMaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<RawMaterialReceipt>()
+                .HasIndex(r => r.ReceiptNumber).IsUnique();
+            modelBuilder.Entity<RawMaterialReceipt>()
+                .HasIndex(r => new { r.QuarryId, r.RawMaterialId, r.ReceiptDate });
+
+            modelBuilder.Entity<ProductionRun>()
+                .HasOne(p => p.Quarry)
+                .WithMany()
+                .HasForeignKey(p => p.QuarryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ProductionRun>()
+                .HasOne(p => p.RawMaterial)
+                .WithMany()
+                .HasForeignKey(p => p.RawMaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ProductionRun>()
+                .HasIndex(p => p.RunNumber).IsUnique();
+            modelBuilder.Entity<ProductionRun>()
+                .HasIndex(p => new { p.QuarryId, p.RunDate });
+
+            modelBuilder.Entity<ProductionRunOutput>()
+                .HasOne(o => o.ProductionRun)
+                .WithMany(p => p.Outputs)
+                .HasForeignKey(o => o.ProductionRunId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ProductionRunOutput>()
+                .HasOne(o => o.Material)
+                .WithMany()
+                .HasForeignKey(o => o.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            // Operator may legitimately repeat the same material on a run if
+            // they want separate sub-batches; not enforcing uniqueness here.
+            modelBuilder.Entity<ProductionRunOutput>()
+                .HasIndex(o => new { o.ProductionRunId, o.MaterialId });
+
+            // StockMovement: the audit log. Fast queries by (quarry, material,
+            // date) for stock reports; restrict-on-delete everywhere because we
+            // never want history to vanish if a master row is deleted.
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.Quarry).WithMany().HasForeignKey(m => m.QuarryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.Material).WithMany().HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.RawMaterial).WithMany().HasForeignKey(m => m.RawMaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.RawMaterialReceipt).WithMany().HasForeignKey(m => m.RawMaterialReceiptId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.ProductionRun).WithMany().HasForeignKey(m => m.ProductionRunId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.ProductionRunOutput).WithMany().HasForeignKey(m => m.ProductionRunOutputId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<StockMovement>()
+                .HasOne(m => m.WeighmentTransaction).WithMany().HasForeignKey(m => m.WeighmentTransactionId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<StockMovement>()
+                .HasIndex(m => new { m.QuarryId, m.MaterialId, m.MovementDate });
+            modelBuilder.Entity<StockMovement>()
+                .HasIndex(m => new { m.QuarryId, m.RawMaterialId, m.MovementDate });
+            modelBuilder.Entity<StockMovement>()
+                .HasIndex(m => m.MovementType);
+
+            // MaterialCostState: one row per (quarry, material-or-raw). The
+            // service will use {QuarryId, MaterialId, RawMaterialId} as a
+            // logical key with one of the two material columns null.
+            modelBuilder.Entity<MaterialCostState>()
+                .HasOne(s => s.Quarry).WithMany().HasForeignKey(s => s.QuarryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MaterialCostState>()
+                .HasOne(s => s.Material).WithMany().HasForeignKey(s => s.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MaterialCostState>()
+                .HasOne(s => s.RawMaterial).WithMany().HasForeignKey(s => s.RawMaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MaterialCostState>()
+                .HasIndex(s => new { s.QuarryId, s.MaterialId }).IsUnique()
+                .HasFilter("[MaterialId] IS NOT NULL");
+            modelBuilder.Entity<MaterialCostState>()
+                .HasIndex(s => new { s.QuarryId, s.RawMaterialId }).IsUnique()
+                .HasFilter("[RawMaterialId] IS NOT NULL");
  
             // Configure Employee relationships
             modelBuilder.Entity<Employee>()

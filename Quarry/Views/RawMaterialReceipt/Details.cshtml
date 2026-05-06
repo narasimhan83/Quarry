@@ -1,0 +1,76 @@
+@model QuarryManagementSystem.Models.Domain.RawMaterialReceipt
+@{
+    ViewData["Title"] = $"Receipt {Model.ReceiptNumber}";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Receipt @Model.ReceiptNumber</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Receipts</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Receipt Information</h3></div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">Receipt Number</dt>
+                            <dd class="col-sm-8">@Model.ReceiptNumber</dd>
+
+                            <dt class="col-sm-4">Date</dt>
+                            <dd class="col-sm-8">@Model.ReceiptDate.ToString("yyyy-MM-dd")</dd>
+
+                            <dt class="col-sm-4">Quarry</dt>
+                            <dd class="col-sm-8">@(Model.Quarry?.Name ?? "-")</dd>
+
+                            <dt class="col-sm-4">Raw Material</dt>
+                            <dd class="col-sm-8">@(Model.RawMaterial?.Name ?? "-")</dd>
+
+                            <dt class="col-sm-4">Quantity</dt>
+                            <dd class="col-sm-8">@Model.Quantity.ToString("N3") @(Model.RawMaterial?.Unit ?? "")</dd>
+
+                            <dt class="col-sm-4">Unit Cost</dt>
+                            <dd class="col-sm-8">@Model.UnitCost.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Total Cost</dt>
+                            <dd class="col-sm-8"><strong>@Model.TotalCost.ToString("C")</strong></dd>
+
+                            <dt class="col-sm-4">Source</dt>
+                            <dd class="col-sm-8">@(Model.Source ?? "-")</dd>
+
+                            <dt class="col-sm-4">Notes</dt>
+                            <dd class="col-sm-8">@(Model.Notes ?? "-")</dd>
+
+                            <dt class="col-sm-4">Created</dt>
+                            <dd class="col-sm-8">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm") by @(Model.CreatedBy ?? "-")</dd>
+                        </dl>
+                        <a asp-action="Index" class="btn btn-secondary btn-sm"><i class="fas fa-list"></i> Back to List</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card card-info">
+                    <div class="card-header"><h3 class="card-title">Inventory Impact</h3></div>
+                    <div class="card-body">
+                        <p>This receipt added <strong>@Model.Quantity.ToString("N3")</strong> units to raw inventory at <strong>@(Model.Quarry?.Name)</strong>.</p>
+                        <p class="text-muted small">The running weighted-average cost for this raw material at this quarry has been updated. Phase 4 will post the matching journal entry (Dr Raw Material Inventory / Cr Cash or Payable).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

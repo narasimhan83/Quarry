@@ -1,0 +1,126 @@
+@model QuarryManagementSystem.ViewModels.StockOnHandViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Stock On Hand";
+    var quarries = ViewBag.Quarries as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Stock On Hand</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item active">Stock</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-outline card-primary">
+            <div class="card-header"><h3 class="card-title">Filters</h3></div>
+            <div class="card-body">
+                <form method="get" class="form-inline">
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Quarry</label>
+                        <select name="quarryId" class="form-control">
+                            <option value="">All</option>
+                            @foreach (var q in quarries)
+                            {
+                                if (Model.QuarryFilter.HasValue && Model.QuarryFilter.Value.ToString() == q.Value)
+                                {
+                                    <option value="@q.Value" selected="selected">@q.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@q.Value">@q.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Kind</label>
+                        <select name="kind" class="form-control">
+                            <option value="">All</option>
+                            <option value="Finished" selected="@(Model.KindFilter == "Finished")">Finished only</option>
+                            <option value="Raw" selected="@(Model.KindFilter == "Raw")">Raw only</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Current Stock</h3>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Rows.Any())
+                {
+                    <div class="p-4 text-muted">No stock on hand. Record a Raw Material Receipt or post a Production Run to populate inventory.</div>
+                }
+                else
+                {
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Quarry</th>
+                                <th>Kind</th>
+                                <th>Item</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Avg Unit Cost</th>
+                                <th class="text-right">Total Cost</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Rows)
+                            {
+                                <tr>
+                                    <td>@row.QuarryName</td>
+                                    <td>
+                                        @if (row.Kind == "Finished")
+                                        {
+                                            <span class="badge badge-info">Finished</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Raw</span>
+                                        }
+                                    </td>
+                                    <td><strong>@row.ItemName</strong></td>
+                                    <td class="text-right">@row.QuantityOnHand.ToString("N3")</td>
+                                    <td class="text-right">@row.AverageUnitCost.ToString("N4")</td>
+                                    <td class="text-right">@row.TotalCostOnHand.ToString("N2")</td>
+                                    <td><small class="text-muted">@row.LastUpdated.ToString("yyyy-MM-dd HH:mm")</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="5" class="text-right">Total Inventory Value:</th>
+                                <th class="text-right">@Model.TotalValue.ToString("N2")</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="callout callout-info">
+            <h5>About this view</h5>
+            <p class="mb-0">
+                This is the running cache of inventory state. It updates whenever a raw receipt is recorded or a production run is posted.
+                Phase 3 will add weighbridge integration so completed sales reduce stock automatically; Phase 4 will tie this to the General Ledger.
+            </p>
+        </div>
+    </div>
+</section>

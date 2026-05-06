@@ -1,0 +1,86 @@
+@model IEnumerable<QuarryManagementSystem.Models.Domain.RawMaterial>
+@{
+    ViewData["Title"] = "Raw Materials";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Raw Materials</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item active">Raw Materials</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h3 class="card-title mb-0">Raw Material Catalogue</h3>
+                <a asp-action="Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Raw Material
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Any())
+                {
+                    <div class="p-4 text-muted">No raw materials yet. Use "Add Raw Material" to register one (e.g. "Blasted Rock").</div>
+                }
+                else
+                {
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Unit</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var rm in Model)
+                            {
+                                <tr>
+                                    <td><strong>@rm.Name</strong></td>
+                                    <td>@rm.Unit</td>
+                                    <td>
+                                        @if (rm.Status == "Active")
+                                        {
+                                            <span class="badge badge-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">@rm.Status</span>
+                                        }
+                                    </td>
+                                    <td>@rm.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                    <td class="text-right">
+                                        <a asp-action="Details" asp-route-id="@rm.Id" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                                        <a asp-action="Edit" asp-route-id="@rm.Id" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</section>

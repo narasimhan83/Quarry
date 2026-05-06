@@ -16,15 +16,18 @@ namespace QuarryManagementSystem.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<WeighmentController> _logger;
         private readonly ICustomerPricingService _pricingService;
+        private readonly IInventoryService _inventory;
 
         public WeighmentController(
             ApplicationDbContext context,
             ILogger<WeighmentController> logger,
-            ICustomerPricingService pricingService)
+            ICustomerPricingService pricingService,
+            IInventoryService inventory)
         {
             _context = context;
             _logger = logger;
             _pricingService = pricingService;
+            _inventory = inventory;
         }
 
         // GET: Weighment
@@ -325,6 +328,7 @@ namespace QuarryManagementSystem.Controllers
                     // Store old values for comparison
                     var oldCustomerId = weighment.CustomerId;
                     var oldTotalAmount = weighment.TotalAmount;
+                    var oldStatus = weighment.Status;  // Phase 3: needed to detect Completed-transition for inventory hook
 
                     // Update weighment
                     weighment.VehicleRegNumber = model.VehicleRegNumber;
@@ -353,22 +357,127 @@ namespace QuarryManagementSystem.Controllers
                     // Recalculate financials honoring the customer's VAT treatment.
                     await ApplyVatTreatmentAsync(weighment, model.CustomerId);
 
-                    await _context.SaveChangesAsync();
+                    // Phase 3: detect status transitions and adjust inventory.
+                    // We wrap everything from here through the customer-balance
+                    // updates in a single DB transaction so an inventory refusal
+                    // (e.g. insufficient stock) rolls the financial changes back
+                    // too — the operator sees the error and the row stays in its
+                    // pre-edit state.
+                    var newStatus = weighment.Status;
+                    var transitionsToCompleted =
+                        !string.Equals(oldStatus, "Completed", StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(newStatus, "Completed", StringComparison.OrdinalIgnoreCase);
+                    var transitionsOutOfCompleted =
+                        string.Equals(oldStatus, "Completed", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(newStatus, "Completed", StringComparison.OrdinalIgnoreCase);
 
-                    // Update customer outstanding balances if customer or amount changed
-                    if (oldCustomerId != model.CustomerId || oldTotalAmount != model.TotalAmount)
+                    using var tx = await _context.Database.BeginTransactionAsync();
+                    try
                     {
-                        // Revert old customer balance
-                        if (oldCustomerId.HasValue && oldTotalAmount.HasValue)
+                        await _context.SaveChangesAsync();
+
+                        // Update customer outstanding balances if customer or amount changed.
+                        // (UpdateCustomerOutstandingBalance internally calls SaveChangesAsync,
+                        // which is fine inside an active transaction — the saves are not
+                        // committed until tx.CommitAsync below.)
+                        if (oldCustomerId != model.CustomerId || oldTotalAmount != weighment.TotalAmount)
                         {
-                            await UpdateCustomerOutstandingBalance(oldCustomerId.Value, -oldTotalAmount.Value);
+                            if (oldCustomerId.HasValue && oldTotalAmount.HasValue)
+                            {
+                                await UpdateCustomerOutstandingBalance(oldCustomerId.Value, -oldTotalAmount.Value);
+                            }
+                            if (model.CustomerId.HasValue && weighment.TotalAmount.HasValue)
+                            {
+                                await UpdateCustomerOutstandingBalance(model.CustomerId.Value, weighment.TotalAmount.Value);
+                            }
                         }
-                        
-                        // Apply new customer balance
-                        if (model.CustomerId.HasValue && weighment.TotalAmount.HasValue)
+
+                        if (transitionsToCompleted)
                         {
-                            await UpdateCustomerOutstandingBalance(model.CustomerId.Value, weighment.TotalAmount.Value);
+                            // Validate prerequisites for the inventory draw.
+                            if (!weighment.MaterialId.HasValue)
+                            {
+                                throw new InvalidOperationException(
+                                    "Cannot mark this weighment Completed: no Material is selected. Pick a material first.");
+                            }
+
+                            // Need to know the source quarry. Weighbridge.QuarryId is the
+                            // canonical source; the navigation property may not be loaded
+                            // (we used FindAsync above), so fetch the quarry id directly.
+                            int? quarryId = null;
+                            if (weighment.WeighbridgeId.HasValue)
+                            {
+                                quarryId = await _context.Weighbridges
+                                    .Where(b => b.Id == weighment.WeighbridgeId.Value)
+                                    .Select(b => b.QuarryId)
+                                    .FirstOrDefaultAsync();
+                            }
+                            if (!quarryId.HasValue)
+                            {
+                                throw new InvalidOperationException(
+                                    "Cannot mark this weighment Completed: the selected weighbridge isn't linked to a quarry, " +
+                                    "so we don't know which yard to draw stock from. Set the weighbridge's quarry first.");
+                            }
+
+                            // Convert the dispatched weight to the same unit MaterialCostState
+                            // tracks (tons). MaterialCostState quantities are in tons because
+                            // raw receipts and production runs are recorded in tons.
+                            var quantityInTons = weighment.WeightUnit == "kg"
+                                ? weighment.NetWeight / 1000m
+                                : weighment.NetWeight;
+
+                            if (quantityInTons <= 0)
+                            {
+                                throw new InvalidOperationException(
+                                    "Cannot mark this weighment Completed with a zero or negative net weight.");
+                            }
+
+                            var unitCostUsed = await _inventory.RecordSaleAsync(
+                                quarryId.Value,
+                                weighment.MaterialId.Value,
+                                quantityInTons,
+                                weighment.Id,
+                                weighment.TransactionNumber,
+                                User.Identity?.Name);
+                            await _context.SaveChangesAsync();
+
+                            _logger.LogInformation(
+                                "Inventory: weighment {TransactionNumber} drew {Qty:N3} units from quarry {QuarryId} at WAC {Cost:N4}",
+                                weighment.TransactionNumber, quantityInTons, quarryId.Value, unitCostUsed);
                         }
+                        else if (transitionsOutOfCompleted)
+                        {
+                            // Cancel / re-open: reverse any prior Sale movement(s)
+                            // recorded against this weighment. Idempotent — if there
+                            // are no prior sales (e.g. the weighment was completed before
+                            // Phase 3 was deployed), this is a no-op.
+                            await _inventory.ReverseSaleAsync(weighment.Id, User.Identity?.Name);
+                            await _context.SaveChangesAsync();
+
+                            _logger.LogInformation(
+                                "Inventory: weighment {TransactionNumber} reversed (status moved from Completed to {NewStatus})",
+                                weighment.TransactionNumber, newStatus);
+                        }
+
+                        await tx.CommitAsync();
+                    }
+                    catch (InvalidOperationException invEx)
+                    {
+                        // Expected business-rule failures (insufficient stock, missing
+                        // quarry, etc.) — surface to the operator and leave the row
+                        // unchanged. The catch block rolls back the financial saves too.
+                        await tx.RollbackAsync();
+                        ModelState.AddModelError("", invEx.Message);
+                        _logger.LogWarning(invEx,
+                            "Weighment {TransactionNumber} could not be saved due to inventory rule.",
+                            weighment.TransactionNumber);
+                        await PopulateDropdowns(model);
+                        return View(model);
+                    }
+                    catch
+                    {
+                        await tx.RollbackAsync();
+                        throw; // outer catch logs and re-renders
                     }
 
                     TempData["Success"] = $"Weighment {weighment.TransactionNumber} updated successfully.";

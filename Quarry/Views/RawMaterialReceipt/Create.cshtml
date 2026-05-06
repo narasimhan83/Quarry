@@ -1,0 +1,115 @@
+@model QuarryManagementSystem.ViewModels.RawMaterialReceiptEditViewModel
+@{
+    ViewData["Title"] = "New Raw Material Receipt";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">New Raw Material Receipt</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Dashboard")">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Receipts</a></li>
+                    <li class="breadcrumb-item active">New</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header"><h3 class="card-title">Receipt Information</h3></div>
+                        <div class="card-body">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ReceiptNumber" class="control-label"></label>
+                                        <input asp-for="ReceiptNumber" class="form-control" placeholder="(auto-generated if blank)" />
+                                        <small class="form-text text-muted">Leave blank to auto-generate (RR-YYYYMM-NNNN).</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ReceiptDate" class="control-label"></label>
+                                        <input asp-for="ReceiptDate" class="form-control" type="date" />
+                                        <span asp-validation-for="ReceiptDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="QuarryId" class="control-label"></label>
+                                        <select asp-for="QuarryId" asp-items="Model.Quarries" class="form-control">
+                                            <option value="">-- Select Quarry --</option>
+                                        </select>
+                                        <span asp-validation-for="QuarryId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="RawMaterialId" class="control-label"></label>
+                                        <select asp-for="RawMaterialId" asp-items="Model.RawMaterials" class="form-control">
+                                            <option value="">-- Select Raw Material --</option>
+                                        </select>
+                                        <span asp-validation-for="RawMaterialId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Quantity" class="control-label"></label>
+                                        <input asp-for="Quantity" type="number" step="0.001" min="0" class="form-control" />
+                                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="UnitCost" class="control-label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text">&#8358;</span></div>
+                                            <input asp-for="UnitCost" type="number" step="0.01" min="0" class="form-control" />
+                                        </div>
+                                        <small class="form-text text-muted">Cost per unit (blasting + transport for self-extracted; invoiced price for purchased).</small>
+                                        <span asp-validation-for="UnitCost" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Source" class="control-label"></label>
+                                <input asp-for="Source" class="form-control" placeholder="e.g. Blasting Crew A, or supplier name" />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Notes" class="control-label"></label>
+                                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                            <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
