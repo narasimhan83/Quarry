@@ -60,6 +60,8 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Domain services
 builder.Services.AddScoped<ICustomerPricingService, CustomerPricingService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IGeneralLedgerService, GeneralLedgerService>();
 
 // Remove repository and service registrations for now - they can be added later
 // These would need to be implemented as actual classes
